@@ -7,3 +7,4 @@ wave
 soundfile
 clipboard
 numpy
+tiktoken 

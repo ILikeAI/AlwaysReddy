@@ -4,13 +4,13 @@ from transcriber import transcribe_audio
 import keyboard
 import sound
 import chat_completions 
-from utils import read_clipboard, to_clipboard, extract_text_between_symbols
-from config import START_SOUND_VOLUME, END_SOUND_VOLUME, MIN_RECORDING_DURATION, HOTKEY_DELAY, USE_TOGETHER_API,VOICE
-from prompt import messages
+from utils import read_clipboard, to_clipboard, extract_text_between_symbols, count_tokens, trim_messages
+from config import START_SOUND_VOLUME, END_SOUND_VOLUME, MIN_RECORDING_DURATION, HOTKEY_DELAY, USE_TOGETHER_API,VOICE, MAX_TOKENS
+from prompt import default_messages
 
 
 def main():
-
+    messages = default_messages.copy()  
     
     recorder = AudioRecorder() 
     is_busy = False  
@@ -39,7 +39,7 @@ def main():
     def stop_recording():
         if not (keyboard.is_pressed('ctrl') and keyboard.is_pressed('space')):
             return
-        nonlocal is_busy, clipboard_text 
+        nonlocal is_busy, clipboard_text, messages
 
         #if not busy, return
         if not is_busy:  
@@ -58,13 +58,20 @@ def main():
         transcript = transcribe_audio(recorder.filename)  
 
 
+
+
+
         #prepare the messages 
         #if clipboard_text clipboard hotkey was used, add the clipboard text to the transcript
         if clipboard_text:
             messages.append({"role": "user", "content": transcript+f"\n\nTHE USER HAS THIS TEXT COPPIED:\n{clipboard_text}"})
             clipboard_text = None  
+            if count_tokens(messages) > MAX_TOKENS:
+                messages = trim_messages(messages, MAX_TOKENS)
         else:
             messages.append({"role": "user", "content": transcript})
+            if count_tokens(messages) > MAX_TOKENS:
+                messages = trim_messages(messages, MAX_TOKENS)
 
         print("Transcription:\n", transcript)
         

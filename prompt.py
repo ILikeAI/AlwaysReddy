@@ -1,6 +1,6 @@
 
 #I have added a couple examples messages so the LLM gets the idea of how to save things to the clipboard
-messages = [
+default_messages = [
     {"role": "system", "content": """This message contains instructions on how you should behave.
 
 ## About you:
