@@ -1,0 +1,9 @@
+sounddevice
+openai
+pydub
+python-dotenv
+keyboard
+wave
+soundfile
+clipboard
+numpy
