@@ -19,6 +19,8 @@ def main():
 
     # Function to start recording
     def start_recording(use_clipboard=False):
+        if not (keyboard.is_pressed('ctrl') and keyboard.is_pressed('space')):
+            return
         nonlocal is_busy, clipboard_text
         if is_busy:  
             return
@@ -32,8 +34,11 @@ def main():
 
 
 
+
     # Function to stop recording
     def stop_recording():
+        if not (keyboard.is_pressed('ctrl') and keyboard.is_pressed('space')):
+            return
         nonlocal is_busy, clipboard_text 
 
         #if not busy, return
@@ -82,9 +87,8 @@ def main():
         time.sleep(HOTKEY_DELAY) 
 
 
-    keyboard.add_hotkey('ctrl + space', lambda: start_recording(use_clipboard=False) if not is_busy else stop_recording(), trigger_on_release=False)
-    keyboard.add_hotkey('ctrl + shift + space', lambda: start_recording(use_clipboard=True) if not is_busy else stop_recording(), suppress=True, trigger_on_release=False)  
-
+    keyboard.add_hotkey('ctrl + space', lambda: start_recording(use_clipboard=False) if not is_busy else stop_recording())
+    keyboard.add_hotkey('ctrl + shift + space', lambda: start_recording(use_clipboard=True) if not is_busy else stop_recording(), suppress=True)
     print("Press 'Ctrl + Spacebar' to start recording, press again to stop and transcribe")
     keyboard.wait('esc')  # Wait for 'esc' key to exit
 

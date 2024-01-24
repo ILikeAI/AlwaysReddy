@@ -29,7 +29,7 @@ def get_completion(messages, together=False, together_model="NousResearch/Nous-H
             model="gpt-3.5-turbo-1106",
             messages=messages
         )
-    print(response)
+
     return response.choices[0].message.content
 
 def main():
