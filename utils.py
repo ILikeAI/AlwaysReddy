@@ -9,9 +9,9 @@ def read_clipboard():
 def to_clipboard(text):
     clipboard.copy(text)
 
-def extract_text_between_symbols(text, symbol="&&&"):
+def extract_text_between_symbols(text, start_symbol="-CLIPSTART-", end_symbol="-CLIPEND-"):
     # Define the regex pattern
-    pattern = r'{}(.*?){}'.format(symbol, symbol)
+    pattern = r'{}\s*(.*?)\s*{}'.format(start_symbol, end_symbol)
 
     # Search for the pattern
     match = re.search(pattern, text, re.DOTALL)
@@ -60,3 +60,11 @@ def trim_messages(messages, max_tokens):
                 break
 
     return messages
+
+def main():
+    print(extract_text_between_symbols(""" -CLIPSTART- 1, 2, 3 -CLIPEND-
+I have saved the words "1, 2, 3" to the clipboard for you."""))
+
+
+if __name__ == "__main__":
+    main()
