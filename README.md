@@ -31,6 +31,7 @@ If you want to improve on this system here are some places to start:
 - The prompt could do with a lot of work
 - Faster STT
 - Possible issues around the hotkey that need to be fixed?
+- Streaming TTS
 
 
 
