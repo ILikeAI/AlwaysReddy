@@ -20,7 +20,7 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - Support for togetherAI API
 
 ### Setup:
-1. Clone this repo with `git clone https://github.com/ILikeAI/Windows-assistant`
+1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
 2. cd into the directory
 3. Install reqs with `pip install -r requirements.txt`
 4. make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file.
