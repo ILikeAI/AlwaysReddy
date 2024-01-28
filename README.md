@@ -1,5 +1,6 @@
 ### Notice:
-There seems to be an issue with the hotkeys sometimes not behaving as they should, I will look into this asap! (you are welcome to fix it too!)
+1. There seems to be an issue with the hotkeys sometimes not behaving as they should, I will look into this asap! (you are welcome to fix it too!)
+2. I have only tested this on Windows so I'm unsure if it works on linux or macOS
 ## Meet AlwaysReddy
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 
