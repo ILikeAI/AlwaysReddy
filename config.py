@@ -10,3 +10,4 @@ TOGETHER_MODEL = "NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT"
 VOICE = "nova"
 AUDIO_FILE_DIR = "audio_files"
 MAX_TOKENS = 6000 
+CANCEL_HOTKEY = 'ctrl + shift + z'

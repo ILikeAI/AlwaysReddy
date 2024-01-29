@@ -5,99 +5,66 @@ import keyboard
 import sound
 import chat_completions 
 from utils import read_clipboard, to_clipboard, extract_text_between_symbols, count_tokens, trim_messages
-from config import START_SOUND_VOLUME, END_SOUND_VOLUME, MIN_RECORDING_DURATION, HOTKEY_DELAY, USE_TOGETHER_API,VOICE, MAX_TOKENS
+import config
 from prompt import default_messages
 
+class Recorder:
+    def __init__(self):
+        self.recorder = AudioRecorder()
+        self.is_busy = False
+        self.clipboard_text = None
+        self.messages = default_messages.copy()
 
-def main():
-    messages = default_messages.copy()  
-    
-    recorder = AudioRecorder() 
-    is_busy = False  
-    clipboard_text = None 
+    def start_recording(self, use_clipboard=False):
+        if not self.is_busy:
+            self.is_busy = True
+            if use_clipboard:
+                self.clipboard_text = read_clipboard()
+                print("Copied to from clip:"+self.clipboard_text)
+            self.recorder.start_recording()
+            sound.play_sound("start", volume=config.START_SOUND_VOLUME)
+            time.sleep(config.HOTKEY_DELAY)
 
+    def stop_recording(self):
+        if self.is_busy:
+            sound.play_sound("end", volume=config.END_SOUND_VOLUME)  
+            self.recorder.stop_recording()
+            if self.recorder.duration < config.MIN_RECORDING_DURATION:
+                print("Recording is too short, ignoring...")
+                self.is_busy = False
+                return
+            transcript = transcribe_audio(self.recorder.filename)
+            self.handle_transcript(transcript)
+            self.is_busy = False
+            time.sleep(config.HOTKEY_DELAY)
 
-    # Function to start recording
-    def start_recording(use_clipboard=False):
-        if not (keyboard.is_pressed('ctrl') and keyboard.is_pressed('space')):
-            return
-        nonlocal is_busy, clipboard_text
-        if is_busy:  
-            return
-        is_busy = True  
-        if use_clipboard:
-            clipboard_text = read_clipboard()  # Read from clipboard
-            print("Copied to from clip:"+clipboard_text)
-        recorder.start_recording() 
-        sound.play_sound("start", volume=START_SOUND_VOLUME)  
-        time.sleep(HOTKEY_DELAY) 
-
-
-
-
-    # Function to stop recording
-    def stop_recording():
-        if not (keyboard.is_pressed('ctrl') and keyboard.is_pressed('space')):
-            return
-        nonlocal is_busy, clipboard_text, messages
-
-        #if not busy, return
-        if not is_busy:  
-            return
-        recorder.stop_recording() 
-        sound.play_sound("end", volume=END_SOUND_VOLUME)
-
-
-        # Check if the recording is less than the minimum duration
-        if recorder.duration < MIN_RECORDING_DURATION:
-            print("Recording is too short, ignoring...")
-            is_busy = False  # Reset the flag
-            return
-        
-        # Transcribe the audio
-        transcript = transcribe_audio(recorder.filename)  
-
-
-
-
-
-        #prepare the messages 
-        #if clipboard_text clipboard hotkey was used, add the clipboard text to the transcript
-        if clipboard_text:
-            messages.append({"role": "user", "content": transcript+f"\n\nTHE USER HAS THIS TEXT COPPIED:\n{clipboard_text}"})
-            clipboard_text = None  
-            if count_tokens(messages) > MAX_TOKENS:
-                messages = trim_messages(messages, MAX_TOKENS)
+    def handle_transcript(self, transcript):
+        if self.clipboard_text:
+            self.messages.append({"role": "user", "content": transcript+f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
+            self.clipboard_text = None
         else:
-            messages.append({"role": "user", "content": transcript})
-            if count_tokens(messages) > MAX_TOKENS:
-                messages = trim_messages(messages, MAX_TOKENS)
-
+            self.messages.append({"role": "user", "content": transcript})
+        if count_tokens(self.messages) > config.MAX_TOKENS:
+            self.messages = trim_messages(self.messages, config.MAX_TOKENS)
         print("Transcription:\n", transcript)
-        
+        self.handle_response(chat_completions.get_completion(self.messages, together=config.USE_TOGETHER_API))
 
-        # Get the response from the chat completions
-        response = chat_completions.get_completion(messages,together=USE_TOGETHER_API)  # Get the response from the chat completions
-        messages.append({"role": "assistant", "content": response})  # Add the response to the messages
+    def handle_response(self, response):
+        self.messages.append({"role": "assistant", "content": response})
         print("Response:\n", response)
-
-        #check if there is text to be copied to the clipboard, and if so, copy it
         text, remaining_text = extract_text_between_symbols(response)
         if text:
-            to_clipboard(text)  # Copy the text to clipboard
+            to_clipboard(text)
             print("Text copied to clipboard:", text)
+        sound.TTS(remaining_text, voice=config.VOICE)
 
 
-        #play the TTS
-        sound.TTS(remaining_text,voice=VOICE)  # Text to speech for the remaining text
-        is_busy = False 
-        time.sleep(HOTKEY_DELAY) 
-
-
-    keyboard.add_hotkey('ctrl + space', lambda: start_recording(use_clipboard=False) if not is_busy else stop_recording())
-    keyboard.add_hotkey('ctrl + shift + space', lambda: start_recording(use_clipboard=True) if not is_busy else stop_recording(), suppress=True)
-    print("Press 'Ctrl + Spacebar' to start recording, press again to stop and transcribe")
-    keyboard.wait('esc')  # Wait for 'esc' key to exit
+    def run(self):
+        keyboard.add_hotkey(config.DEFAULT_HOTKEY, lambda: self.start_recording(use_clipboard=False) if not self.is_busy else self.stop_recording(), suppress=True)
+        keyboard.add_hotkey(config.DEFAULT_CLIP_HOTKEY, lambda: self.start_recording(use_clipboard=True) if not self.is_busy else self.stop_recording(), suppress=True)
+        keyboard.add_hotkey(config.CANCEL_HOTKEY, lambda: self.start_recording(use_clipboard=True) if not self.is_busy else self.stop_recording(), suppress=True)
+        print("Press 'Ctrl + Spacebar' to start recording, press again to stop and transcribe")
+        keyboard.wait('esc')
 
 if __name__ == "__main__":
-    main() 
+    Recorder().run()
