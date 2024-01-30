@@ -1,22 +1,19 @@
 ### Notice:
-1. There seems to be an issue with the hotkeys sometimes not behaving as they should, I will look into this asap! (you are welcome to fix it too!)
+1. AlwaysReddy is still very much a work in progress!
 2. I have only tested this on Windows so I'm unsure if it works on Linux or macOS
 ## Meet AlwaysReddy
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 
-
-There are currently only 2 actions:
-- Voice chat:
-    - Press `Ctrl + Space` to start dictating, you can talk for as long as you want, then press `Ctrl + Space` again to stop recording, a few seconds later you will get a voice response from the AI.
-- Voice chat with context of your clipboard:
-    - `Ctrl + Shift + Space` This will use the contents of your clipboard as added context for the AI, you can get it to summarize.
-  
-Note: AlwaysReddy is still very much a work in progress!
-
 ### How to use:
-- Press `Ctrl + Space` to start dictating, you can talk for as long as you want, then press `Ctrl + Space` again to stop recording, a few seconds later you will get a voice response from the AI.
- 
-- Press `Ctrl + Shift + Space` to use the contents of your clipboard as added context for the AI, allowing it to summarize.
+There are currently only main 2 actions:
+- Voice chat:
+    - Press `Ctrl + Shift + Space`  to start dictating, you can talk for as long as you want, then press `Ctrl + Shift + Space` again to stop recording, a few seconds later you will get a voice response from the AI.
+- Voice chat with context of your clipboard:
+    - Double tap `Ctrl + Shift + Space` (or just hold `Ctrl + Shift` and quickly press `Space` Twice) This will give the AI the content of your clipboard so you can ask it to reference it, rewrite it, answer questions from its contents... whatever you like! 
+- Clear the assistants memory with `ctrl + alt + f12`.
+- Cancel recording without getting a response from the AI with `ctrl + alt + x`
+
+All hotkeys can be edited in config.py
 
 ### Features:
 You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
