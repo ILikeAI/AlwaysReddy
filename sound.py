@@ -3,15 +3,17 @@ import os
 import soundfile as sf
 import sounddevice as sd
 from openai import OpenAI
-from config import AUDIO_FILE_DIR
+import config
 from dotenv import load_dotenv
 import numpy as np
+import time
+
+
 # Load .env file if present
 load_dotenv()
 
 # Fetch API keys from .env file or environment variables
 openai_api_key = os.getenv('OPENAI_API_KEY') or os.environ['OPENAI_API_KEY']
-
 
 def TTS(text, model="tts-1", voice="nova", format="opus"):
     client = OpenAI()
@@ -30,23 +32,31 @@ def TTS(text, model="tts-1", voice="nova", format="opus"):
 
     with sf.SoundFile(buffer, 'r') as sound_file:
         data = sound_file.read(dtype='int16')
+    data = data * config.BASE_VOLUME  # Apply BASE_VOLUME multiplier
     sd.play(data, sound_file.samplerate)
     sd.wait()
     
 def play_sound(name, volume=1.0):
-    #start and end sounds
+    volume *= config.BASE_VOLUME
     if name == "start":
-
         with sf.SoundFile(f"sounds/recording-start.mp3", 'r') as sound_file:
             data = sound_file.read(dtype='int16')
-        sd.play(data * volume, sound_file.samplerate)
+        silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
+        sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
         sd.wait()
 
     elif name == "end":
-
         with sf.SoundFile(f"sounds/recording-end.mp3", 'r') as sound_file:
             data = sound_file.read(dtype='int16')
-        sd.play(data * volume, sound_file.samplerate)
+        silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
+        sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
+        sd.wait()
+    
+    elif name == "cancel":
+        with sf.SoundFile(f"sounds/recording-cancel.mp3", 'r') as sound_file:
+            data = sound_file.read(dtype='int16')
+        silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
+        sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
         sd.wait()
 
 

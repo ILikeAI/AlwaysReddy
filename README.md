@@ -1,6 +1,6 @@
 ### Notice:
 1. There seems to be an issue with the hotkeys sometimes not behaving as they should, I will look into this asap! (you are welcome to fix it too!)
-2. I have only tested this on Windows so I'm unsure if it works on linux or macOS
+2. I have only tested this on Windows so I'm unsure if it works on Linux or macOS
 ## Meet AlwaysReddy
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 
@@ -16,11 +16,12 @@ Note: AlwaysReddy is still very much a work in progress!
 ### How to use:
 - Press `Ctrl + Space` to start dictating, you can talk for as long as you want, then press `Ctrl + Space` again to stop recording, a few seconds later you will get a voice response from the AI.
  
+- Press `Ctrl + Shift + Space` to use the contents of your clipboard as added context for the AI, allowing it to summarize.
 
 ### Features:
 You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - Voice chat with you via TTS and STT
-- Read from your clipboard (with ctrl + shift + space by default )
+- Read from your clipboard (with `Ctrl + Shift + Space` by default )
 - Write text to your clipboard on request.
 - Support for togetherAI API
 
@@ -38,7 +39,7 @@ To add AlwaysReddy to your startup list so it starts automatically on your compu
 4. Right click the file and select edit, replace `DIR_TO_ALWAYSREDDY_REPO` with the directory to the main folder of the AlwaysReddy Repo
 
 The file should end up looking something like this:
-```
+```cmd
 cd C:\Users\Josh\Documents\GitHub\AlwaysReddy\
 python main.py
 pause
