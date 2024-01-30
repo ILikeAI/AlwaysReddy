@@ -1,6 +1,7 @@
 ### Notice:
 1. AlwaysReddy is still very much a work in progress!
 2. I have only tested this on Windows so I'm unsure if it works on Linux or macOS
+
 ## Meet AlwaysReddy
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 
@@ -28,6 +29,7 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 3. Install reqs with `pip install -r requirements.txt`
 4. make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file.
 5. Run the assistant! `python main.py`
+
 ## How to add AlwaysReddy to Startup List
 To add AlwaysReddy to your startup list so it starts automatically on your computer startup, follow these steps:
 1. Press Windows key + R to open the "Run" dialog.
