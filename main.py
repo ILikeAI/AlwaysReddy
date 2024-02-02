@@ -18,6 +18,7 @@ class Recorder:
         self.messages = default_messages.copy()
         self.last_press_time = 0
         self.tts = sound.TTS() 
+        self.recording_timeout_timer = None
 
 
     def clear_messages(self):
