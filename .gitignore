@@ -4,3 +4,8 @@ __pycache__
 .env
 audio_files/*
 !audio_files/temp_files_live_here.txt
+
+piper_voices/*
+
+!piper_voices/en_en_US_amy_medium_en_US-amy-medium.onnx.json
+!piper_voices/en_US-amy-medium.onnx

@@ -8,7 +8,7 @@ from config import AUDIO_FILE_DIR
 load_dotenv()
 
 # Fetch API keys from .env file or environment variables
-openai_api_key = os.getenv('OPENAI_API_KEY') or os.environ['OPENAI_API_KEY']
+openai_api_key = os.getenv('OPENAI_API_KEY')
 
 def transcribe_audio(file_path):
     client = openai.OpenAI(api_key=openai_api_key)
@@ -47,7 +47,8 @@ def transcribe_audio(file_path):
                 chunk_transcript = client.audio.transcriptions.create(
                     model="whisper-1", 
                     file=audio_file, 
-                    response_format="text"
+                    response_format="text",
+                    prompt="Respond with ' ' if there are no words present"
                 )
 
             # Append the chunk transcript to the overall transcript

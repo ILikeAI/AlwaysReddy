@@ -17,6 +17,8 @@ class Recorder:
         self.clipboard_text = None
         self.messages = default_messages.copy()
         self.last_press_time = 0
+        self.tts = sound.TTS() 
+
 
     def clear_messages(self):
         print("Clearing messages...")
@@ -30,6 +32,7 @@ class Recorder:
         double_tapped = current_time - self.last_press_time < threshold
         self.last_press_time = current_time
         return double_tapped
+
 
     def start_recording(self, use_clipboard=False):
         if self.is_busy:
@@ -48,9 +51,15 @@ class Recorder:
         self.recorder.start_recording()
         sound.play_sound("start", volume=config.START_SOUND_VOLUME)
         time.sleep(config.HOTKEY_DELAY)
-    
+
+        # Start a timer that will stop the recording after a certain amount of time
+        self.recording_timeout_timer = threading.Timer(config.MAX_RECORDING_DURATION, self.stop_recording, args=[use_clipboard])
+        self.recording_timeout_timer.start()
 
     def stop_recording(self, use_clipboard=False):
+        # Cancel the timer if it's still running
+        if self.recording_timeout_timer and self.recording_timeout_timer.is_alive():
+            self.recording_timeout_timer.cancel()
         if self.is_recording:
             self.is_busy = True
             sound.play_sound("end", volume=config.END_SOUND_VOLUME)  
@@ -59,15 +68,18 @@ class Recorder:
                 print("Recording is too short, ignoring...")
                 self.is_recording = False
                 return
+
             transcript = transcribe_audio(self.recorder.filename)
             if use_clipboard:
                 self.clipboard_text = read_clipboard()
                 print("Copied to from clip:"+self.clipboard_text)
 
             self.handle_transcript(transcript)
+  
             time.sleep(config.HOTKEY_DELAY)
             self.is_recording = False
             self.is_busy = False
+
 
     def cancel_recording(self):
         print("cancel recording")
@@ -76,6 +88,11 @@ class Recorder:
             self.recorder.stop_recording(cancel=True)
             print("Recording cancelled.")
             self.is_busy = False
+
+        # Stop the text-to-speech if it's running
+        if self.tts.play_obj and self.tts.play_obj.is_playing():
+            self.tts.stop()
+            print("Text-to-speech cancelled.")
 
     def handle_transcript(self, transcript):
         if self.clipboard_text:
@@ -86,16 +103,28 @@ class Recorder:
         if count_tokens(self.messages) > config.MAX_TOKENS:
             self.messages = trim_messages(self.messages, config.MAX_TOKENS)
         print("Transcription:\n", transcript)
+
         self.handle_response(chat_completions.get_completion(self.messages, together=config.USE_TOGETHER_API))
+
 
     def handle_response(self, response):
         self.messages.append({"role": "assistant", "content": response})
         print("Response:\n", response)
+        
         text, remaining_text = extract_text_between_symbols(response)
         if text:
             to_clipboard(text)
             print("Text copied to clipboard:", text)
-        sound.TTS(remaining_text, voice=config.VOICE)
+
+        
+
+        # Use the TTS instance to generate speech
+        tts_thread = threading.Thread(target=self.tts.run_tts, args=(remaining_text, "tts_outputs\\response"))
+        tts_thread.start()
+        tts_thread.join()
+
+
+
 
     def run(self):
         self.timer = None
@@ -112,7 +141,7 @@ class Recorder:
         keyboard.add_hotkey(config.RECORD_HOTKEY, start_recording_wrapper)
         keyboard.add_hotkey(config.CANCEL_HOTKEY, self.cancel_recording)
         keyboard.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
-        print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to give the AI access to your clipboard.\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
+        print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to give the AI access to read your clipboard.\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 
         while True:
             time.sleep(1)

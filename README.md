@@ -7,12 +7,12 @@ AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 
 ### How to use:
 There are currently only main 2 actions:
-- Voice chat:
-    - Press `Ctrl + Shift + Space`  to start dictating, you can talk for as long as you want, then press `Ctrl + Shift + Space` again to stop recording, a few seconds later you will get a voice response from the AI.
-- Voice chat with context of your clipboard:
-    - Double tap `Ctrl + Shift + Space` (or just hold `Ctrl + Shift` and quickly press `Space` Twice) This will give the AI the content of your clipboard so you can ask it to reference it, rewrite it, answer questions from its contents... whatever you like! 
+Voice chat:
+- Press `Ctrl + Shift + Space`  to start dictating, you can talk for as long as you want, then press `Ctrl + Shift + Space` again to stop recording, a few seconds later you will get a voice response from the AI.
+Voice chat with context of your clipboard:
+- Double tap `Ctrl + Shift + Space` (or just hold `Ctrl + Shift` and quickly press `Space` Twice) This will give the AI the content of your clipboard so you can ask it to reference it, rewrite it, answer questions from its contents... whatever you like! 
 - Clear the assistants memory with `ctrl + alt + f12`.
-- Cancel recording without getting a response from the AI with `ctrl + alt + x`
+- Cancel recording or TTS with `ctrl + alt + x`
 
 All hotkeys can be edited in config.py
 
