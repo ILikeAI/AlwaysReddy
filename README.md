@@ -1,9 +1,6 @@
-### Notice:
-1. AlwaysReddy is still very much a work in progress!
-2. I have only tested this on Windows so I'm unsure if it works on Linux or macOS
-
-## Meet AlwaysReddy
+# Meet AlwaysReddy (Now with Piper TTS!)
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
+You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
 
 ### How to use:
 There are currently only main 2 actions:
@@ -15,6 +12,12 @@ Voice chat with context of your clipboard:
 - Cancel recording or TTS with `ctrl + alt + x`
 
 All hotkeys can be edited in config.py
+
+### How to use local TTS or Together API models (easy!)
+To use local TTS just open the config file and set `TTS_ENGINE="piper"`
+
+To use Together AI API (allowing for mixtral), open the config file and set `USE_TOGETHER_API = True`
+Make sure your TOGETHER_API_KEY is in the .env or in your env vars.
 
 ### Features:
 You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
@@ -48,7 +51,5 @@ pause
 If you want to improve on this system here are some places to start:
 - The prompt could do with a lot of work
 - Faster STT
-- Possible issues around the hotkey that need to be fixed?
-- Streaming TTS
 
 Please feel free to improve this repo and make forks of it as you like!
