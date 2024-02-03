@@ -13,6 +13,7 @@ import config
 import simpleaudio as sa
 import glob
 from nltk import data
+import time
 
 
 # Load .env file if present
@@ -43,19 +44,13 @@ class TTS:
     def wait(self):
         self.play_audio_thread.join()
 
-    def run_tts(self, text_to_speak, output_file):
-        self.stop_tts = False
+    def run_tts(self, text_to_speak, output_file="tts_outputs\\response"):
 
-        # Delete all .wav files in the output directory
-        output_dir = os.path.dirname(output_file)
-        files = glob.glob(f"{output_dir}/*.wav")
-        for f in files:
-            os.remove(f)
+        self.stop_tts = False
 
         sentences = self.split_text(text_to_speak)
 
-
-
+        output_dir = os.path.dirname(output_file)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -64,14 +59,17 @@ class TTS:
             if self.stop_tts:
                 break
 
+            # Append a timestamp to the filename to ensure it's unique
+            timestamp = int(time.time())
+            unique_output_file = f"{output_file}_{timestamp}_{i}.wav"
+
             if self.service == "openai":
-                self.TTS_openai(sentence, f"{output_file}_{i}.wav")
+                self.TTS_openai(sentence, unique_output_file)
             else:
-                self.TTS_piper(sentence, f"{output_file}_{i}.wav")  # Pass the output_file argument here
+                self.TTS_piper(sentence, unique_output_file)
 
-            self.audio_queue.put(f"{output_file}_{i}.wav")
+            self.audio_queue.put(unique_output_file)
 
-        #self.stop_tts = True
 
     def TTS_piper(self, text_to_speak, output_file ):
         
@@ -114,6 +112,7 @@ class TTS:
         subprocess.run(['cmd.exe', '/c', command], capture_output=True, text=True)
 
     def TTS_openai(self, text, output_file, model="tts-1", format="opus"):
+        
         try:
             client = OpenAI()
 
@@ -152,7 +151,7 @@ class TTS:
             if not os.path.exists(file_path):
                 print(f"The file {file_path} does not exist.")
                 continue
-
+            
             wave_obj = sa.WaveObject.from_wave_file(file_path)
             self.play_obj = wave_obj.play()
             self.play_obj.wait_done()
@@ -160,6 +159,7 @@ class TTS:
 
             # Delete the audio file after it has been played
             os.remove(file_path)
+
     def stop(self):
         self.stop_tts = True
         if self.play_obj:
@@ -195,16 +195,14 @@ def play_sound(name, volume=1.0):
         sd.wait()
 
 def main():
-    tts = TTS(service="piper")
+    tts = TTS()
     print("Running TTS")
-    tts.run_tts("This is a test", "tts_outputs\\response")
+    tts.run_tts("This is the first test")
+    tts.run_tts("This is the second test")
     tts.wait()
     print("TTS finished")
     tts.stop()  # Stop the text-to-speech process
 
 if __name__ == "__main__":
     main()
-
-
-
 

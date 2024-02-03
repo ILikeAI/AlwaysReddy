@@ -19,6 +19,9 @@ OPENAI_VOICE = "nova"
 HOTKEY_DELAY = 0.5
 AUDIO_FILE_DIR = "audio_files"
 MAX_TOKENS = 6000 #Max tokens allowed in memory at once
+START_SEQ = "-CLIPSTART-" #the model is instructed to place any text for the clipboard between the start and end seq
+END_SEQ = "-CLIPEND-" #the model is instructed to place any text for the clipboard between the start and end seq
+
 
 ### AUDIO SETTINGS ###
 BASE_VOLUME = 1 

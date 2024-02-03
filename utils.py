@@ -9,21 +9,7 @@ def read_clipboard():
 def to_clipboard(text):
     clipboard.copy(text)
 
-def extract_text_between_symbols(text, start_symbol="-CLIPSTART-", end_symbol="-CLIPEND-"):
-    # Define the regex pattern
-    pattern = r'{}\s*(.*?)\s*{}'.format(start_symbol, end_symbol)
 
-    # Search for the pattern
-    match = re.search(pattern, text, re.DOTALL)
-
-    if match:
-        # Separate the matched text and the remaining text
-        separated_text = match.group(1).strip()
-        remaining_text = re.sub(pattern, '', text, flags=re.DOTALL).strip()
-
-        return separated_text, remaining_text
-    else:
-        return None, text
 
 def count_tokens(messages, model="gpt-3.5-turbo"):
     enc = tiktoken.encoding_for_model(model)
@@ -62,8 +48,7 @@ def trim_messages(messages, max_tokens):
     return messages
 
 def main():
-    print(extract_text_between_symbols(""" -CLIPSTART- 1, 2, 3 -CLIPEND-
-I have saved the words "1, 2, 3" to the clipboard for you."""))
+    pass
 
 
 if __name__ == "__main__":
