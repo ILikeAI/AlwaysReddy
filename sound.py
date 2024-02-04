@@ -7,13 +7,12 @@ from dotenv import load_dotenv
 import numpy as np
 import subprocess
 import threading
-import nltk
 import queue
 import config
 import simpleaudio as sa
 import glob
-from nltk import data
 import time
+import re
 
 
 # Load .env file if present
@@ -31,15 +30,12 @@ class TTS:
 
         self.play_audio_thread = threading.Thread(target=self.play_audio, daemon=True)
         self.play_audio_thread.start()
-        if not data.find('tokenizers/punkt'):
-            nltk.download('punkt', quiet=True)
+
+
 
     def split_text(self, text):
-        sentences = nltk.sent_tokenize(text)
-        split_sentences = []
-        for sentence in sentences:
-            split_sentences.extend(sentence.split('\n'))
-        return split_sentences
+        split_sentences = re.split('!|\.|\?|\n', text)
+        return [sentence for sentence in split_sentences if sentence]
         
     def wait(self):
         self.play_audio_thread.join()
