@@ -9,9 +9,9 @@ load_dotenv()
 
 # Fetch API keys from .env file or environment variables
 openai_api_key = os.getenv('OPENAI_API_KEY')
+client = openai.OpenAI(api_key=openai_api_key)
 
 def transcribe_audio(file_path):
-    client = openai.OpenAI(api_key=openai_api_key)
     audio = AudioSegment.from_file(f"{AUDIO_FILE_DIR}/{file_path}")
 
     # Define the chunk size (10 minutes in milliseconds)
@@ -54,5 +54,7 @@ def transcribe_audio(file_path):
             # Append the chunk transcript to the overall transcript
             transcript += chunk_transcript
 
-    return transcript
+    # Delete the audio file
+    os.remove(f"{AUDIO_FILE_DIR}/{file_path}")
 
+    return transcript

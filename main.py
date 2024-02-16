@@ -4,8 +4,9 @@ from audio_recorder import AudioRecorder
 from transcriber import transcribe_audio
 import keyboard
 import sound
-import chat_completions 
-from utils import read_clipboard, to_clipboard, extract_text_between_symbols, count_tokens, trim_messages
+from chat_completions import ChatCompletion
+
+from utils import read_clipboard, to_clipboard, count_tokens, trim_messages
 import config
 from prompt import default_messages
 
@@ -42,6 +43,7 @@ class Recorder:
         print(f"USE CLIPBOARD: {use_clipboard}")
         self.timer = None
         if self.is_recording:
+            
             self.stop_recording(use_clipboard)
             return
 
@@ -59,27 +61,31 @@ class Recorder:
 
     def stop_recording(self, use_clipboard=False):
         # Cancel the timer if it's still running
+        
         if self.recording_timeout_timer and self.recording_timeout_timer.is_alive():
             self.recording_timeout_timer.cancel()
+        
         if self.is_recording:
             self.is_busy = True
+            
             sound.play_sound("end", volume=config.END_SOUND_VOLUME)  
             self.recorder.stop_recording()
             if self.recorder.duration < config.MIN_RECORDING_DURATION:
                 print("Recording is too short, ignoring...")
                 self.is_recording = False
                 return
-
             transcript = transcribe_audio(self.recorder.filename)
             if use_clipboard:
                 self.clipboard_text = read_clipboard()
                 print("Copied to from clip:"+self.clipboard_text)
 
-            self.handle_transcript(transcript)
+            self.handle_response(transcript)
   
             time.sleep(config.HOTKEY_DELAY)
             self.is_recording = False
             self.is_busy = False
+
+
 
 
     def cancel_recording(self):
@@ -95,7 +101,8 @@ class Recorder:
             self.tts.stop()
             print("Text-to-speech cancelled.")
 
-    def handle_transcript(self, transcript):
+    def handle_response(self, transcript):
+        chat_completion = ChatCompletion()
         if self.clipboard_text:
             self.messages.append({"role": "user", "content": transcript+f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
             self.clipboard_text = None
@@ -104,26 +111,10 @@ class Recorder:
         if count_tokens(self.messages) > config.MAX_TOKENS:
             self.messages = trim_messages(self.messages, config.MAX_TOKENS)
         print("Transcription:\n", transcript)
+        response = chat_completion.get_completion(self.messages, self.tts.run_tts)
 
-        self.handle_response(chat_completions.get_completion(self.messages, together=config.USE_TOGETHER_API))
-
-
-    def handle_response(self, response):
         self.messages.append({"role": "assistant", "content": response})
         print("Response:\n", response)
-        
-        text, remaining_text = extract_text_between_symbols(response)
-        if text:
-            to_clipboard(text)
-            print("Text copied to clipboard:", text)
-
-        
-
-        # Use the TTS instance to generate speech
-        tts_thread = threading.Thread(target=self.tts.run_tts, args=(remaining_text, "tts_outputs\\response"))
-        tts_thread.start()
-        tts_thread.join()
-
 
 
 
