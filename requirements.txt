@@ -3,10 +3,7 @@ openai
 pydub
 python-dotenv
 keyboard
-wave
 soundfile
 clipboard
 numpy
-nltk
 tiktoken
-simpleaudio

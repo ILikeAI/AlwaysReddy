@@ -9,7 +9,6 @@ import subprocess
 import threading
 import queue
 import config
-import simpleaudio as sa
 import re
 import tempfile
 import threading
@@ -145,10 +144,11 @@ class TTS:
             if not os.path.exists(file_path):
                 print(f"The file {file_path} does not exist.")
                 continue
-            
-            wave_obj = sa.WaveObject.from_wave_file(file_path)
-            self.play_obj = wave_obj.play()
-            self.play_obj.wait_done()
+
+            data, fs = sf.read(file_path, dtype='float32')  # Read audio file using soundfile
+            sd.play(data, fs)  # Play audio data using sounddevice
+            sd.wait()  # Wait until the file is done playing
+
             self.audio_queue.task_done()
 
             # Delete the temporary audio file after it has been played
