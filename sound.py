@@ -10,10 +10,9 @@ import threading
 import queue
 import config
 import simpleaudio as sa
-import glob
-import time
 import re
-
+import tempfile
+import threading
 
 # Load .env file if present
 load_dotenv()
@@ -40,13 +39,11 @@ class TTS:
     def wait(self):
         self.play_audio_thread.join()
 
-    def run_tts(self, text_to_speak, output_file="tts_outputs\\response"):
-
+    def run_tts(self, text_to_speak, output_dir=config.AUDIO_FILE_DIR):
         self.stop_tts = False
 
         sentences = self.split_text(text_to_speak)
 
-        output_dir = os.path.dirname(output_file)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -55,16 +52,17 @@ class TTS:
             if self.stop_tts:
                 break
 
-            # Append a timestamp to the filename to ensure it's unique
-            timestamp = int(time.time())
-            unique_output_file = f"{output_file}_{timestamp}_{i}.wav"
+            # Create a temporary file in the specified directory
+            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
+            temp_output_file = temp_file.name
+            temp_file.close()
 
             if self.service == "openai":
-                self.TTS_openai(sentence, unique_output_file)
+                self.TTS_openai(sentence, temp_output_file)
             else:
-                self.TTS_piper(sentence, unique_output_file)
+                self.TTS_piper(sentence, temp_output_file)
 
-            self.audio_queue.put(unique_output_file)
+            self.audio_queue.put(temp_output_file)
 
 
     def TTS_piper(self, text_to_speak, output_file ):
@@ -153,7 +151,7 @@ class TTS:
             self.play_obj.wait_done()
             self.audio_queue.task_done()
 
-            # Delete the audio file after it has been played
+            # Delete the temporary audio file after it has been played
             os.remove(file_path)
 
     def stop(self):
@@ -167,28 +165,34 @@ class TTS:
                 os.remove(file_path)
         self.audio_queue.join()
 
+
 def play_sound(name, volume=1.0):
     volume *= config.BASE_VOLUME
-    if name == "start":
-        with sf.SoundFile(f"sounds/recording-start.mp3", 'r') as sound_file:
-            data = sound_file.read(dtype='int16')
-        silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
-        sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
-        sd.wait()
+    def play():
+        if name == "start":
+            with sf.SoundFile(f"sounds/recording-start.mp3", 'r') as sound_file:
+                data = sound_file.read(dtype='int16')
+            silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
+            sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
+            sd.wait()
 
-    elif name == "end":
-        with sf.SoundFile(f"sounds/recording-end.mp3", 'r') as sound_file:
-            data = sound_file.read(dtype='int16')
-        silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
-        sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
-        sd.wait()
-    
-    elif name == "cancel":
-        with sf.SoundFile(f"sounds/recording-cancel.mp3", 'r') as sound_file:
-            data = sound_file.read(dtype='int16')
-        silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
-        sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
-        sd.wait()
+        elif name == "end":
+            with sf.SoundFile(f"sounds/recording-end.mp3", 'r') as sound_file:
+                data = sound_file.read(dtype='int16')
+            silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
+            sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
+            sd.wait()
+        
+        elif name == "cancel":
+            with sf.SoundFile(f"sounds/recording-cancel.mp3", 'r') as sound_file:
+                data = sound_file.read(dtype='int16')
+            silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
+            sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
+            sd.wait()
+
+    # Create a thread to play the sound asynchronously
+    sound_thread = threading.Thread(target=play)
+    sound_thread.start()
 
 def main():
     tts = TTS()

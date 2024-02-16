@@ -4,7 +4,8 @@ from audio_recorder import AudioRecorder
 from transcriber import transcribe_audio
 import keyboard
 import sound
-import chat_completions 
+from chat_completions import ChatCompletion
+
 from utils import read_clipboard, to_clipboard, count_tokens, trim_messages
 import config
 from prompt import default_messages
@@ -42,6 +43,7 @@ class Recorder:
         print(f"USE CLIPBOARD: {use_clipboard}")
         self.timer = None
         if self.is_recording:
+            
             self.stop_recording(use_clipboard)
             return
 
@@ -59,17 +61,19 @@ class Recorder:
 
     def stop_recording(self, use_clipboard=False):
         # Cancel the timer if it's still running
+        
         if self.recording_timeout_timer and self.recording_timeout_timer.is_alive():
             self.recording_timeout_timer.cancel()
+        
         if self.is_recording:
             self.is_busy = True
+            
             sound.play_sound("end", volume=config.END_SOUND_VOLUME)  
             self.recorder.stop_recording()
             if self.recorder.duration < config.MIN_RECORDING_DURATION:
                 print("Recording is too short, ignoring...")
                 self.is_recording = False
                 return
-
             transcript = transcribe_audio(self.recorder.filename)
             if use_clipboard:
                 self.clipboard_text = read_clipboard()
@@ -80,6 +84,8 @@ class Recorder:
             time.sleep(config.HOTKEY_DELAY)
             self.is_recording = False
             self.is_busy = False
+
+
 
 
     def cancel_recording(self):
@@ -96,6 +102,7 @@ class Recorder:
             print("Text-to-speech cancelled.")
 
     def handle_response(self, transcript):
+        chat_completion = ChatCompletion()
         if self.clipboard_text:
             self.messages.append({"role": "user", "content": transcript+f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
             self.clipboard_text = None
@@ -104,13 +111,10 @@ class Recorder:
         if count_tokens(self.messages) > config.MAX_TOKENS:
             self.messages = trim_messages(self.messages, config.MAX_TOKENS)
         print("Transcription:\n", transcript)
-
-        response = chat_completions.get_completion(self.messages, self.tts.run_tts, together=config.USE_TOGETHER_API)
-
+        response = chat_completion.get_completion(self.messages, self.tts.run_tts)
 
         self.messages.append({"role": "assistant", "content": response})
         print("Response:\n", response)
-
 
 
 
