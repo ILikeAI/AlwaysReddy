@@ -64,4 +64,3 @@ class AudioRecorder:
             sf.write(filename, recording, config.FS)
             print(f"Recording saved to {filename}")
 
-# Ensure the `config` module has the appropriate FS (sampling rate) and AUDIO_FILE_DIR settings.

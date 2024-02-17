@@ -1,8 +1,7 @@
-### TOGETHER SETTINGS ###
-TOGETHER_MODEL = "NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT"
-
 ### COMPLETIONS API SETTINGS ###
-COMPLETIONS_API = "openai" # 'openai' or 'together' 
+COMPLETIONS_API = "together" # 'openai' or 'together' 
+OPENAI_MODEL = "gpt-3.5-turbo"
+TOGETHER_MODEL = "NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT"
 
 ### HOTKEYS ###
 CANCEL_HOTKEY = 'ctrl + alt + x'
@@ -12,7 +11,7 @@ RECORD_HOTKEY = 'ctrl + shift + space'
 ### VOICE SETTINGS ###
 PIPER_VOICE_JSON="en_en_US_amy_medium_en_US-amy-medium.onnx.json" #These are located in the piper_voices folder
 PIPER_VOICE_ONNX="en_US-amy-medium.onnx"
-TTS_ENGINE="openai" # 'piper' or 'openai' piper is local and fast but openai is better sounding
+TTS_ENGINE="piper" # 'piper' or 'openai' piper is local and fast but openai is better sounding
 OPENAI_VOICE = "nova"
 
 

@@ -17,15 +17,18 @@ class ChatCompletion:
     def __init__(self):
         if completions_api == "openai":
             self.client = OpenAI(api_key=openai_api_key)
+            self.model = config.OPENAI_MODEL
         elif completions_api == "together":
             self.client = OpenAI(
                 api_key=os.getenv('TOGETHER_API_KEY'),
                 base_url="https://api.together.xyz/v1",
             )
+            self.model = config.TOGETHER_MODEL
+            
         else:
             raise ValueError("Invalid COMPLETIONS_API value")
 
-    def get_completion(self, messages, TTS_func, together=False, together_model="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT", max_tokens=2048):
+    def get_completion(self, messages, TTS_func, max_tokens=2048):
         main_response = ""
         between_symbols = ""
         full_response = ""
@@ -34,21 +37,15 @@ class ChatCompletion:
         start_seq = config.START_SEQ
         end_seq = config.END_SEQ
 
-        if together:
-            stream = self.client.chat.completions.create(
-                model=together_model,
-                messages=messages,
-                temperature=0.7,
-                max_tokens=max_tokens,
-                stream=True
-            )
-        else:
-            stream = self.client.chat.completions.create(
-                model="gpt-3.5-turbo-1106",
-                messages=messages,
-                max_tokens=max_tokens,
-                stream=True
-                )
+
+        stream = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=0.7,
+            max_tokens=max_tokens,
+            stream=True
+        )
+
             
         for chunk in stream:
             content = chunk.choices[0].delta.content
