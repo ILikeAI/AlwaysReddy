@@ -1,6 +1,7 @@
 # Meet AlwaysReddy (Now with Piper TTS!)
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
+Join the discord: https://discord.gg/v3Hb9za9B4
 
 ### How to use:
 There are currently only main 2 actions:
