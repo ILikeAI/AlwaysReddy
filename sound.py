@@ -32,7 +32,7 @@ class TTS:
 
 
     def split_text(self, text):
-        split_sentences = re.split('!|\.|\?|\n', text)
+        split_sentences = re.split('!|\. |\?|\n', text)
         return [sentence for sentence in split_sentences if sentence]
         
     def wait(self):
