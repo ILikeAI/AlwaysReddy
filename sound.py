@@ -12,7 +12,7 @@ import config
 import re
 import tempfile
 import threading
-
+import time
 # Load .env file if present
 load_dotenv()
 
@@ -20,52 +20,74 @@ load_dotenv()
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
 class TTS:
-    def __init__(self):
+    def __init__(self,parent_client=None):
         self.service = config.TTS_ENGINE
         self.audio_queue = queue.Queue()
+        self.running_tts = False
         self.stop_tts = False
-        self.play_obj = None  
+        self.play_obj = None
+        self.parent_client = parent_client 
+        self.text_incoming = False 
 
         self.play_audio_thread = threading.Thread(target=self.play_audio, daemon=True)
         self.play_audio_thread.start()
+        self.completion_client = None
+
+        #delete any left over temp files
+        for file in os.listdir(config.AUDIO_FILE_DIR):
+            if file.endswith(".wav"):
+                os.remove(f"{config.AUDIO_FILE_DIR}\\{file}")
+
+        
 
 
     def split_text(self, text):
-        split_sentences = re.split('!|\?|\n|\. ', text)
+
+        split_sentences = re.split('!|\. |\?|\n', text)
+
         return [sentence for sentence in split_sentences if sentence]
         
     def wait(self):
         self.play_audio_thread.join()
 
     def run_tts(self, text_to_speak, output_dir=config.AUDIO_FILE_DIR):
-        self.stop_tts = False
+        print(f"Running TTS: {text_to_speak}")
+        self.running_tts = True  # Ensure this is set when starting to process new text
+        if self.text_incoming:
+            self.running_tts = True
 
-        sentences = self.split_text(text_to_speak)
+        if self.running_tts:
+            sentences = self.split_text(text_to_speak)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            
+            for i, sentence in enumerate(sentences):
+                temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
+                temp_output_file = temp_file.name
+                temp_file.close()
 
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+                if self.service == "openai":
+                    self.TTS_openai(sentence, temp_output_file)
+                else:
+                    self.TTS_piper(sentence, temp_output_file)
 
-        for i, sentence in enumerate(sentences):
-            # Stop adding sentences if the TTS is cancelled
-            if self.stop_tts:
-                break
+                print("Adding to queue")
+                if self.running_tts:
+                    self.audio_queue.put((temp_output_file, sentence))
 
-            # Create a temporary file in the specified directory
-            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
-            temp_output_file = temp_file.name
-            temp_file.close()
+            # Check if the play_audio thread is alive and restart it if necessary
+            if not self.play_audio_thread.is_alive():
+                self.play_audio_thread = threading.Thread(target=self.play_audio, daemon=True)
+                self.play_audio_thread.start()
 
-            if self.service == "openai":
-                self.TTS_openai(sentence, temp_output_file)
-            else:
-                self.TTS_piper(sentence, temp_output_file)
 
-            self.audio_queue.put(temp_output_file)
 
 
     def TTS_piper(self, text_to_speak, output_file ):
         
-
+        #clear double quotes from text
+        text_to_speak = text_to_speak.replace('"', '')
+        
         json_file_name = config.PIPER_VOICE_JSON
         onnx_file_name = config.PIPER_VOICE_ONNX
 
@@ -130,42 +152,57 @@ class TTS:
                 file.write(data)
         except Exception as e:
             print(f"Error occurred while using OpenAI API: {e}")
-
+    
     def play_audio(self):
         while True:
             try:
-                file_path = self.audio_queue.get(timeout=1) 
+                file_path, sentence = self.audio_queue.get(timeout=1)  # Extract both the file path and the text
+                self.running_tts = True  # Indicate processing is active
             except queue.Empty:
-                if self.stop_tts:
+                if not self.running_tts:
                     break
                 continue
 
             if not os.path.exists(file_path):
                 print(f"The file {file_path} does not exist.")
+                self.audio_queue.task_done()
                 continue
-
-            data, fs = sf.read(file_path, dtype='float32')  # Read audio file using soundfile
-            sd.play(data, fs)  # Play audio data using sounddevice
-            sd.wait()  # Wait until the file is done playing
-
+            if self.parent_client.waiting_for_tts:
+                self.parent_client.waiting_for_tts = False
+            data, fs = sf.read(file_path, dtype='float32')
+            self.parent_client.how_long_to_speak_first_word(time.time())
+            self.play_obj = sd.play(data, fs)
+            print(f"Playing audio: {sentence}")
+            self.last_played_sentence = sentence  # Store the last played sentence
+            sd.wait()
             self.audio_queue.task_done()
-
-            # Delete the temporary audio file after it has been played
-            os.remove(file_path)
-
-    def stop(self):
-        self.stop_tts = True
-        if self.play_obj:
-            self.play_obj.stop()
-        # Delete any remaining audio files in the queue
-        while not self.audio_queue.empty():
-            file_path = self.audio_queue.get()
+            #check if file path exists and delete it
             if os.path.exists(file_path):
                 os.remove(file_path)
-        self.audio_queue.join()
+
+            if self.audio_queue.empty():
+                self.running_tts = False # No more items to process, can indicate the process is not active
+
+    def stop(self):
+        print("Stopping TTS")
+        self.running_tts = False
+        self.text_incoming = False
+        self.completion_client.cancel = True
+        self.waiting_for_tts = False
+        sd.stop()  # This will stop any currently playing audio immediately
+
+        # Clear the queue
+        while not self.audio_queue.empty():
+            try:
+                self.audio_queue.get_nowait()
+            except queue.Empty:
+                continue
+            self.audio_queue.task_done()
 
 
-def play_sound(name, volume=1.0):
+
+
+def play_sound_FX(name, volume=1.0):
     volume *= config.BASE_VOLUME
     def play():
         if name == "start":
@@ -193,15 +230,23 @@ def play_sound(name, volume=1.0):
     sound_thread = threading.Thread(target=play)
     sound_thread.start()
 
-def main():
-    tts = TTS()
-    print("Running TTS")
-    tts.run_tts("This is the first test")
-    tts.run_tts("This is the second test")
-    tts.wait()
-    print("TTS finished")
-    tts.stop()  # Stop the text-to-speech process
+import unittest
+from unittest.mock import Mock
+from sound import TTS
+
+class TestTTS(unittest.TestCase):
+    def test_tts_queue_cancel(self):
+        tts = TTS()
+        tts.parent_client = Mock()
+        tts.text_incoming = True
+        tts.run_tts("This is the first test 1 2 3 4 5 6 7 8 9 10 11")
+        tts.run_tts("This is the second test")
+        
+        #tts.stop()
+        #print("Cancelling TTS")
+        #self.assertTrue(tts.audio_queue.empty())
+        #wait for the audio queue to empty
+        tts.wait()
 
 if __name__ == "__main__":
-    main()
-
+    unittest.main()

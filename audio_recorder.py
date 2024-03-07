@@ -43,11 +43,11 @@ class AudioRecorder:
 
     def stop_recording(self, cancel=False):
         if self.recording:
-            print("Stopping recording...")
             self.recording = False
             self.record_thread.join()
             if not cancel:
                 self.save_recording()
+
 
     def save_recording(self):
         if self.frames:

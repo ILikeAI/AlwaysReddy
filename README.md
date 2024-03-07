@@ -53,5 +53,6 @@ pause
 If you want to improve on this system here are some places to start:
 - The prompt could do with a lot of work
 - Faster STT
+- The chat completions file is suepr messy
 
 Please feel free to improve this repo and make forks of it as you like!
