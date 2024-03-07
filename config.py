@@ -1,8 +1,7 @@
-### TOGETHER SETTINGS ###
-TOGETHER_MODEL = "NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT"
-
 ### COMPLETIONS API SETTINGS ###
 COMPLETIONS_API = "openai" # 'openai' or 'together' 
+OPENAI_MODEL = "gpt-3.5-turbo"
+TOGETHER_MODEL = "NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT"
 
 ### HOTKEYS ###
 CANCEL_HOTKEY = 'ctrl + alt + x'
@@ -19,7 +18,7 @@ OPENAI_VOICE = "nova"
 ### MISC ###
 HOTKEY_DELAY = 0.5
 AUDIO_FILE_DIR = "audio_files"
-MAX_TOKENS = 6000 #Max tokens allowed in memory at once
+MAX_TOKENS = 8000 #Max tokens allowed in memory at once
 START_SEQ = "-CLIPSTART-" #the model is instructed to place any text for the clipboard between the start and end seq
 END_SEQ = "-CLIPEND-" #the model is instructed to place any text for the clipboard between the start and end seq
 

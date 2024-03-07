@@ -1,6 +1,7 @@
 # Meet AlwaysReddy (Now with Piper TTS!)
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
+Join the discord: https://discord.gg/v3Hb9za9B4
 
 ### How to use:
 There are currently only main 2 actions:
@@ -32,6 +33,7 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 3. Install reqs with `pip install -r requirements.txt`
 4. make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file.
 5. Run the assistant! `python main.py`
+5.1 If you need fmmpeg installed run the `fmmpegsetup.bat`script as administrator in the scripts folder
 
 ## How to add AlwaysReddy to Startup List
 To add AlwaysReddy to your startup list so it starts automatically on your computer startup, follow these steps:
