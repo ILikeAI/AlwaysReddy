@@ -43,11 +43,11 @@ class AudioRecorder:
 
     def stop_recording(self, cancel=False):
         if self.recording:
-            print("Stopping recording...")
             self.recording = False
             self.record_thread.join()
             if not cancel:
                 self.save_recording()
+
 
     def save_recording(self):
         if self.frames:
@@ -64,4 +64,3 @@ class AudioRecorder:
             sf.write(filename, recording, config.FS)
             print(f"Recording saved to {filename}")
 
-# Ensure the `config` module has the appropriate FS (sampling rate) and AUDIO_FILE_DIR settings.
