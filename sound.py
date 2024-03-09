@@ -58,7 +58,6 @@ class TTS:
 
         if self.running_tts:
             sentences = self.split_text(text_to_speak)
-            print(f"sentences:{sentences}")
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
 
