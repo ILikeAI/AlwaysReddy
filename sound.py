@@ -58,10 +58,17 @@ class TTS:
 
         if self.running_tts:
             sentences = self.split_text(text_to_speak)
+            print(f"sentences:{sentences}")
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            
-            for i, sentence in enumerate(sentences):
+
+
+            sentences = [sentence for sentence in sentences if any(char.isalnum() for char in sentence)]
+            if not sentences:
+                self.running_tts = False
+                return
+
+            for sentence in sentences:
                 temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
                 temp_output_file = temp_file.name
                 temp_file.close()
@@ -239,8 +246,8 @@ class TestTTS(unittest.TestCase):
         tts = TTS()
         tts.parent_client = Mock()
         tts.text_incoming = True
-        tts.run_tts("This is the first test 1 2 3 4 5 6 7 8 9 10 11")
-        tts.run_tts("This is the second test")
+        tts.run_tts("  ")
+        tts.run_tts("This is the second test. This is the second test. ")
         
         #tts.stop()
         #print("Cancelling TTS")
