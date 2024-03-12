@@ -54,7 +54,6 @@ class ChatCompletion:
 
             
         self.cancel = False
-        self.TTS_client.text_incoming = True
         self.TTS_client.last_played_sentence = ""
         for chunk in stream:
             if self.cancel == True:
@@ -115,6 +114,6 @@ class ChatCompletion:
         if main_response and not self.parent_client.is_recording:
             self.TTS_client.run_tts(main_response)
 
-        self.TTS_client.text_incoming = False
+
         return self.full_response
 
