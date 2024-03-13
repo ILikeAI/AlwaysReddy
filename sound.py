@@ -28,6 +28,7 @@ class TTS:
         self.parent_client = parent_client 
         self.text_incoming = False  
         self.queing = False
+        self.temp_files = []
 
         self.play_audio_thread = threading.Thread(target=self.play_audio)
         
@@ -58,22 +59,22 @@ class TTS:
         if not self.play_audio_thread.is_alive():
             self.play_audio_thread = threading.Thread(target=self.play_audio)
             self.play_audio_thread.start()
- 
+
         print(f"Running TTS: {text_to_speak}")
 
         sentences = self.split_text(text_to_speak)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-
         sentences = [sentence for sentence in sentences if any(char.isalnum() for char in sentence)]
-
-
 
         for sentence in sentences:
             temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
             temp_output_file = temp_file.name
             temp_file.close()
+
+            # Add the temp file to the list
+            self.temp_files.append(temp_output_file)
 
             if self.service == "openai":
                 self.TTS_openai(sentence, temp_output_file)
@@ -87,7 +88,6 @@ class TTS:
 
         self.queing = False
         print(self.audio_queue.qsize())
-
 
 
 
@@ -186,6 +186,7 @@ class TTS:
 
             if os.path.exists(file_path):
                 os.remove(file_path)
+                self.temp_files.remove(file_path)
 
 
 
@@ -203,7 +204,11 @@ class TTS:
             except queue.Empty:
                 continue
             self.audio_queue.task_done()
-
+        
+        for temp_file in self.temp_files:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+        self.temp_files = []
         # Wait for the play_audio thread to acknowledge the stop signal and exit
         self.play_audio_thread.join()
 
