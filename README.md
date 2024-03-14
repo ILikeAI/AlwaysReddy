@@ -1,7 +1,33 @@
-# Meet AlwaysReddy (Now with Piper TTS!)
+# Welcome
+Hey, I'm Josh, the creator of AlwaysReddy. I am still a noob when it comes to programming and I'm really trying to develop my skills over the next year, I'm treating this project as an attempt to better develop my skills, with that in mind I would really appreciate it if you could point out issues and bad practices in my code (of which I'm sure there will be plenty). I would also appreciate if you would make your own improvements to the project so I can learn from your changes.
+
+## Meet AlwaysReddy 
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
 Join the discord: https://discord.gg/v3Hb9za9B4
+
+### Features:
+You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
+- Voice chat with you via TTS and STT
+- Read from your clipboard (with `Ctrl + Shift + Space + Space` rapidly double tapping space).
+- Write text to your clipboard on request.
+- Support for togetherAI API.
+
+## Use cases:
+I often use AlwaysReddy for the following things:
+- When I have just learned a new concept I will often explain the concept aloud to AlwaysReddy and have it save the concept (in roughly my words) into a note.
+- "What is X called?" Often I know how to roughly describe something but cant remember what it is called, AlwaysReddy is handy for quickly giving me the answer without me having to open the browser.
+- "Can you proof read the text in my clipboard before I send it?"
+- "From the comments in my clipboard what do the r/LocalLLaMA users think of X?"
+- Quick journal entries, I speedily list what I have done today and get it to write a journal entry to my clipboard before I shutdown the computer for the day.
+
+### Setup:
+1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
+2. cd into the directory
+3. Install reqs with `pip install -r requirements.txt`
+4. make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file.
+5. Run the assistant! `python main.py`
+5.1 If you need fmmpeg installed run the `fmmpegsetup.bat`script as administrator in the scripts folder
 
 ### How to use:
 There are currently only main 2 actions:
@@ -20,21 +46,6 @@ To use local TTS just open the config file and set `TTS_ENGINE="piper"`
 To use Together AI API (allowing for mixtral), open the config file and set `USE_TOGETHER_API = True`
 Make sure your TOGETHER_API_KEY is in the .env or in your env vars.
 
-### Features:
-You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
-- Voice chat with you via TTS and STT
-- Read from your clipboard (with `Ctrl + Shift + Space` by default )
-- Write text to your clipboard on request.
-- Support for togetherAI API
-
-### Setup:
-1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
-2. cd into the directory
-3. Install reqs with `pip install -r requirements.txt`
-4. make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file.
-5. Run the assistant! `python main.py`
-5.1 If you need fmmpeg installed run the `fmmpegsetup.bat`script as administrator in the scripts folder
-
 ## How to add AlwaysReddy to Startup List
 To add AlwaysReddy to your startup list so it starts automatically on your computer startup, follow these steps:
 1. Press Windows key + R to open the "Run" dialog.
@@ -48,11 +59,3 @@ cd C:\Users\Josh\Documents\GitHub\AlwaysReddy\
 python main.py
 pause
 ```
-
-### Improvements:
-If you want to improve on this system here are some places to start:
-- The prompt could do with a lot of work
-- Faster STT
-- The chat completions file is suepr messy
-
-Please feel free to improve this repo and make forks of it as you like!
