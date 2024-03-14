@@ -92,10 +92,10 @@ class TTS:
 
 
     def TTS_piper(self, text_to_speak, output_file ):
-        
-        #clear double quotes and greater-than signs from text
-        text_to_speak = text_to_speak.replace('"', '').replace('>', '')
-        
+        # Remove characters not suitable for TTS, including additional symbols
+        disallowed_chars = '"<>[]{}|\\~`^*!@#$%()_+=;'
+        text_to_speak = ''.join(filter(lambda x: x not in disallowed_chars, text_to_speak)).replace('&', ' and ')
+
         json_file_name = config.PIPER_VOICE_JSON
         onnx_file_name = config.PIPER_VOICE_ONNX
 
@@ -259,7 +259,8 @@ class TestTTS(unittest.TestCase):
         tts.parent_client = Mock()
         tts.text_incoming = True
 
-        tts.run_tts(""" This is a... Test!""")
+        tts.run_tts(""" This is a... Test""")
+
 
 
 
