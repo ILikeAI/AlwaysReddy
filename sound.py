@@ -93,8 +93,8 @@ class TTS:
 
     def TTS_piper(self, text_to_speak, output_file ):
         
-        #clear double quotes from text
-        text_to_speak = text_to_speak.replace('"', '')
+        #clear double quotes and greater-than signs from text
+        text_to_speak = text_to_speak.replace('"', '').replace('>', '')
         
         json_file_name = config.PIPER_VOICE_JSON
         onnx_file_name = config.PIPER_VOICE_ONNX
