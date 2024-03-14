@@ -87,7 +87,7 @@ class TTS:
                 self.parent_client.waiting_for_tts = False
 
         self.queing = False
-        print(self.audio_queue.qsize())
+
 
 
 
@@ -205,10 +205,13 @@ class TTS:
                 continue
             self.audio_queue.task_done()
         
-        for temp_file in self.temp_files:
+        for temp_file in self.temp_files.copy():
             if os.path.exists(temp_file):
-                os.remove(temp_file)
-        self.temp_files = []
+                try:
+                    os.remove(temp_file)
+                    self.temp_files.remove(temp_file)
+                except PermissionError as e:
+                    print(f"Permission denied error when trying to delete {temp_file}: {e}")
         # Wait for the play_audio thread to acknowledge the stop signal and exit
         self.play_audio_thread.join()
 

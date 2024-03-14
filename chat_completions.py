@@ -18,7 +18,6 @@ class ChatCompletion:
         self.parent_client = parent_client
         self.TTS_client = TTS_client
         self.full_response = ""
-        self.cancel = False
         if completions_api == "openai":
             self.client = OpenAI(api_key=openai_api_key)
             self.model = config.OPENAI_MODEL
@@ -52,12 +51,8 @@ class ChatCompletion:
             stream=True
         )
 
-            
-        self.cancel = False
-        self.TTS_client.last_played_sentence = ""
+
         for chunk in stream:
-            if self.cancel == True:
-                break
 
             if self.parent_client.is_recording:
                 return self.full_response
@@ -91,21 +86,6 @@ class ChatCompletion:
                     main_response = ""
 
 
-        if self.cancel:            
-            print("Cancelling completion...")
-            if self.TTS_client.last_played_sentence:
-                #The aim of this is to identify what the assisant has spoken aloud so far and only add that to the message thread
-                if self.TTS_client.last_played_sentence in self.full_response:
-                    # Find the end of the last played sentence in the full response
-                    end_index = self.full_response.find(self.TTS_client.last_played_sentence) + len(self.TTS_client.last_played_sentence)
-                    # Slice the full response up to and including the last played sentence
-                    self.full_response = self.full_response[:end_index]
-                else:
-                    print(f"Last played sentence not in full response: {self.TTS_client.last_played_sentence}")
-                    print(f"Full response: {self.full_response}")
-            self.TTS_client.last_played_sentence = ""
-            self.cancel = False
-            return self.full_response
         
         #If there is still text in the buffer, add it to the main response
         if buffer:
