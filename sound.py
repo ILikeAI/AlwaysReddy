@@ -44,7 +44,7 @@ class TTS:
 
     def split_text(self, text):
 
-        split_sentences = re.split('!|\. |\?|\n', text)
+        split_sentences = re.split(r'!|\. |\?|\n', text)
 
         return [sentence for sentence in split_sentences if sentence]
         
@@ -82,13 +82,15 @@ class TTS:
                 self.TTS_piper(sentence, temp_output_file)
 
             print("Adding to queue")
+            if self.stop_tts:
+                # Do not add audio to the que if the stop flag is set
+                break
+
             self.audio_queue.put((temp_output_file, sentence))
             if self.parent_client.waiting_for_tts:
                 self.parent_client.waiting_for_tts = False
 
         self.queing = False
-
-
 
 
     def TTS_piper(self, text_to_speak, output_file ):
@@ -99,10 +101,9 @@ class TTS:
         json_file_name = config.PIPER_VOICE_JSON
         onnx_file_name = config.PIPER_VOICE_ONNX
 
-
         # Change voice_name to output_file
-        exe_path = "piper\piper.exe"  
-        voices_dir = "piper_voices"  
+        exe_path = r"piper\piper.exe"
+        voices_dir = r"piper_voices"
 
         #if the json file name does not end with .json, add it
         if not json_file_name.endswith(".json"):
@@ -168,8 +169,6 @@ class TTS:
                 self.running_tts = True
             except queue.Empty:
                 continue
-            
-
 
             data, fs = sf.read(file_path, dtype='float32')
 
@@ -186,9 +185,8 @@ class TTS:
 
             if os.path.exists(file_path):
                 os.remove(file_path)
-                self.temp_files.remove(file_path)
-
-
+                if file_path in self.temp_files:
+                    self.temp_files.remove(file_path)
 
         self.running_tts = False 
 
@@ -209,7 +207,9 @@ class TTS:
             if os.path.exists(temp_file):
                 try:
                     os.remove(temp_file)
-                    self.temp_files.remove(temp_file)
+                    if temp_file in self.temp_files:
+                        self.temp_files.remove(temp_file)
+
                 except PermissionError as e:
                     print(f"Permission denied error when trying to delete {temp_file}: {e}")
         # Wait for the play_audio thread to acknowledge the stop signal and exit
@@ -218,8 +218,6 @@ class TTS:
         # Reset flags as necessary
         self.running_tts = False
         self.text_incoming = False
-
-
 
 def play_sound_FX(name, volume=1.0):
     volume *= config.BASE_VOLUME

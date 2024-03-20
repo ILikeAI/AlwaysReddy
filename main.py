@@ -115,7 +115,6 @@ class Recorder:
         print("Response:\n", response)
 
     def handle_hotkey(self):
-        last_press_time = 0
         if self.waiting_for_tts:
             # If we're waiting for the TTS to finish, don't start a new recording
             return
