@@ -23,7 +23,7 @@ class Recorder:
         self.completion_client = ChatCompletion(parent_client=self, TTS_client=self.tts)
         self.tts.completion_client = self.completion_client
         self.recording_stop_time = None
-
+        self.timer = None
 
     def clear_messages(self):
         print("Clearing messages...")
@@ -130,28 +130,27 @@ class Recorder:
         else:
             self.start_recording()
 
+
+            
+
+    def handle_hotkey_wrapper(self):
+        # If the hotkey is pressed again within 0.2 seconds, we'll use the clipboard
+        # This just checks if the hotkey was double tapped
+        use_clipboard = self.was_double_tapped()
+        print("use_clipboard:",use_clipboard)
+        if use_clipboard:
+            self.clipboard_text = read_clipboard()
+        if self.timer is not None:
+            self.timer.cancel()
+            self.timer = None
+            self.handle_hotkey()
+            
+        else:
+            self.timer = threading.Timer(0.2, self.handle_hotkey)
+            self.timer.start()
+
     def run(self):
-        self.timer = None
-
-        def handle_hotkey_wrapper():
-            # If the hotkey is pressed again within 0.2 seconds, we'll use the clipboard
-            # This just checks if the hotkey was double tapped
-            use_clipboard = self.was_double_tapped()
-            print("use_clipboard:",use_clipboard)
-            if use_clipboard:
-                self.clipboard_text = read_clipboard()
-            if self.timer is not None:
-                self.timer.cancel()
-                self.timer = None
-                self.handle_hotkey()
-                
-
-            else:
-                self.timer = threading.Timer(0.2, self.handle_hotkey)
-                self.timer.start()
-
-
-        keyboard.add_hotkey(config.RECORD_HOTKEY, handle_hotkey_wrapper)
+        keyboard.add_hotkey(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
         keyboard.add_hotkey(config.CANCEL_HOTKEY, self.cancel_recording)
         keyboard.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
         print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to give the AI access to read your clipboard.\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
