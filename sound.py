@@ -16,9 +16,6 @@ import time
 # Load .env file if present
 load_dotenv()
 
-# Fetch API keys from .env file or environment variables
-openai_api_key = os.getenv('OPENAI_API_KEY')
-
 class TTS:
     def __init__(self,parent_client=None):
         self.service = config.TTS_ENGINE
