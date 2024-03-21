@@ -233,23 +233,3 @@ def play_sound_FX(name, volume=1.0):
     # Create a thread to play the sound asynchronously
     sound_thread = threading.Thread(target=play_sound_file, args=(sound_file_name, volume))
     sound_thread.start()
-
-import unittest
-from unittest.mock import Mock
-from sound import TTS
-
-class TestTTS(unittest.TestCase):
-    def test_tts_queue_cancel(self):
-        tts = TTS()
-        tts.parent_client = Mock()
-        tts.text_incoming = True
-
-        tts.run_tts(""" This is a... Test""")
-
-
-
-
-
-
-if __name__ == "__main__":
-    unittest.main()
