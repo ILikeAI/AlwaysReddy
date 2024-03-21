@@ -1,9 +1,9 @@
-sounddevice
+clipboard
+keyboard
+numpy
 openai
 pydub
 python-dotenv
-keyboard
+sounddevice
 soundfile
-clipboard
-numpy
 tiktoken
