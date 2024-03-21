@@ -46,10 +46,3 @@ def trim_messages(messages, max_tokens):
                 break
 
     return messages
-
-def main():
-    pass
-
-
-if __name__ == "__main__":
-    main()
