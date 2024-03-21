@@ -219,32 +219,19 @@ class TTS:
         self.running_tts = False
         self.text_incoming = False
 
+def play_sound_file(file_name, volume):
+    with sf.SoundFile(file_name, 'r') as sound_file:
+        data = sound_file.read(dtype='int16')
+    silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
+    sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
+    sd.wait()
+
 def play_sound_FX(name, volume=1.0):
     volume *= config.BASE_VOLUME
-    def play():
-        if name == "start":
-            with sf.SoundFile(f"sounds/recording-start.mp3", 'r') as sound_file:
-                data = sound_file.read(dtype='int16')
-            silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
-            sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
-            sd.wait()
-
-        elif name == "end":
-            with sf.SoundFile(f"sounds/recording-end.mp3", 'r') as sound_file:
-                data = sound_file.read(dtype='int16')
-            silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
-            sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
-            sd.wait()
-        
-        elif name == "cancel":
-            with sf.SoundFile(f"sounds/recording-cancel.mp3", 'r') as sound_file:
-                data = sound_file.read(dtype='int16')
-            silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
-            sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
-            sd.wait()
-
+    sound_file_name = f"sounds/recording-{name}.mp3"
+    
     # Create a thread to play the sound asynchronously
-    sound_thread = threading.Thread(target=play)
+    sound_thread = threading.Thread(target=play_sound_file, args=(sound_file_name, volume))
     sound_thread.start()
 
 import unittest
