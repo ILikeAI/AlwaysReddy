@@ -3,9 +3,9 @@ import threading
 from audio_recorder import AudioRecorder
 from transcriber import transcribe_audio
 import keyboard
-import sound
+import TTS
 from chat_completions import ChatCompletion
-
+from soundfx import play_sound_FX
 from utils import read_clipboard, count_tokens, trim_messages
 import config
 from prompt import default_messages
@@ -17,7 +17,7 @@ class Recorder:
         self.clipboard_text = None
         self.messages = default_messages.copy()
         self.last_press_time = 0
-        self.tts = sound.TTS(parent_client=self) 
+        self.tts = TTS.TTS(parent_client=self) 
         self.recording_timeout_timer = None
         self.waiting_for_tts = False
         self.completion_client = ChatCompletion(parent_client=self, TTS_client=self.tts)
@@ -43,7 +43,7 @@ class Recorder:
         self.recorder.start_recording()
 
 
-        sound.play_sound_FX("start", volume=config.START_SOUND_VOLUME)
+        play_sound_FX("start", volume=config.START_SOUND_VOLUME)
         time.sleep(config.HOTKEY_DELAY)
  
         # To stop us from recording for ages in the background without the user knowing, we set a timer to stop the recording after a certain amount of time
@@ -58,7 +58,7 @@ class Recorder:
             self.recording_timeout_timer.cancel()
         
         if self.is_recording:
-            sound.play_sound_FX("end", volume=config.END_SOUND_VOLUME)
+            play_sound_FX("end", volume=config.END_SOUND_VOLUME)
             self.is_recording = False  
             self.waiting_for_tts = True
             self.recorder.stop_recording()
@@ -86,7 +86,7 @@ class Recorder:
         # If we're already recording, stop the recording and return
         if self.is_recording:
             print("Cancelling recording...")
-            sound.play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)  
+            play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)  
             self.recorder.stop_recording(cancel=True)
             print("Recording cancelled.")
             self.is_recording = False
