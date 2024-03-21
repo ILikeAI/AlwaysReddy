@@ -31,7 +31,7 @@ class ChatCompletion:
         else:
             raise ValueError("Invalid COMPLETIONS_API value")
 
-    def get_completion(self, messages, together=False, together_model="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT", max_tokens=2048):
+    def get_completion(self, messages, max_tokens=2048):
         """This function streams in the response from a completions API, splits it into sentences and streams the sentences to the TTS client."""
         main_response = ""
         between_symbols = ""

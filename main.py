@@ -101,16 +101,17 @@ class Recorder:
         
         if self.clipboard_text:
             self.messages.append({"role": "user", "content":f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
-
             self.messages.append({"role": "user", "content": transcript})
             self.clipboard_text = None
+
         else:
             self.messages.append({"role": "user", "content": transcript})
+
         if count_tokens(self.messages) > config.MAX_TOKENS:
             self.messages = trim_messages(self.messages, config.MAX_TOKENS)
+
         print("Transcription:\n", transcript)
         response = self.completion_client.get_completion(self.messages)
-
         self.messages.append({"role": "assistant", "content": response})
         print("Response:\n", response)
 
