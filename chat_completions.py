@@ -94,6 +94,10 @@ class ChatCompletion:
         if main_response and not self.parent_client.is_recording:
             self.TTS_client.run_tts(main_response)
 
+        # Set waiting for TTS to false this should be done in the TTS class but sometimes the completion does not have any text to pass to TTS
+        # meaning that flag is never set back to false.
+        self.parent_client.waiting_for_tts = False
+
 
         return self.full_response
 
