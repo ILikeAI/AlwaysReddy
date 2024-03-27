@@ -64,7 +64,6 @@ class Recorder:
 
         if self.recording_timeout_timer and self.recording_timeout_timer.is_alive():
             self.recording_timeout_timer.cancel()
-        
         if self.is_recording:
             play_sound_FX("end", volume=config.END_SOUND_VOLUME)
             self.is_recording = False  
@@ -73,7 +72,7 @@ class Recorder:
             self.recording_stop_time = time.time()
 
             if self.recorder.duration < config.MIN_RECORDING_DURATION:
-                print("Recording is too short, ignoring...")
+                print("Recording is too short or file does not exist, ignoring...")
                 self.waiting_for_tts = False
                 return
             
@@ -83,6 +82,7 @@ class Recorder:
             except Exception as e:
                 print(f"An error occurred during transcription: {e}")
             finally:
+                self.waiting_for_tts = False
                 time.sleep(config.HOTKEY_DELAY)
 
     def how_long_to_speak_first_word(self, first_word_time):
@@ -143,6 +143,7 @@ class Recorder:
         if self.tts.running_tts:
             print("TTS is running, stopping...")
             self.tts.stop()
+            self.waiting_for_tts = False
 
         if self.is_recording:
             self.stop_recording()

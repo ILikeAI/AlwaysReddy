@@ -187,7 +187,6 @@ class TTS:
         print("Stopping TTS")
         self.stop_tts = True  # Signal to stop the audio playback loop
         sd.stop()  # Stop any currently playing audio
-        self.waiting_for_tts = False
         # Attempt to clear the queue immediately to prevent any further processing
         while not self.audio_queue.empty():
             try:
