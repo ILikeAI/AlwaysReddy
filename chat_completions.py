@@ -115,7 +115,7 @@ class ChatCompletion:
 
                 # Set waiting for TTS to false this should be done in the TTS class but sometimes the completion does not have any text to pass to TTS
                 # meaning that flag is never set back to false.
-                self.parent_client.waiting_for_tts = False
+
                 break  # Break out of the retry loop on success
 
             except Exception as e:

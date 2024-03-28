@@ -10,7 +10,6 @@ import queue
 import config
 import re
 import tempfile
-import threading
 
 # Load .env file if present
 load_dotenv()
@@ -87,8 +86,7 @@ class TTS:
                     break
 
                 self.audio_queue.put((temp_output_file, sentence))
-                if self.parent_client.waiting_for_tts:
-                    self.parent_client.waiting_for_tts = False
+
             except Exception as e:
                 print(f"Error during TTS processing: {e}")
 

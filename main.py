@@ -20,11 +20,11 @@ class Recorder:
         self.last_press_time = 0
         self.tts = TTS.TTS(parent_client=self) 
         self.recording_timeout_timer = None
-        self.waiting_for_tts = False
         self.completion_client = ChatCompletion(parent_client=self, TTS_client=self.tts)
         self.tts.completion_client = self.completion_client
         self.recording_stop_time = None
         self.timer = None
+        self.main_thread = None
 
     def clear_messages(self):
         """Clear the message history."""
@@ -67,13 +67,11 @@ class Recorder:
         if self.is_recording:
             play_sound_FX("end", volume=config.END_SOUND_VOLUME)
             self.is_recording = False  
-            self.waiting_for_tts = True
             self.recorder.stop_recording()
             self.recording_stop_time = time.time()
 
             if self.recorder.duration < config.MIN_RECORDING_DURATION:
                 print("Recording is too short or file does not exist, ignoring...")
-                self.waiting_for_tts = False
                 return
             
             try:
@@ -82,7 +80,6 @@ class Recorder:
             except Exception as e:
                 print(f"An error occurred during transcription: {e}")
             finally:
-                self.waiting_for_tts = False
                 time.sleep(config.HOTKEY_DELAY)
 
     def how_long_to_speak_first_word(self, first_word_time):
@@ -137,23 +134,29 @@ class Recorder:
 
     def handle_hotkey(self):
         """Handle the hotkey press for starting or stopping recording."""
-        if self.waiting_for_tts:
-            return
-        
+
         if self.tts.running_tts:
             print("TTS is running, stopping...")
             self.tts.stop()
-            self.waiting_for_tts = False
 
         if self.is_recording:
             self.stop_recording()
         else:
             self.start_recording()
 
+
+    def start_main_thread(self):
+        """This starts the mean thread and keeps a refrence to it"""
+        if self.main_thread is None or not self.main_thread.is_alive():
+            self.main_thread = threading.Thread(target=self.handle_hotkey)
+            self.main_thread.start()
+
     def handle_hotkey_wrapper(self):
         """
         Wrapper for the hotkey handler to include double tap detection for clipboard usage.
         """
+        if self.main_thread is not None and self.main_thread.is_alive():
+            return
         use_clipboard = self.was_double_tapped()
         print("use_clipboard:", use_clipboard)
         if use_clipboard:
@@ -165,9 +168,9 @@ class Recorder:
         if self.timer is not None:
             self.timer.cancel()
             self.timer = None
-            self.handle_hotkey()
+            self.start_main_thread()
         else:
-            self.timer = threading.Timer(0.2, self.handle_hotkey)
+            self.timer = threading.Timer(0.2, self.start_main_thread)
             self.timer.start()
 
     def run(self):

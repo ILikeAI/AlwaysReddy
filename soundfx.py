@@ -1,7 +1,6 @@
 import soundfile as sf
 import sounddevice as sd
 import numpy as np
-import threading
 import config
 import threading
 
