@@ -1,7 +1,6 @@
 ### COMPLETIONS API SETTINGS ###
 COMPLETIONS_API = "openai" # 'openai' or 'together' 
-OPENAI_MODEL = "gpt-3.5-turbo"
-TOGETHER_MODEL = "NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT"
+COMPLETION_MODEL = "gpt-3.5-turbo" #"NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT" is a good together model
 
 ### HOTKEYS ###
 CANCEL_HOTKEY = 'ctrl + alt + x'

@@ -4,7 +4,7 @@ from audio_recorder import AudioRecorder
 from transcriber import transcribe_audio
 import keyboard
 import TTS
-from chat_completions import ChatCompletion
+from chat_completions import CompletionManager
 from soundfx import play_sound_FX
 from utils import read_clipboard, count_tokens, trim_messages
 import config
@@ -20,7 +20,7 @@ class Recorder:
         self.last_press_time = 0
         self.tts = TTS.TTS(parent_client=self) 
         self.recording_timeout_timer = None
-        self.completion_client = ChatCompletion(parent_client=self, TTS_client=self.tts)
+        self.completion_client = CompletionManager(TTS_client=self.tts)
         self.tts.completion_client = self.completion_client
         self.recording_stop_time = None
         self.timer = None
@@ -126,7 +126,7 @@ class Recorder:
                 self.messages = trim_messages(self.messages, config.MAX_TOKENS)
 
             print("Transcription:\n", transcript)
-            response = self.completion_client.get_completion(self.messages)
+            response = self.completion_client.get_completion(self.messages,model=config.COMPLETION_MODEL)
             self.messages.append({"role": "assistant", "content": response})
             print("Response:\n", response)
         except Exception as e:

@@ -31,22 +31,12 @@ class TTS:
         for file in os.listdir(config.AUDIO_FILE_DIR):
             if file.endswith(".wav"):
                 os.remove(f"{config.AUDIO_FILE_DIR}\\{file}")
-
-    def split_text(self, text):
-        split_sentences = re.split(r'!|\. |\?|\n', text)
-        return [sentence for sentence in split_sentences if sentence]
         
     def wait(self):
         self.play_audio_thread.join()
 
-    def run_tts(self, text_to_speak, output_dir=config.AUDIO_FILE_DIR):
+    def run_tts(self, sentence, output_dir=config.AUDIO_FILE_DIR):
         """
-        Runs the text-to-speech process on the given text, splitting it into sentences,
-        generating audio files, and queuing them for playback.
-
-        Args:
-            text_to_speak (str): The text to be converted to speech.
-            output_dir (str): The directory where the audio files will be saved.
         """
         self.queing = True
         self.stop_tts = False
@@ -55,7 +45,6 @@ class TTS:
             self.play_audio_thread = threading.Thread(target=self.play_audio)
             self.play_audio_thread.start()
 
-        sentences = self.split_text(text_to_speak)
         if not os.path.exists(output_dir):
             try:
                 os.makedirs(output_dir)
@@ -63,32 +52,29 @@ class TTS:
                 print(f"Error creating output directory {output_dir}: {e}")
                 self.queing = False
                 return
-        sentences = [sentence for sentence in sentences if any(char.isalnum() for char in sentence)]
 
-        for sentence in sentences:
-            try:
-                print(f"Running TTS: {text_to_speak}")
-                temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
-                temp_output_file = temp_file.name
-                temp_file.close()
+        try:
+            print(f"Running TTS: {sentence}")
+            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
+            temp_output_file = temp_file.name
+            temp_file.close()
 
-                # Add the temp file to the list
-                self.temp_files.append(temp_output_file)
+            # Add the temp file to the list
+            self.temp_files.append(temp_output_file)
 
-                if self.service == "openai":
-                    self.TTS_openai(sentence, temp_output_file)
-                else:
-                    self.TTS_piper(sentence, temp_output_file)
+            if self.service == "openai":
+                self.TTS_openai(sentence, temp_output_file)
+            else:
+                self.TTS_piper(sentence, temp_output_file)
 
-                print("Adding to queue")
-                if self.stop_tts:
-                    # Do not add audio to the queue if the stop flag is set
-                    break
+            print("Adding to queue")
+            if self.stop_tts:
+                return
 
-                self.audio_queue.put((temp_output_file, sentence))
+            self.audio_queue.put((temp_output_file, sentence))
 
-            except Exception as e:
-                print(f"Error during TTS processing: {e}")
+        except Exception as e:
+            print(f"Error during TTS processing: {e}")
 
         self.queing = False
 
