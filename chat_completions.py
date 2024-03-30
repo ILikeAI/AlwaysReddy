@@ -18,8 +18,6 @@ class CompletionManager:
         """Instantiates the appropriate AI client based on configuration file."""
         if config.COMPLETIONS_API == "openai":
             self.client = OpenAIClient()
-
-        ##TODO add these apis:
         elif config.COMPLETIONS_API == "together":
             self.client = TogetherAIClient()
         elif config.COMPLETIONS_API == "anthropic":
@@ -41,18 +39,20 @@ class CompletionManager:
         response = ''
         stream = self.client.stream_completion(messages, model, **kwargs)
         for type, content in self.stream_sentences_from_chunks(stream, clip_start_marker=config.START_SEQ, clip_end_marker=config.END_SEQ):
+            
             if type == "sentence":
                 self.TTS_client.run_tts(content)
                     
             elif type == "clipboard_text":
                 to_clipboard(content)
-            response += content
+            
+            elif type == "full_response":
+                response += content
 
         return response
 
-
     def stream_sentences_from_chunks(self, chunks_stream, clip_start_marker="-CLIPSTART-", clip_end_marker="-CLIPEND-"):
-        """Takes in audio chunks and returns sentences or chuks fo text for the clipboard.
+        """Takes in audio chunks and returns sentences or chunks of text for the clipboard, as well as the full unmodified text stream.
 
         Args:
             chunks_stream: Stream of chunks.
@@ -63,11 +63,13 @@ class CompletionManager:
             tuple: Type of content and the content itself.
         """
         buffer = ''
+        full_response = ''
         sentence_endings = re.compile(r'(?<=[.!?])\s+|(?<=\n)')
         in_marker = False
         
         for chunk in chunks_stream:
             buffer += chunk
+            full_response += chunk
 
             # Check for clip_start_marker without clip_end_marker
             if clip_start_marker in buffer and not in_marker:
@@ -102,3 +104,6 @@ class CompletionManager:
             yield "sentence", buffer.strip()
         elif buffer.strip() and in_marker:  # Handle any remaining marked text
             yield "clipboard_text", buffer.strip()
+        # Yield the full unmodified text stream
+        if full_response.strip():
+            yield "full_response", full_response.strip()

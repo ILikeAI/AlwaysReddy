@@ -116,8 +116,7 @@ class Recorder:
         """
         try:
             if self.clipboard_text:
-                self.messages.append({"role": "user", "content": f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
-                self.messages.append({"role": "user", "content": transcript})
+                self.messages.append({"role": "user", "content": transcript+f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
                 self.clipboard_text = None
             else:
                 self.messages.append({"role": "user", "content": transcript})
