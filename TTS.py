@@ -8,35 +8,48 @@ import subprocess
 import threading
 import queue
 import config
-import re
 import tempfile
 
 # Load .env file if present
 load_dotenv()
 
 class TTS:
-    def __init__(self,parent_client=None):
+    """
+    Text-to-Speech (TTS) class for generating speech from text.
+    """
+    def __init__(self):
+        """
+        Initialize the TTS class with the parent client and necessary attributes.
+        
+        """
         self.service = config.TTS_ENGINE
         self.audio_queue = queue.Queue()
         self.running_tts = False
         self.stop_tts = False
-        self.parent_client = parent_client 
         self.text_incoming = False  
         self.queing = False
         self.temp_files = []
         self.play_audio_thread = threading.Thread(target=self.play_audio)
         self.completion_client = None
 
-        #delete any left over temp files
+        # Delete any leftover temp files
         for file in os.listdir(config.AUDIO_FILE_DIR):
             if file.endswith(".wav"):
                 os.remove(f"{config.AUDIO_FILE_DIR}\\{file}")
         
     def wait(self):
+        """
+        Wait for the play_audio_thread to join.
+        """
         self.play_audio_thread.join()
 
     def run_tts(self, sentence, output_dir=config.AUDIO_FILE_DIR):
         """
+        Run the TTS for the given sentence and output the audio to the specified directory.
+        
+        Args:
+            sentence (str): The text to be converted to speech.
+            output_dir (str): The directory where the audio file will be saved.
         """
         self.queing = True
         self.stop_tts = False
@@ -80,8 +93,8 @@ class TTS:
 
     def TTS_piper(self, text_to_speak, output_file):
         """
-        Generates speech from text using the Piper TTS engine and saves it to an output file.
-
+        Generate speech from text using the Piper TTS engine and save it to an output file.
+        
         Args:
             text_to_speak (str): The text to be converted to speech.
             output_file (str): The file path where the audio will be saved.
@@ -117,6 +130,15 @@ class TTS:
             print(f"Error running Piper TTS command: {e}")
 
     def TTS_openai(self, text, output_file, model="tts-1", format="opus"):
+        """
+        Generate speech from text using the OpenAI TTS engine and save it to an output file.
+        
+        Args:
+            text (str): The text to be converted to speech.
+            output_file (str): The file path where the audio will be saved.
+            model (str): The model for TTS.
+            format (str): The response format for the audio.
+        """
         try:
             client = OpenAI()
             voice = config.OPENAI_VOICE
@@ -141,6 +163,9 @@ class TTS:
             print(f"Error occurred while getting OpenAI TTS: {e}")
     
     def play_audio(self):
+        """
+        Play the audio from the audio queue.
+        """
         while self.queing or not self.audio_queue.empty(): 
             try:
                 file_path, sentence = self.audio_queue.get(timeout=1) 
@@ -168,6 +193,9 @@ class TTS:
         self.running_tts = False 
 
     def stop(self):
+        """
+        Stop the TTS process and clean up any temporary files.
+        """
         print("Stopping TTS")
         self.stop_tts = True  # Signal to stop the audio playback loop
         sd.stop()  # Stop any currently playing audio

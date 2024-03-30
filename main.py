@@ -18,7 +18,7 @@ class Recorder:
         self.clipboard_text = None
         self.messages = default_messages.copy()
         self.last_press_time = 0
-        self.tts = TTS.TTS(parent_client=self) 
+        self.tts = TTS.TTS() 
         self.recording_timeout_timer = None
         self.completion_client = CompletionManager(TTS_client=self.tts)
         self.tts.completion_client = self.completion_client
