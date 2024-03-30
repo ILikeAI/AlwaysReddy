@@ -3,27 +3,54 @@ import clipboard
 import tiktoken
 
 def read_clipboard():
+    """
+    Read the text from the clipboard.
+
+    Returns:
+    str: The text read from the clipboard.
+    """
     text = clipboard.paste()
     return text
 
 def to_clipboard(text):
+    """
+    Copy the given text to the clipboard.
+
+    Args:
+    text (str): The text to be copied to the clipboard.
+    """
     clipboard.copy(text)
 
 def count_tokens(messages, model="gpt-3.5-turbo"):
+    """
+    Count the tokens in the given messages using the specified model.
+
+    Args:
+    messages (list): A list of messages to count tokens from.
+    model (str): The model to use for token counting. Defaults to "gpt-3.5-turbo".
+
+    Returns:
+    int: The total count of tokens in the messages.
+    """
     enc = tiktoken.encoding_for_model(model)
     msg_token_count = 0
-
     for message in messages:
-        msg_token_count += 3 # Add tokens for each message
         for key, value in message.items():
-            msg_token_count += len(enc.encode(value)) # Add tokens in set message
-            if key == "name":
-                msg_token_count += 1 # Add token if name is set
-    msg_token_count += 3 # Add tokens to account for ending
+            msg_token_count += len(enc.encode(value))  # Add tokens in set message
 
     return msg_token_count
 
 def trim_messages(messages, max_tokens):
+    """
+    Trim the messages to fit within the maximum token limit.
+
+    Args:
+    messages (list): A list of messages to be trimmed.
+    max_tokens (int): The maximum number of tokens allowed.
+
+    Returns:
+    list: The trimmed list of messages.
+    """
     msg_token_count = 0
     # Check if the system message is about to be deleted
     if count_tokens([messages[0]]) > max_tokens:
