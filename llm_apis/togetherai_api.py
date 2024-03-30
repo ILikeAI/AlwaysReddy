@@ -11,7 +11,7 @@ class TogetherAIClient:
         )
         
     
-    def get_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
+    def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
         """Get completion from the TogetherAI API.
 
         Args:

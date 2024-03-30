@@ -6,8 +6,8 @@ class AnthropicClient:
         """Initialize the Anthropic client with the API key."""
         self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
-    def get_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
-        """Get completion from the Anthropic API.
+    def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
+        """Stream completion from the Anthropic API.
 
         Args:
             messages (list): List of messages.
@@ -37,3 +37,4 @@ class AnthropicClient:
 
         except Exception as e:
             raise RuntimeError(f"An error occurred streaming completion from Anthropic API: {e}")
+

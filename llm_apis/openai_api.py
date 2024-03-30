@@ -7,7 +7,7 @@ class OpenAIClient:
         self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
         
     
-    def get_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
+    def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
         """Get completion from OpenAI API.
 
         Args:
