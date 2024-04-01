@@ -12,6 +12,7 @@ COMPLETION_MODEL = "claude-3-sonnet-20240229"
 # COMPLETIONS_API = "openai"
 # COMPLETION_MODEL = "gpt-4-0125-preview"
 
+ACTIVE_PROMPT = "default_prompt"
 
 ### HOTKEYS ###
 CANCEL_HOTKEY = 'ctrl + alt + x'

@@ -8,7 +8,7 @@ from chat_completions import CompletionManager
 from soundfx import play_sound_FX
 from utils import read_clipboard, count_tokens, trim_messages
 import config
-from prompt import default_messages
+from prompt import prompts
 
 class Recorder:
     def __init__(self):
@@ -16,7 +16,7 @@ class Recorder:
         self.recorder = AudioRecorder()
         self.is_recording = False
         self.clipboard_text = None
-        self.messages = default_messages.copy()
+        self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
         self.last_press_time = 0
         self.tts = TTS.TTS() 
         self.recording_timeout_timer = None
@@ -29,7 +29,7 @@ class Recorder:
     def clear_messages(self):
         """Clear the message history."""
         print("Clearing messages...")
-        self.messages = default_messages.copy()
+        self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
 
     def was_double_tapped(self, threshold=0.2):
         """
