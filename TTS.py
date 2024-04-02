@@ -24,13 +24,12 @@ class TTS:
         """
         self.service = config.TTS_ENGINE
         self.audio_queue = queue.Queue()
-        self.running_tts = False
         self.stop_tts = False
-        self.text_incoming = False  
         self.queing = False
         self.temp_files = []
         self.play_audio_thread = threading.Thread(target=self.play_audio)
         self.completion_client = None
+        self.running_tts = False
 
         # Delete any leftover temp files
         for file in os.listdir(config.AUDIO_FILE_DIR):
@@ -52,7 +51,7 @@ class TTS:
             output_dir (str): The directory where the audio file will be saved.
         """
         self.queing = True
-        self.stop_tts = False
+
         # If thread is not running, start it
         if not self.play_audio_thread.is_alive():
             self.play_audio_thread = threading.Thread(target=self.play_audio)
@@ -72,17 +71,18 @@ class TTS:
             temp_output_file = temp_file.name
             temp_file.close()
 
-            # Add the temp file to the list
-            self.temp_files.append(temp_output_file)
 
             if self.service == "openai":
                 self.TTS_openai(sentence, temp_output_file)
             else:
                 self.TTS_piper(sentence, temp_output_file)
 
-            print("Adding to queue")
+            self.temp_files.append(temp_output_file)
             if self.stop_tts:
+                print("STOP TTS IS TRUE")
                 return
+            
+            print("Adding to queue")
 
             self.audio_queue.put((temp_output_file, sentence))
 
@@ -167,16 +167,16 @@ class TTS:
         Play the audio from the audio queue.
         """
         while self.queing or not self.audio_queue.empty(): 
+            self.running_tts = True
             try:
                 file_path, sentence = self.audio_queue.get(timeout=1) 
-                self.running_tts = True
+                
             except queue.Empty:
                 continue
-
+            
             data, fs = sf.read(file_path, dtype='float32')
             if self.stop_tts:
-                self.stop_tts = False
-                self.running_tts = False
+
                 self.audio_queue.task_done()
                 break
             sd.play(data, fs)
@@ -189,8 +189,8 @@ class TTS:
                 os.remove(file_path)
                 if file_path in self.temp_files:
                     self.temp_files.remove(file_path)
+        self.running_tts = False
 
-        self.running_tts = False 
 
     def stop(self):
         """
@@ -204,6 +204,7 @@ class TTS:
             try:
                 self.audio_queue.get_nowait()
             except queue.Empty:
+                print("Queue is empty")
                 continue
             self.audio_queue.task_done()
         
@@ -216,9 +217,8 @@ class TTS:
 
                 except PermissionError as e:
                     print(f"Permission denied error when trying to delete {temp_file}: {e}")
-        # Wait for the play_audio thread to acknowledge the stop signal and exit
-        self.play_audio_thread.join()
 
-        # Reset flags as necessary
-        self.running_tts = False
-        self.text_incoming = False
+
+        
+        if self.play_audio_thread.is_alive():
+            self.play_audio_thread.join()

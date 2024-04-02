@@ -7,12 +7,14 @@ from utils import to_clipboard
 import os
 
 class CompletionManager:
-    def __init__(self, TTS_client):
+    def __init__(self, TTS_client,parent_client):
         """Initialize the CompletionManager with the TTS client."""
         self.client = None
         self.setup_client()
         self.model = None
         self.TTS_client = TTS_client
+        self.parent_client = parent_client
+
 
     def setup_client(self):
         """Instantiates the appropriate AI client based on configuration file."""
@@ -24,7 +26,7 @@ class CompletionManager:
             self.client = AnthropicClient()
         else:
             raise ValueError("Unsupported completion API service configured")
-        
+                
     def get_completion(self, messages, model, **kwargs):
         """Get completion from the selected AI client and streams sentences into the TTS client.
 
@@ -39,6 +41,10 @@ class CompletionManager:
         response = ''
         stream = self.client.stream_completion(messages, model, **kwargs)
         for type, content in self.stream_sentences_from_chunks(stream, clip_start_marker=config.START_SEQ, clip_end_marker=config.END_SEQ):
+
+            #if stop stream is set to True, break the loop
+            if self.parent_client.stop_response:
+                break
             
             if type == "sentence":
                 self.TTS_client.run_tts(content)
@@ -49,8 +55,13 @@ class CompletionManager:
             elif type == "full_response":
                 response += content
 
-        return response
 
+        if not response.strip():
+    
+            return None
+        
+        return response
+    
     def stream_sentences_from_chunks(self, chunks_stream, clip_start_marker="-CLIPSTART-", clip_end_marker="-CLIPEND-"):
         """Takes in audio chunks and returns sentences or chunks of text for the clipboard, as well as the full unmodified text stream.
 
@@ -68,6 +79,9 @@ class CompletionManager:
         in_marker = False
         
         for chunk in chunks_stream:
+            #if stop stream is set to True, break the loop
+            if self.parent_client.stop_response:
+                break
             buffer += chunk
             full_response += chunk
 

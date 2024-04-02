@@ -20,11 +20,12 @@ class Recorder:
         self.last_press_time = 0
         self.tts = TTS.TTS() 
         self.recording_timeout_timer = None
-        self.completion_client = CompletionManager(TTS_client=self.tts)
+        self.completion_client = CompletionManager(TTS_client=self.tts,parent_client=self)
         self.tts.completion_client = self.completion_client
         self.recording_stop_time = None
         self.timer = None
         self.main_thread = None
+        self.stop_response = False
 
     def clear_messages(self):
         """Clear the message history."""
@@ -77,6 +78,7 @@ class Recorder:
             try:
                 transcript = transcribe_audio(self.recorder.filename)
                 self.handle_response(transcript)
+
             except Exception as e:
                 print(f"An error occurred during transcription: {e}")
             finally:
@@ -94,18 +96,32 @@ class Recorder:
             self.recording_stop_time = None
 
     def cancel_recording(self):
-        """Cancel the current recording or TTS if running."""
+        """Cancel the current recording """
         if self.is_recording:
             print("Cancelling recording...")
-            play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)  
             self.recorder.stop_recording(cancel=True)
             print("Recording cancelled.")
             self.is_recording = False
 
-        if self.tts.running_tts:
-            print("Stopping text-to-speech...")
-            self.tts.stop()
-            print("Text-to-speech cancelled.")
+    def cancel_tts(self):
+        """Cancel the current TTS """
+
+        print("Stopping text-to-speech...")
+        self.tts.stop()
+        print("Text-to-speech cancelled.")
+
+    def cancel_all(self):
+        """Cancel the current recording and TTS """
+        print("canceling all!")
+        if self.main_thread is not None and self.main_thread.is_alive():
+
+            play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME) 
+            self.stop_response = True
+            self.cancel_recording()
+            self.cancel_tts()
+        
+    
+
 
     def handle_response(self, transcript):
         """
@@ -115,6 +131,7 @@ class Recorder:
             transcript (str): The transcribed text from the audio recording.
         """
         try:
+            
             if self.clipboard_text:
                 self.messages.append({"role": "user", "content": transcript+f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
                 self.clipboard_text = None
@@ -125,15 +142,29 @@ class Recorder:
                 self.messages = trim_messages(self.messages, config.MAX_TOKENS)
 
             print("Transcription:\n", transcript)
+            if self.stop_response:
+                self.messages = self.messages[:-1]
+                return
+            
             response = self.completion_client.get_completion(self.messages,model=config.COMPLETION_MODEL)
+
+            if response is None:
+                print("No response generated.")
+                self.messages = self.messages[:-1]
+                return
+            
             self.messages.append({"role": "assistant", "content": response})
             print("Response:\n", response)
+
         except Exception as e:
             print(f"An error occurred while handling the response: {e}")
 
     def handle_hotkey(self):
         """Handle the hotkey press for starting or stopping recording."""
-
+        #reset flags
+        self.stop_response = False
+        self.tts.stop_tts = False
+        
         if self.tts.running_tts:
             print("TTS is running, stopping...")
             self.tts.stop()
@@ -145,17 +176,21 @@ class Recorder:
 
 
     def start_main_thread(self):
-        """This starts the mean thread and keeps a refrence to it"""
-        if self.main_thread is None or not self.main_thread.is_alive():
+        """This starts the main thread and keeps a refrence to it"""
+        
+        if self.main_thread is not None and self.main_thread.is_alive():
+            self.cancel_all()
+        else:
             self.main_thread = threading.Thread(target=self.handle_hotkey)
             self.main_thread.start()
+
+        
 
     def handle_hotkey_wrapper(self):
         """
         Wrapper for the hotkey handler to include double tap detection for clipboard usage.
         """
-        if self.main_thread is not None and self.main_thread.is_alive():
-            return
+
         use_clipboard = self.was_double_tapped()
         print("use_clipboard:", use_clipboard)
         if use_clipboard:
@@ -175,7 +210,7 @@ class Recorder:
     def run(self):
         """Run the recorder, setting up hotkeys and entering the main loop."""
         keyboard.add_hotkey(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
-        keyboard.add_hotkey(config.CANCEL_HOTKEY, self.cancel_recording)
+        keyboard.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
         keyboard.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
         print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to give the AI access to read your clipboard.\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 
