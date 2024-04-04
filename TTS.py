@@ -17,21 +17,22 @@ class TTS:
     """
     Text-to-Speech (TTS) class for generating speech from text.
     """
-    def __init__(self):
+    def __init__(self, parent_client):
         """
         Initialize the TTS class with the parent client and necessary attributes.
         
         """
         self.service = config.TTS_ENGINE
         self.audio_queue = queue.Queue()
-        self.stop_tts = False
+        self.parent_client = parent_client
         self.queing = False
         self.temp_files = []
         self.play_audio_thread = threading.Thread(target=self.play_audio)
         self.completion_client = None
         self.running_tts = False
+        self.last_sentence_spoken = ""
 
-        # Delete any leftover temp files
+        # Delete any leftover temp files if any
         for file in os.listdir(config.AUDIO_FILE_DIR):
             if file.endswith(".wav"):
                 os.remove(f"{config.AUDIO_FILE_DIR}\\{file}")
@@ -78,7 +79,8 @@ class TTS:
                 self.TTS_piper(sentence, temp_output_file)
 
             self.temp_files.append(temp_output_file)
-            if self.stop_tts:
+
+            if self.parent_client.stop_response:
                 print("STOP TTS IS TRUE")
                 return
             
@@ -167,6 +169,11 @@ class TTS:
         Play the audio from the audio queue.
         """
         while self.queing or not self.audio_queue.empty(): 
+
+            
+            if self.parent_client.stop_response == True:
+                break
+            print(f'playing audio: {self.parent_client.stop_response}')
             self.running_tts = True
             try:
                 file_path, sentence = self.audio_queue.get(timeout=1) 
@@ -175,13 +182,11 @@ class TTS:
                 continue
             
             data, fs = sf.read(file_path, dtype='float32')
-            if self.stop_tts:
 
-                self.audio_queue.task_done()
-                break
             sd.play(data, fs)
 
             print(f"Playing audio: {sentence}")
+            self.last_sentence_spoken = sentence
             sd.wait()
             self.audio_queue.task_done()
 
@@ -197,7 +202,6 @@ class TTS:
         Stop the TTS process and clean up any temporary files.
         """
         print("Stopping TTS")
-        self.stop_tts = True  # Signal to stop the audio playback loop
         sd.stop()  # Stop any currently playing audio
         # Attempt to clear the queue immediately to prevent any further processing
         while not self.audio_queue.empty():
@@ -217,8 +221,6 @@ class TTS:
 
                 except PermissionError as e:
                     print(f"Permission denied error when trying to delete {temp_file}: {e}")
-
-
         
         if self.play_audio_thread.is_alive():
             self.play_audio_thread.join()

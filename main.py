@@ -18,7 +18,7 @@ class Recorder:
         self.clipboard_text = None
         self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
         self.last_press_time = 0
-        self.tts = TTS.TTS() 
+        self.tts = TTS.TTS(parent_client=self) 
         self.recording_timeout_timer = None
         self.completion_client = CompletionManager(TTS_client=self.tts,parent_client=self)
         self.tts.completion_client = self.completion_client
@@ -65,6 +65,7 @@ class Recorder:
 
         if self.recording_timeout_timer and self.recording_timeout_timer.is_alive():
             self.recording_timeout_timer.cancel()
+            
         if self.is_recording:
             play_sound_FX("end", volume=config.END_SOUND_VOLUME)
             self.is_recording = False  
@@ -112,14 +113,15 @@ class Recorder:
 
     def cancel_all(self):
         """Cancel the current recording and TTS """
-        print("canceling all!")
         if self.main_thread is not None and self.main_thread.is_alive():
-
             play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME) 
             self.stop_response = True
-            self.cancel_recording()
             self.cancel_tts()
-        
+
+        elif self.is_recording:
+            play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME) 
+            self.cancel_recording()
+
     
 
 
@@ -148,10 +150,20 @@ class Recorder:
             
             response = self.completion_client.get_completion(self.messages,model=config.COMPLETION_MODEL)
 
-            if response is None:
+            if not response:
                 print("No response generated.")
                 self.messages = self.messages[:-1]
                 return
+
+            if self.stop_response:
+                # If the assistant was cut off while speaking, find the last sentence spoken and cut off the response there
+                index = response.rfind(self.tts.last_sentence_spoken)
+
+                # If the last sentence spoken was found, cut off the response there
+                if index != -1:
+                    # Add a message to indicate the user cut off the response
+                    response = response[:index + len(self.tts.last_sentence_spoken)] + "--> USER CUT OFF RESPONSE <--"
+                
             
             self.messages.append({"role": "assistant", "content": response})
             print("Response:\n", response)
@@ -163,8 +175,7 @@ class Recorder:
         """Handle the hotkey press for starting or stopping recording."""
         #reset flags
         self.stop_response = False
-        self.tts.stop_tts = False
-        
+
         if self.tts.running_tts:
             print("TTS is running, stopping...")
             self.tts.stop()
@@ -177,9 +188,10 @@ class Recorder:
 
     def start_main_thread(self):
         """This starts the main thread and keeps a refrence to it"""
-        
+        self.timer = None
         if self.main_thread is not None and self.main_thread.is_alive():
             self.cancel_all()
+            self.main_thread.join()
         else:
             self.main_thread = threading.Thread(target=self.handle_hotkey)
             self.main_thread.start()
