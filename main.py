@@ -111,23 +111,29 @@ class Recorder:
         self.tts.stop()
         print("Text-to-speech cancelled.")
 
-    def cancel_all(self):
+    def cancel_all(self,silent=False):
         """Cancel the current recording and TTS """
         played_cancel_sfx = False
         if self.main_thread is not None and self.main_thread.is_alive():
-            play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME) 
+            if not silent:
+                play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)
+                played_cancel_sfx = True  
             self.stop_response = True
-            played_cancel_sfx = True 
+            
 
         elif self.is_recording:
-            play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME) 
+            if not silent:
+                play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)
+                played_cancel_sfx = True 
             self.cancel_recording()
-            played_cancel_sfx = True
+
 
         if self.tts.running_tts:
             #Seems like the wrong way to do this but I want to ensure I only play the sound once
             if not played_cancel_sfx:
-                play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)
+                if not silent:
+                    play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)
+                    played_cancel_sfx 
             self.cancel_tts()
 
     
@@ -204,8 +210,11 @@ class Recorder:
         self.timer = None
         
         if self.main_thread is not None and self.main_thread.is_alive():
-            self.cancel_all()
+            #If the thread is alreddy running, cancel (without playing cancel sound) and start a new one
+            self.cancel_all(silent=True)#the slience is just so you dont hear cancel sound immediately followed by the start sound
             self.main_thread.join()
+            self.main_thread = threading.Thread(target=self.handle_hotkey)
+            self.main_thread.start()
         else:
             self.main_thread = threading.Thread(target=self.handle_hotkey)
             self.main_thread.start()
