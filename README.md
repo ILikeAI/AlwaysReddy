@@ -21,13 +21,14 @@ I often use AlwaysReddy for the following things:
 - "From the comments in my clipboard what do the r/LocalLLaMA users think of X?"
 - Quick journal entries, I speedily list what I have done today and get it to write a journal entry to my clipboard before I shutdown the computer for the day.
 
-### Setup:
-1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
+### Setup: 
+1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy` 
 2. cd into the directory
 3. Install reqs with `pip install -r requirements.txt`
-4. make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file.
-5. Run the assistant! `python main.py`
-5.1 If you need fmmpeg installed run the `fmmpegsetup.bat`script as administrator in the scripts folder
+4. Make a copy of the `config.py.example` file and rename the copy to `config.py`
+5. Make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file. 
+6. Run the assistant! `python main.py`
+7. If you need ffmpeg installed run the `ffmpegsetup.bat` script as administrator in the scripts folder.
 
 ### How to use:
 There are currently only main 2 actions:
