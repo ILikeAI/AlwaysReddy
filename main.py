@@ -113,14 +113,22 @@ class Recorder:
 
     def cancel_all(self):
         """Cancel the current recording and TTS """
+        played_cancel_sfx = False
         if self.main_thread is not None and self.main_thread.is_alive():
             play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME) 
             self.stop_response = True
-            self.cancel_tts()
+            played_cancel_sfx = True 
 
         elif self.is_recording:
             play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME) 
             self.cancel_recording()
+            played_cancel_sfx = True
+
+        if self.tts.running_tts:
+            #Seems like the wrong way to do this but I want to ensure I only play the sound once
+            if not played_cancel_sfx:
+                play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)
+            self.cancel_tts()
 
     
 
@@ -150,6 +158,12 @@ class Recorder:
             
             response = self.completion_client.get_completion(self.messages,model=config.COMPLETION_MODEL)
 
+            while self.tts.running_tts:
+                #Waiting for the TTS to finish before processing it this way we can tell if the user has cut off the TTS before saving it to the messages
+                #Doing it this way feels like its probably not optimal though 
+                time.sleep(0.1)
+
+
             if not response:
                 print("No response generated.")
                 self.messages = self.messages[:-1]
@@ -173,14 +187,13 @@ class Recorder:
 
     def handle_hotkey(self):
         """Handle the hotkey press for starting or stopping recording."""
-        #reset flags
-        self.stop_response = False
 
         if self.tts.running_tts:
             print("TTS is running, stopping...")
             self.tts.stop()
 
         if self.is_recording:
+            self.stop_response = False
             self.stop_recording()
         else:
             self.start_recording()
@@ -189,6 +202,7 @@ class Recorder:
     def start_main_thread(self):
         """This starts the main thread and keeps a refrence to it"""
         self.timer = None
+        
         if self.main_thread is not None and self.main_thread.is_alive():
             self.cancel_all()
             self.main_thread.join()
