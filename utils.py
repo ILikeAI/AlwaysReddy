@@ -56,7 +56,8 @@ def sanitize_text(text):
         ('%', 'percent'), 
         ('@', 'at'), 
         ('=', 'equals'), 
-        ('+', 'plus')
+        ('+', 'plus'),
+        ('/', 'slash'),
     ]
 
     sanitized_text = ''.join(filter(lambda x: x not in disallowed_chars, text))
