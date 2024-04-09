@@ -61,12 +61,12 @@ class Recorder:
 
     def stop_recording(self):
         """Stop the audio recording process and handle the recorded audio."""
-        print("Stopping recording...")
 
         if self.recording_timeout_timer and self.recording_timeout_timer.is_alive():
             self.recording_timeout_timer.cancel()
             
         if self.is_recording:
+            print("Stopping recording...")
             play_sound_FX("end", volume=config.END_SOUND_VOLUME)
             self.is_recording = False  
             self.recorder.stop_recording()
