@@ -32,6 +32,9 @@ class TTS:
         self.completion_client = None
         self.running_tts = False
         self.last_sentence_spoken = ""
+        if self.service == "openai":
+            self.OpenAIClient = OpenAI()
+
 
         # Delete any leftover temp files if any
         for file in os.listdir(config.AUDIO_FILE_DIR):
@@ -156,7 +159,7 @@ class TTS:
             return "failed"
         
         try:
-            client = OpenAI()
+            client = self.OpenAIClient
             voice = config.OPENAI_VOICE
             spoken_response = client.audio.speech.create(
                 model=model,

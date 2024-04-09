@@ -22,7 +22,7 @@ RECORD_HOTKEY = 'ctrl + shift + space'
 ### VOICE SETTINGS ###
 PIPER_VOICE_JSON="en_en_US_amy_medium_en_US-amy-medium.onnx.json" #These are located in the piper_voices folder
 PIPER_VOICE_ONNX="en_US-amy-medium.onnx"
-TTS_ENGINE="piper" # 'piper' or 'openai' piper is local and fast but openai is better sounding
+TTS_ENGINE="openai" # 'piper' or 'openai' piper is local and fast but openai is better sounding
 OPENAI_VOICE = "nova"
 
 
