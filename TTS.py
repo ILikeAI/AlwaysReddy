@@ -67,27 +67,27 @@ class TTS:
                 return
 
         try:
-            print(f"Running TTS: {sentence}")
+            
             temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
             temp_output_file = temp_file.name
             temp_file.close()
 
 
             if self.service == "openai":
-                self.TTS_openai(sentence, temp_output_file)
+                result = self.TTS_openai(sentence, temp_output_file)
             else:
-                self.TTS_piper(sentence, temp_output_file)
-
-            self.temp_files.append(temp_output_file)
-
-            if self.parent_client.stop_response:
-                print("STOP TTS IS TRUE")
-                return
+                result = self.TTS_piper(sentence, temp_output_file)
             
-            print("Adding to queue")
+            if result == "success":
+                print(f"Running TTS: {sentence}")
+                self.temp_files.append(temp_output_file)
 
-            self.audio_queue.put((temp_output_file, sentence))
+                if self.parent_client.stop_response:
+                    print("STOP TTS IS TRUE")
+                    return
 
+                print("Adding to queue")
+                self.audio_queue.put((temp_output_file, sentence))
         except Exception as e:
             print(f"Error during TTS processing: {e}")
 
@@ -104,6 +104,9 @@ class TTS:
         # Remove characters not suitable for TTS, including additional symbols
         disallowed_chars = '"<>[]{}|\\~`^*!@#$%()_+=;'
         text_to_speak = ''.join(filter(lambda x: x not in disallowed_chars, text_to_speak)).replace('&', ' and ')
+        #if there is no text after illegal characters are stripped
+        if not text_to_speak.strip():
+            return "failed"
 
         json_file_name = config.PIPER_VOICE_JSON
         onnx_file_name = config.PIPER_VOICE_ONNX
@@ -124,12 +127,14 @@ class TTS:
             for file_path in [exe_path, onnx_file, json_file]:
                 if not os.path.exists(file_path):
                     print(f"{file_path} does not exist")
-            return
+            return "failed"
         try:
             command = f'echo {text_to_speak} | {exe_path} -m {onnx_file} -c {json_file} -f {output_file}'
             subprocess.run(['cmd.exe', '/c', command], capture_output=True, text=True)
+            return "success"
         except subprocess.CalledProcessError as e:
             print(f"Error running Piper TTS command: {e}")
+            return "failed"
 
     def TTS_openai(self, text, output_file, model="tts-1", format="opus"):
         """
@@ -141,6 +146,7 @@ class TTS:
             model (str): The model for TTS.
             format (str): The response format for the audio.
         """
+        
         try:
             client = OpenAI()
             voice = config.OPENAI_VOICE
@@ -161,9 +167,12 @@ class TTS:
 
             with sf.SoundFile(output_file, 'w', samplerate=sound_file.samplerate, channels=sound_file.channels, subtype='PCM_16') as file:
                 file.write(data)
+            return "success"
         except Exception as e:
             print(f"Error occurred while getting OpenAI TTS: {e}")
-    
+            return "failed"
+        
+
     def play_audio(self):
         """
         Play the audio from the audio queue.
@@ -173,7 +182,7 @@ class TTS:
             
             if self.parent_client.stop_response == True:
                 break
-            print(f'playing audio: {self.parent_client.stop_response}')
+
             self.running_tts = True
             try:
                 file_path, sentence = self.audio_queue.get(timeout=1) 
