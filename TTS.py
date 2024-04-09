@@ -168,16 +168,10 @@ class TTS:
                 input=text_to_speak
                 )
 
-            buffer = io.BytesIO()
-            for chunk in spoken_response.iter_bytes(chunk_size=4096):
-                buffer.write(chunk)
-            buffer.seek(0)
-            with sf.SoundFile(buffer, 'r') as sound_file:
-                data = sound_file.read(dtype='int16')
-            data = data * config.BASE_VOLUME
+            with open(output_file, "wb") as f:
+                for chunk in spoken_response.iter_bytes(chunk_size=4096):
+                    f.write(chunk)
 
-            with sf.SoundFile(output_file, 'w', samplerate=sound_file.samplerate, channels=sound_file.channels, subtype='PCM_16') as file:
-                file.write(data)
             return "success"
         except Exception as e:
             print(f"Error occurred while getting OpenAI TTS: {e}")
