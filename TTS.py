@@ -9,6 +9,7 @@ import threading
 import queue
 import config
 import tempfile
+import utils
 
 # Load .env file if present
 load_dotenv()
@@ -102,8 +103,8 @@ class TTS:
             output_file (str): The file path where the audio will be saved.
         """
         # Remove characters not suitable for TTS, including additional symbols
-        disallowed_chars = '"<>[]{}|\\~`^*!@#$%()_+=;'
-        text_to_speak = ''.join(filter(lambda x: x not in disallowed_chars, text_to_speak)).replace('&', ' and ')
+        text_to_speak = utils.sanitize_text(text_to_speak)
+        
         #if there is no text after illegal characters are stripped
         if not text_to_speak.strip():
             return "failed"
@@ -136,7 +137,7 @@ class TTS:
             print(f"Error running Piper TTS command: {e}")
             return "failed"
 
-    def TTS_openai(self, text, output_file, model="tts-1", format="opus"):
+    def TTS_openai(self, text_to_speak, output_file, model="tts-1", format="opus"):
         """
         Generate speech from text using the OpenAI TTS engine and save it to an output file.
         
@@ -146,6 +147,13 @@ class TTS:
             model (str): The model for TTS.
             format (str): The response format for the audio.
         """
+
+        # Remove characters not suitable for TTS, including additional symbols
+        text_to_speak = utils.sanitize_text(text_to_speak)
+        
+        #if there is no text after illegal characters are stripped
+        if not text_to_speak.strip():
+            return "failed"
         
         try:
             client = OpenAI()
@@ -154,7 +162,7 @@ class TTS:
                 model=model,
                 voice=voice,
                 response_format=format,
-                input=text
+                input=text_to_speak
                 )
 
             buffer = io.BytesIO()

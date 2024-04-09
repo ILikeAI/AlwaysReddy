@@ -40,6 +40,31 @@ def count_tokens(messages, model="gpt-3.5-turbo"):
 
     return msg_token_count
 
+def sanitize_text(text):
+    """
+    Remove disallowed characters from a string and replace certain symbols with their text equivalents.
+
+    Args:
+        text (str): The text to be sanitized.
+
+    Returns:
+        str: The sanitized text.
+    """
+    disallowed_chars = '"<>[]{}|\\~`^*!#$()_;'
+    symbol_text_pairs = [
+        ('&', 'and'), 
+        ('%', 'percent'), 
+        ('@', 'at'), 
+        ('=', 'equals'), 
+        ('+', 'plus')
+    ]
+
+    sanitized_text = ''.join(filter(lambda x: x not in disallowed_chars, text))
+    for symbol, text_equivalent in symbol_text_pairs:
+        sanitized_text = sanitized_text.replace(symbol, text_equivalent)
+    
+    return sanitized_text
+
 def trim_messages(messages, max_tokens):
     """
     Trim the messages to fit within the maximum token limit.
