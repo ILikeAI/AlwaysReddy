@@ -29,6 +29,7 @@ class Recorder:
 
     def clear_messages(self):
         """Clear the message history."""
+        # TODO Eventually i would like to keep track of conversations and be able to switch between them
         print("Clearing messages...")
         self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
 
@@ -56,12 +57,13 @@ class Recorder:
         play_sound_FX("start", volume=config.START_SOUND_VOLUME)
         time.sleep(config.HOTKEY_DELAY)
  
+        # This just starts a timer for the recording to stop after a certain amount of time, just to make sure you dont leave it recording forever!
         self.recording_timeout_timer = threading.Timer(config.MAX_RECORDING_DURATION, self.stop_recording)
         self.recording_timeout_timer.start()
 
     def stop_recording(self):
         """Stop the audio recording process and handle the recorded audio."""
-
+        # If there is a timeout timer running, cancel it
         if self.recording_timeout_timer and self.recording_timeout_timer.is_alive():
             self.recording_timeout_timer.cancel()
             
@@ -72,13 +74,18 @@ class Recorder:
             self.recorder.stop_recording()
             self.recording_stop_time = time.time()
 
+            # If the recording is too short, ignore it
             if self.recorder.duration < config.MIN_RECORDING_DURATION:
                 print("Recording is too short or file does not exist, ignoring...")
                 return
             
             try:
                 transcript = transcribe_audio(self.recorder.filename)
-                self.handle_response(transcript)
+                
+                # If the user has tried to cut off the response, we need to make sure we dont process it
+                if not self.stop_response:
+                    # Handle response is where the magic happens
+                    self.handle_response(transcript)
 
             except Exception as e:
                 print(f"An error occurred during transcription: {e}")
@@ -88,6 +95,7 @@ class Recorder:
     def how_long_to_speak_first_word(self, first_word_time):
         """
         Calculate and print the delay between the end of recording and the first word spoken by TTS.
+        This is really just for testing purposes.
 
         Args:
             first_word_time (float): The timestamp of the first word spoken by TTS.
@@ -114,19 +122,21 @@ class Recorder:
     def cancel_all(self,silent=False):
         """Cancel the current recording and TTS """
         played_cancel_sfx = False
+
+
         if self.main_thread is not None and self.main_thread.is_alive():
             if not silent:
+                # Track if the cancel sound has been played so it doesn't play twice
                 play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)
                 played_cancel_sfx = True  
             self.stop_response = True
             
-
         elif self.is_recording:
             if not silent:
+                # Track if the cancel sound has been played so it doesn't play twice
                 play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)
                 played_cancel_sfx = True 
             self.cancel_recording()
-
 
         if self.tts.running_tts:
             #Seems like the wrong way to do this but I want to ensure I only play the sound once
@@ -136,8 +146,6 @@ class Recorder:
                     played_cancel_sfx 
             self.cancel_tts()
 
-    
-
 
     def handle_response(self, transcript):
         """
@@ -146,20 +154,21 @@ class Recorder:
         Args:
             transcript (str): The transcribed text from the audio recording.
         """
-        try:
-            
+
+        try:           
+            # If the user wants to use the clipboard text, append it to the message
             if self.clipboard_text:
                 self.messages.append({"role": "user", "content": transcript+f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
                 self.clipboard_text = None
             else:
                 self.messages.append({"role": "user", "content": transcript})
 
+            # Make sure token count is within limits
             if count_tokens(self.messages) > config.MAX_TOKENS:
                 self.messages = trim_messages(self.messages, config.MAX_TOKENS)
 
             print("Transcription:\n", transcript)
             if self.stop_response:
-                self.messages = self.messages[:-1]
                 return
             
             response = self.completion_client.get_completion(self.messages,model=config.COMPLETION_MODEL)
