@@ -168,19 +168,22 @@ class Recorder:
                 self.messages = trim_messages(self.messages, config.MAX_TOKENS)
 
             print("Transcription:\n", transcript)
+
+            # Make sure the user hasn't cut off the response
             if self.stop_response:
                 return
             
+            # Get the response from the AI
             response = self.completion_client.get_completion(self.messages,model=config.COMPLETION_MODEL)
 
             while self.tts.running_tts:
                 #Waiting for the TTS to finish before processing it this way we can tell if the user has cut off the TTS before saving it to the messages
                 #Doing it this way feels like its probably not optimal though 
-                time.sleep(0.1)
-
+                time.sleep(0.001)
 
             if not response:
                 print("No response generated.")
+                # If the response is empty, remove the last message
                 self.messages = self.messages[:-1]
                 return
 
