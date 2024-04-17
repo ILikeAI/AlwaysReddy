@@ -21,6 +21,9 @@ I often use AlwaysReddy for the following things:
 - "From the comments in my clipboard what do the r/LocalLLaMA users think of X?"
 - Quick journal entries, I speedily list what I have done today and get it to write a journal entry to my clipboard before I shutdown the computer for the day.
 
+## Known issues:
+- Sometimes it will stop recording shortly after it starts recording without the hotkey being pressed. I need to investigate... 
+
 ### Setup: 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy` 
 2. cd into the directory
