@@ -26,6 +26,7 @@ class Recorder:
         self.timer = None
         self.main_thread = None
         self.stop_response = False
+        self.last_message_was_cut_off = False
         
 
     def clear_messages(self):
@@ -156,6 +157,12 @@ class Recorder:
         """
 
         try:           
+
+            # If the user has cut off the assistant's last message, add a message to indicate this
+            if self.last_message_was_cut_off:
+                transcript = "--> USER CUT THE ASSISTANTS LAST MESSAGE SHORT <--\n" + transcript
+
+
             # If the user wants to use the clipboard text, append it to the message
             if self.clipboard_text:
                 self.messages.append({"role": "user", "content": transcript+f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
@@ -173,6 +180,8 @@ class Recorder:
             if self.stop_response:
                 return
             
+            print(f"Messages:\n{self.messages}")
+            
             # Get the response from the AI
             response = self.completion_client.get_completion(self.messages,model=config.COMPLETION_MODEL)
 
@@ -186,6 +195,9 @@ class Recorder:
                 # If the response is empty, remove the last message
                 self.messages = self.messages[:-1]
                 return
+            
+            # Reset the flag indicating the last message was cut off
+            self.last_message_was_cut_off = False
 
             if self.stop_response:
                 # If the assistant was cut off while speaking, find the last sentence spoken and cut off the response there
@@ -194,7 +206,8 @@ class Recorder:
                 # If the last sentence spoken was found, cut off the response there
                 if index != -1:
                     # Add a message to indicate the user cut off the response
-                    response = response[:index + len(self.tts.last_sentence_spoken)] + "--> USER CUT OFF RESPONSE <--"
+                    response = response[:index + len(self.tts.last_sentence_spoken)] 
+                    self.last_message_was_cut_off = True
                 
             
             self.messages.append({"role": "assistant", "content": response})
