@@ -26,6 +26,7 @@ class Recorder:
         self.timer = None
         self.main_thread = None
         self.stop_response = False
+        
 
     def clear_messages(self):
         """Clear the message history."""
@@ -55,7 +56,6 @@ class Recorder:
         self.recorder.start_recording()
 
         play_sound_FX("start", volume=config.START_SOUND_VOLUME)
-        time.sleep(config.HOTKEY_DELAY)
  
         # This just starts a timer for the recording to stop after a certain amount of time, just to make sure you dont leave it recording forever!
         self.recording_timeout_timer = threading.Timer(config.MAX_RECORDING_DURATION, self.stop_recording)
@@ -89,8 +89,7 @@ class Recorder:
 
             except Exception as e:
                 print(f"An error occurred during transcription: {e}")
-            finally:
-                time.sleep(config.HOTKEY_DELAY)
+
 
     def how_long_to_speak_first_word(self, first_word_time):
         """
@@ -116,8 +115,9 @@ class Recorder:
         """Cancel the current TTS """
 
         print("Stopping text-to-speech...")
-        self.tts.stop()
+        self.tts.stop() 
         print("Text-to-speech cancelled.")
+        
 
     def cancel_all(self,silent=False):
         """Cancel the current recording and TTS """
@@ -225,8 +225,10 @@ class Recorder:
             #If the thread is alreddy running, cancel (without playing cancel sound) and start a new one
             self.cancel_all(silent=True)#the slience is just so you dont hear cancel sound immediately followed by the start sound
             self.main_thread.join()
+
             self.main_thread = threading.Thread(target=self.handle_hotkey)
             self.main_thread.start()
+    
         else:
             self.main_thread = threading.Thread(target=self.handle_hotkey)
             self.main_thread.start()
@@ -263,7 +265,7 @@ class Recorder:
 
         try:
             while True:
-                time.sleep(1)
+                time.sleep(0.0001)
         except KeyboardInterrupt:
             print("Recorder stopped by user.")
         except Exception as e:
