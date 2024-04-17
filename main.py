@@ -180,7 +180,6 @@ class Recorder:
             if self.stop_response:
                 return
             
-            print(f"Messages:\n{self.messages}")
             
             # Get the response from the AI
             response = self.completion_client.get_completion(self.messages,model=config.COMPLETION_MODEL)
