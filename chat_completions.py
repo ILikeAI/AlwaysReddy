@@ -2,6 +2,7 @@ import config
 from llm_apis.openai_api import OpenAIClient
 from llm_apis.togetherai_api import TogetherAIClient
 from llm_apis.anthropic_api import AnthropicClient
+from llm_apis.lm_studio import LM_StudioClient
 import re
 from utils import to_clipboard
 import os
@@ -25,6 +26,8 @@ class CompletionManager:
             self.client = TogetherAIClient()
         elif config.COMPLETIONS_API == "anthropic":
             self.client = AnthropicClient()
+        elif config.COMPLETIONS_API == "lm_studio":
+            self.client = LM_StudioClient()
         else:
             raise ValueError("Unsupported completion API service configured")
                 
