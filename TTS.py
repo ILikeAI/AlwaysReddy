@@ -190,6 +190,7 @@ class TTS:
             print(f"Error occurred while getting OpenAI TTS: {e}")
             return "failed"
         
+
     def play_audio(self):
         """
         Play the audio from the audio queue.
@@ -211,11 +212,19 @@ class TTS:
                 # If the queue is empty, continue to the next iteration of the loop
                 continue
                 
-            # Read the audio data from the file
-            data, fs = sf.read(file_path, dtype='float32')
+            try:
+                # Read the audio data from the file
+                data, fs = sf.read(file_path, dtype='float32')
+            except Exception as e:
+                print(f"Error reading file {file_path}: {e}")
+                continue
 
-            # Play the audio
-            sd.play(data, fs)
+            try:
+                # Play the audio
+                sd.play(data, fs)
+            except Exception as e:
+                print(f"Error playing audio: {e}")
+                continue
 
             # Print the sentence being spoken
             print(f"Playing audio: {sentence}")
@@ -225,20 +234,26 @@ class TTS:
             # Mark the task as done in the queue
             self.audio_queue.task_done()
 
-            # If the audio file exists, remove it
-            if os.path.exists(file_path):
-                os.remove(file_path)
-                # If the file path is in the temp_files list, remove it
-                if file_path in self.temp_files:
-                    self.temp_files.remove(file_path)
+            try:
+                # If the audio file exists, remove it
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    # If the file path is in the temp_files list, remove it
+                    if file_path in self.temp_files:
+                        self.temp_files.remove(file_path)
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
 
         # Set the running TTS flag to False
         self.running_tts = False
 
         # Delete any leftover temp files if any this is just to be safe and should not be needed
-        for file in os.listdir(config.AUDIO_FILE_DIR):
-            if file.endswith(".wav"):
-                os.remove(f"{config.AUDIO_FILE_DIR}\\{file}")
+        try:
+            for file in os.listdir(config.AUDIO_FILE_DIR):
+                if file.endswith(".wav"):
+                    os.remove(f"{config.AUDIO_FILE_DIR}\\{file}")
+        except Exception as e:
+            print(f"Error deleting leftover files: {e}")
 
 
     def stop(self):
@@ -272,7 +287,7 @@ class TTS:
             # Wait for the thread to finish
             self.play_audio_thread.join()
 
-        # Wait for the file deletion thread to finish
+        # Wait for the file deletion thread to fi   nish
         file_deletion_thread.join()
 
     def delete_temp_files(self):
