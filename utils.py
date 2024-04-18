@@ -52,12 +52,12 @@ def sanitize_text(text):
     """
     disallowed_chars = '"<>[]{}|\\~`^*!#$()_;'
     symbol_text_pairs = [
-        ('&', 'and'), 
-        ('%', 'percent'), 
-        ('@', 'at'), 
-        ('=', 'equals'), 
-        ('+', 'plus'),
-        ('/', 'slash'),
+        (' & ', ' and '), 
+        (' % ', ' percent '), 
+        (' @ ', ' at '), 
+        (' = ', ' equals '), 
+        (' + ', ' plus '),
+        (' / ', ' slash '),
     ]
 
     sanitized_text = ''.join(filter(lambda x: x not in disallowed_chars, text))
