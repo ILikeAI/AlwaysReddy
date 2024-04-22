@@ -4,7 +4,7 @@
 
 ## LM Studio COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "lm_studio" 
-# COMPLETION_MODEL = "local-model" 
+# COMPLETION_MODEL = "local-model" #This stays as local-model no matter what model you are using
 
 ## ANTHROPIC COMPLETIONS API EXAMPLE ##
 COMPLETIONS_API = "anthropic" 

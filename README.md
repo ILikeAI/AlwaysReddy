@@ -11,8 +11,13 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - Voice chat with you via TTS and STT
 - Read from your clipboard (with `Ctrl + Shift + Space + Space` rapidly double tapping space).
 - Write text to your clipboard on request.
-- Support for togetherAI API.
 
+## Supported LLM servers:
+- OpenAI
+- Anthropic
+- TogetherAI
+- LM Studio (local)
+See how to swap models below
 ## Use cases:
 I often use AlwaysReddy for the following things:
 - When I have just learned a new concept I will often explain the concept aloud to AlwaysReddy and have it save the concept (in roughly my words) into a note.
@@ -44,11 +49,31 @@ Voice chat with context of your clipboard:
 
 All hotkeys can be edited in config.py
 
-### How to use local TTS or Together API models (easy!)
-To use local TTS just open the config file and set `TTS_ENGINE="piper"`
+## How to swap servers or models
+To swap models open the config.py file and uncomment the seconds for the API you want to use. For example this is how you would use Claude 3 sonnet, if you wanted to use LM studio you would comment out the Anthropic section and uncomment the LM studio section.
+```python
+### COMPLETIONS API SETTINGS ###
 
-To use Together AI API (allowing for mixtral), open the config file and set `USE_TOGETHER_API = True`
-Make sure your TOGETHER_API_KEY is in the .env or in your env vars.
+## LM Studio COMPLETIONS API EXAMPLE ##
+# COMPLETIONS_API = "lm_studio" 
+# COMPLETION_MODEL = "local-model" #This stays as local-model no matter what model you are using
+
+## ANTHROPIC COMPLETIONS API EXAMPLE ##
+COMPLETIONS_API = "anthropic" 
+COMPLETION_MODEL = "claude-3-sonnet-20240229" 
+
+## TOGETHER COMPLETIONS API EXAMPLE ##
+# COMPLETIONS_API = "together"
+# COMPLETION_MODEL = "NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT" 
+
+## OPENAI COMPLETIONS API EXAMPLE ##
+# COMPLETIONS_API = "openai"
+# COMPLETION_MODEL = "gpt-4-0125-preview"
+
+```
+
+### How to use local TTS
+To use local TTS just open the config file and set `TTS_ENGINE="piper"`
 
 ## How to add AlwaysReddy to Startup List
 To add AlwaysReddy to your startup list so it starts automatically on your computer startup, follow these steps:
