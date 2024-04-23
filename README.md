@@ -36,6 +36,7 @@ I often use AlwaysReddy for the following things:
 
 ### Setup: 
 Please Note that I have only tested on Winodws so far.
+
 Here is a video guide of the setup process: https://youtu.be/14wXj2ypLGU?si=zp13P1Krkt0Vxflo
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy` 
