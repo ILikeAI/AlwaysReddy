@@ -35,7 +35,7 @@ I often use AlwaysReddy for the following things:
 Please Note that I have only tested on Winodws so far.
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy` 
-2. cd into the directory
+2. cd into the directory `cd AlwaysReddy`
 3. Install reqs with `pip install -r requirements.txt`
 4. Make a copy of the `config.py.example` file and rename the copy to `config.py`
 5. Make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file. 
