@@ -32,6 +32,8 @@ I often use AlwaysReddy for the following things:
 - Sometimes it will stop recording shortly after it starts recording without the hotkey being pressed. I need to investigate... 
 
 ### Setup: 
+Please Note that I have only tested on Winodws so far.
+
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy` 
 2. cd into the directory
 3. Install reqs with `pip install -r requirements.txt`
