@@ -12,7 +12,8 @@
 
 ## LM Studio COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "lm_studio" 
-# COMPLETION_MODEL = "local-model" 
+# COMPLETION_MODEL = "local-model" # You dont need to update this
+# LM_STUDIO_API_BASE_URL = "http://localhost:1234/v1" #This should be the defualt
 
 ### Hosted APIS ###
 

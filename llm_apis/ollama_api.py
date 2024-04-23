@@ -5,7 +5,7 @@ import os
 class OllamaClient:
     """Client for interacting with the Ollama API for streaming text completions."""
     
-    def __init__(self, base_url, api_key=None):
+    def __init__(self, base_url="http://localhost:11434", api_key=None):
         """
         Initialize the OllamaStreamingClient with the API base URL and optionally an API key.
         
