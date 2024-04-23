@@ -1,3 +1,4 @@
+anthropic
 clipboard
 keyboard
 numpy
