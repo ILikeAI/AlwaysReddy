@@ -1,29 +1,36 @@
 ## MAKE A COPY OF THIS CALLED config.py
 
-### COMPLETIONS API SETTINGS ###
+### COMPLETIONS API SETTINGS  ###
+# Just uncomment the ONE api you want to use
+
+### LOCAL OPTIONS ###
+
+## OLLAMA COMPLETIONS API EXAMPLE ##
+# COMPLETIONS_API = "ollama"
+# COMPLETION_MODEL = "llama3"
+# OLLAMA_API_BASE_URL = "http://localhost:11434" #This should be the defualt
 
 ## LM Studio COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "lm_studio" 
-# COMPLETION_MODEL = "local-model" #This stays as local-model no matter what model you are using
+# COMPLETION_MODEL = "local-model" 
+
+### Hosted APIS ###
 
 ## ANTHROPIC COMPLETIONS API EXAMPLE ##
-COMPLETIONS_API = "anthropic" 
-COMPLETION_MODEL = "claude-3-sonnet-20240229" 
+# COMPLETIONS_API = "anthropic" 
+# COMPLETION_MODEL = "claude-3-sonnet-20240229" 
 
 ## TOGETHER COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "together"
-# COMPLETION_MODEL = "NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT" 
+# COMPLETION_MODEL = "meta-llama/Llama-3-8b-chat-hf" 
 
 ## OPENAI COMPLETIONS API EXAMPLE ##
-# COMPLETIONS_API = "openai"
-# COMPLETION_MODEL = "gpt-4-0125-preview"
+COMPLETIONS_API = "openai"
+COMPLETION_MODEL = "gpt-4-0125-preview"
 
-ACTIVE_PROMPT = "default_prompt"
 
-### HOTKEYS ###
-CANCEL_HOTKEY = 'ctrl + alt + x'
-CLEAR_HISTORY_HOTKEY = 'ctrl + alt + f12'
-RECORD_HOTKEY = 'ctrl + shift + space'
+
+
 
 ### VOICE SETTINGS ###
 PIPER_VOICE_JSON="en_en_US_amy_medium_en_US-amy-medium.onnx.json" #These are located in the piper_voices folder
@@ -31,6 +38,13 @@ PIPER_VOICE_ONNX="en_US-amy-medium.onnx"
 TTS_ENGINE="openai" # 'piper' or 'openai' piper is local and fast but openai is better sounding
 OPENAI_VOICE = "nova"
 
+### PROMPTS ###
+ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
+
+### HOTKEYS ###
+CANCEL_HOTKEY = 'ctrl + alt + x'
+CLEAR_HISTORY_HOTKEY = 'ctrl + alt + f12'
+RECORD_HOTKEY = 'ctrl + shift + space'
 
 ### MISC ###
 HOTKEY_DELAY = 0.5
@@ -48,4 +62,3 @@ END_SOUND_VOLUME = 0.000003
 CANCEL_SOUND_VOLUME = 0.000009
 MIN_RECORDING_DURATION = 0.3
 MAX_RECORDING_DURATION= 600 # If you record for more than 10 minutes, the recording will stop automatically
-

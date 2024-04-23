@@ -3,6 +3,7 @@ from llm_apis.openai_api import OpenAIClient
 from llm_apis.togetherai_api import TogetherAIClient
 from llm_apis.anthropic_api import AnthropicClient
 from llm_apis.lm_studio import LM_StudioClient
+from llm_apis.ollama_api import OllamaClient
 import re
 from utils import to_clipboard
 import os
@@ -28,6 +29,8 @@ class CompletionManager:
             self.client = AnthropicClient()
         elif config.COMPLETIONS_API == "lm_studio":
             self.client = LM_StudioClient()
+        elif config.COMPLETIONS_API == "ollama":
+            self.client = OllamaClient(base_url=config.OLLAMA_API_BASE_URL)
         else:
             raise ValueError("Unsupported completion API service configured")
                 
