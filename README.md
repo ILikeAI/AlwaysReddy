@@ -37,7 +37,7 @@ I often use AlwaysReddy for the following things:
 5. Make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file. 
 6. Run the assistant! `python main.py`
 7. If you need ffmpeg installed run the `ffmpegsetup.bat` script as administrator in the scripts folder.
-
+**Important note:** You must have an OpenAI API key in the .env file, at this point the only transcription option is via the OpenAI API, I hope to support local whisper soon
 ### How to use:
 There are currently only main 2 actions:
 Voice chat:
