@@ -18,8 +18,10 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - OpenAI
 - Anthropic
 - TogetherAI
-- LM Studio (local)
+- LM Studio (local) Guide: https://youtu.be/3aXDOCibJV0?si=2LTMmaaFbBiTFcnT
+- Ollama (local) Guide: https://youtu.be/BMYwT58rtxw?si=LHTTm85XFEJ5bMUD
 See how to swap models below
+
 ## Use cases:
 I often use AlwaysReddy for the following things:
 - When I have just learned a new concept I will often explain the concept aloud to AlwaysReddy and have it save the concept (in roughly my words) into a note.
@@ -33,6 +35,7 @@ I often use AlwaysReddy for the following things:
 
 ### Setup: 
 Please Note that I have only tested on Winodws so far.
+Here is a video guide of the setup process: https://youtu.be/14wXj2ypLGU?si=zp13P1Krkt0Vxflo
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy` 
 2. cd into the directory `cd AlwaysReddy`
