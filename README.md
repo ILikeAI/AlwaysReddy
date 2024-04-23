@@ -20,6 +20,7 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - TogetherAI
 - LM Studio (local) Guide: https://youtu.be/3aXDOCibJV0?si=2LTMmaaFbBiTFcnT
 - Ollama (local) Guide: https://youtu.be/BMYwT58rtxw?si=LHTTm85XFEJ5bMUD
+  
 See how to swap models below
 
 ## Use cases:
