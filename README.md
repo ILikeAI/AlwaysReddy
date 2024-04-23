@@ -1,6 +1,8 @@
 # Welcome to AlwaysReddy 🔊
 Hey, I'm Josh, the creator of AlwaysReddy. I am still a noob when it comes to programming and I'm really trying to develop my skills over the next year, I'm treating this project as an attempt to better develop my skills, with that in mind I would really appreciate it if you could point out issues and bad practices in my code (of which I'm sure there will be plenty). I would also appreciate if you would make your own improvements to the project so I can learn from your changes.
 
+**Pull Requests Welcome!**
+
 ## Meet AlwaysReddy 
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
