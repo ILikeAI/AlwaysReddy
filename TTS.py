@@ -9,6 +9,9 @@ import queue
 import config
 import tempfile
 import utils
+import shlex
+from utils import resample
+
 
 # Load .env file if present
 load_dotenv()
@@ -38,7 +41,7 @@ class TTS:
         # Delete any leftover temp files if any
         for file in os.listdir(config.AUDIO_FILE_DIR):
             if file.endswith(".wav"):
-                os.remove(f"{config.AUDIO_FILE_DIR}\\{file}")
+                os.remove(f"{config.AUDIO_FILE_DIR}/{file}")
 
     def wait(self):
         """
@@ -124,7 +127,7 @@ class TTS:
         onnx_file_name = config.PIPER_VOICE_ONNX
 
         # Define the paths for the Piper executable and voices directory
-        exe_path = r"piper\piper.exe"
+        exe_path = r"piper2/piper/piper"
         voices_dir = r"piper_voices"
 
         # Ensure the voice model and configuration file names have the correct extensions
@@ -145,8 +148,10 @@ class TTS:
         
         # Try to run the Piper TTS command
         try:
-            command = f'echo {text_to_speak} | {exe_path} -m {onnx_file} -c {json_file} -f {output_file}'
-            subprocess.run(['cmd.exe', '/c', command], capture_output=True, text=True)
+            os.remove(output_file)
+            command = f'echo "{text_to_speak}" | ./{exe_path} --model {onnx_file} --sample-rate ${config.FS} -c {json_file} --output_file {output_file}'
+            # [Atom] Generate file
+            self.execute_cmd(command)
             return "success"
         except subprocess.CalledProcessError as e:
             # If the command fails, print the error and return "failed"
@@ -191,6 +196,27 @@ class TTS:
             return "failed"
         
 
+    def execute_cmd(self, full_command):
+        commands = full_command.split('|')
+
+        # Use shlex.split to correctly parse each part into a list of arguments
+        cmd1 = shlex.split(commands[0].strip())
+        cmd2 = shlex.split(commands[1].strip())
+        
+       # Set up the first subprocess
+        p1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE, text=True)
+
+        # Set up the second subprocess, connecting the output of p1 to its input
+        p2 = subprocess.Popen(cmd2, stdin=p1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        # Close the stdout of p1 to allow p1 to receive a SIGPIPE if p2 exits before p1
+        p1.stdout.close()
+
+        # Capture the output and errors from the second command
+        output, error = p2.communicate()
+
+
+
     def play_audio(self):
         """
         Play the audio from the audio queue.
@@ -221,7 +247,9 @@ class TTS:
 
             try:
                 # Play the audio
-                sd.play(data, fs)
+                # [Atom] resample data
+                resampled = resample(data, fs, config.FS)
+                sd.play(resampled, config.FS, device=config.OUT_DEVICE)
             except Exception as e:
                 print(f"Error playing audio: {e}")
                 continue
@@ -251,7 +279,7 @@ class TTS:
         try:
             for file in os.listdir(config.AUDIO_FILE_DIR):
                 if file.endswith(".wav"):
-                    os.remove(f"{config.AUDIO_FILE_DIR}\\{file}")
+                    os.remove(f"{config.AUDIO_FILE_DIR}/{file}")
         except Exception as e:
             print(f"Error deleting leftover files: {e}")
 

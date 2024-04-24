@@ -2,7 +2,9 @@ import soundfile as sf
 import sounddevice as sd
 import numpy as np
 import config
+import scipy
 import threading
+from utils import resample
 
 def play_sound_file(file_name, volume):
     """
@@ -19,8 +21,18 @@ def play_sound_file(file_name, volume):
     try:
         with sf.SoundFile(file_name, 'r') as sound_file:
             data = sound_file.read(dtype='int16')
-        silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
-        sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
+        
+        # Resample the data to the desired sample rate
+        resampled_data = scipy.signal.resample(data, int(len(data) * config.FS / sound_file.samplerate), axis=0)
+        # Create a silence array of the same duration as one second of the resampled data
+        silence = np.zeros((config.FS, resampled_data.shape[1]), dtype='int16')
+
+        # Concatenate resampled data (scaled by volume) with silence
+        # Note: Make sure to scale by volume correctly. Here assuming volume scales linearly
+        combined_data = np.concatenate((resampled_data * volume, silence))
+
+        # Play the combined data
+        sd.play(combined_data, config.FS, device=config.OUT_DEVICE)
         sd.wait()
     except FileNotFoundError as e:
         raise FileNotFoundError(f"The sound file {file_name} was not found.") from e

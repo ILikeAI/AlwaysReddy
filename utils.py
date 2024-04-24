@@ -1,6 +1,10 @@
 import re
 import clipboard
 import tiktoken
+import sounddevice as sd
+import resampy
+import soundfile as sf
+import config
 
 def read_clipboard():
     """
@@ -96,3 +100,95 @@ def trim_messages(messages, max_tokens):
         first_non_system_msg_index = next((i for i, message in enumerate(messages) if message.get('role') != 'system'), None)
 
     return messages
+
+
+
+
+def check_supported_sample_rates(device_index):
+    """
+    Checks the supported sample rates for a given audio input device.
+
+    Args:
+    - device_index: int, the index of the audio input device
+
+    Returns:
+    - supported_rates: list, a list of supported sample rates
+    """
+    sample_rates = [8000, 16000, 22050, 32000, 44100, 48000, 96000, 192000]  # Common sample rates
+    supported_rates = []
+
+    for rate in sample_rates:
+        try:
+            # Try to open an InputStream at the specified sample rate
+            with sd.InputStream(samplerate=rate, device=device_index, channels=1):
+                supported_rates.append(rate)
+                print(f"Sample rate {rate} Hz is supported.")
+        except Exception as e:
+            print(f"Sample rate {rate} Hz is not supported.")
+
+    return supported_rates
+
+
+def resample(data, orig_sample_rate, target_sample_rate):
+    """
+    Resamples the audio data to the target sample rate.
+
+    Args:
+    - data: numpy array, the audio data to be resampled
+    - orig_sample_rate: int, the original sample rate of the audio data
+    - target_sample_rate: int, the target sample rate for resampling
+
+    Returns:
+    - resampled_data: numpy array, the resampled audio data
+    """
+    resampled_data = resampy.resample(data, orig_sample_rate, target_sample_rate)
+    return resampled_data
+
+
+def read_and_resample(filename, target_sample_rate):
+    """
+    Reads an audio file and resamples it to the target sample rate.
+
+    Args:
+    - filename: str, the path to the audio file
+    - target_sample_rate: int, the target sample rate for resampling
+
+    Returns:
+    - resampled_data: numpy array, the resampled audio data
+    - original_sample_rate: int, the original sample rate of the audio file
+    """
+    data, original_sample_rate = sf.read(filename, dtype='float32')
+    return resampy.resample(data, original_sample_rate, target_sample_rate), original_sample_rate
+
+
+def set_default_device_by_name(device_name, kind='output'):
+    """
+    Sets the default input or output device by its name.
+
+    Args:
+    - device_name: str, the name of the input or output device
+    - kind: str, 'input' or 'output', specifies the kind of device to set as default
+    """
+    devices = sd.query_devices()
+    for i, dev in enumerate(devices):
+        if dev['name'] == device_name:
+            sd.default.device = i
+            print(f"Default {kind} device set to: {device_name}")
+            return
+    print(f"Device '{device_name}' not found or not a {kind} device.")
+
+
+def print_device_names():
+    """
+    Prints the available input and output devices.
+    """
+    devices = sd.query_devices()
+    print("Available input devices:")
+    for i, dev in enumerate(devices):
+        if dev['max_input_channels'] > 0:
+            print(f"  {i}: {dev['name']}")
+
+    print("\nAvailable output devices:")
+    for i, dev in enumerate(devices):
+        if dev['max_output_channels'] > 0:
+            print(f"  {i}: {dev['name']}")

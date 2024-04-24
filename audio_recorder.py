@@ -42,7 +42,7 @@ class AudioRecorder:
     def record_audio(self):
         """Records audio from the default input device."""
         try:
-            with sd.InputStream(samplerate=config.FS, channels=2, dtype='float32', callback=self.callback):
+            with sd.InputStream(samplerate=config.FS, channels=1, dtype='float32', device=config.IN_DEVICE, callback=self.callback):
                 while self.recording:
                     sd.sleep(100)
         except Exception as e:
