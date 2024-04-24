@@ -192,3 +192,21 @@ def print_device_names():
     for i, dev in enumerate(devices):
         if dev['max_output_channels'] > 0:
             print(f"  {i}: {dev['name']}")
+
+
+
+
+def get_device_name(keyword):
+    devices = sd.query_devices()
+    for device in devices:
+        # Regex pattern to find the keyword in the text
+        pattern = rf"\b{re.escape(keyword)}\b"
+
+        # Search for the keyword in the text
+        match = re.search(pattern, device["name"])
+
+        if not match:
+            continue
+
+        # Return the part before ", ALSA" if found
+        return device["name"]
