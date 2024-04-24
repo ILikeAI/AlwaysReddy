@@ -1,6 +1,6 @@
 anthropic
 clipboard
-keyboard
+pynput
 numpy
 openai
 pydub

@@ -2,7 +2,7 @@ import time
 import threading
 from audio_recorder import AudioRecorder
 from transcriber import TranscriptionManager
-import keyboard
+from pynput import keyboard
 import TTS
 from chat_completions import CompletionManager
 from soundfx import play_sound_FX
@@ -271,18 +271,17 @@ class Recorder:
 
     def run(self):
         """Run the recorder, setting up hotkeys and entering the main loop."""
-        keyboard.add_hotkey(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
-        keyboard.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
-        keyboard.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
         print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to give the AI access to read your clipboard.\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
-
-        try:
-            while True:
-                time.sleep(0.0001)
-        except KeyboardInterrupt:
-            print("Recorder stopped by user.")
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        with keyboard.GlobalHotKeys({
+                config.RECORD_HOTKEY: self.handle_hotkey_wrapper,
+                config.CANCEL_HOTKEY: self.cancel_all,
+                config.CLEAR_HISTORY_HOTKEY: self.clear_messages}) as hotkey_listener:
+            try:
+                hotkey_listener.join()
+            except KeyboardInterrupt:
+                print("Recorder stopped by user.")
+            except Exception as e:
+                print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     try:

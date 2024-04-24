@@ -55,9 +55,10 @@ OPENAI_VOICE = "nova"
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 
 ### HOTKEYS ###
-CANCEL_HOTKEY = 'ctrl + alt + x'
-CLEAR_HISTORY_HOTKEY = 'ctrl + alt + f12'
-RECORD_HOTKEY = 'ctrl + shift + space'
+CANCEL_HOTKEY = '<ctrl>+<alt>+x'
+CLEAR_HISTORY_HOTKEY = '<ctrl>+<alt>+c'
+RECORD_HOTKEY = '<ctrl>+<alt>+r'
+
 
 ### MISC ###
 HOTKEY_DELAY = 0.5
