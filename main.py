@@ -1,7 +1,7 @@
 import time
 import threading
 from audio_recorder import AudioRecorder
-from transcriber import transcribe_audio
+from transcriber import TranscriptionManager
 import keyboard
 import TTS
 from chat_completions import CompletionManager
@@ -20,6 +20,7 @@ class Recorder:
         self.last_press_time = 0
         self.tts = TTS.TTS(parent_client=self) 
         self.recording_timeout_timer = None
+        self.transcription_manager = TranscriptionManager()
         self.completion_client = CompletionManager(TTS_client=self.tts,parent_client=self)
         self.tts.completion_client = self.completion_client
         self.recording_stop_time = None
@@ -81,7 +82,7 @@ class Recorder:
                 return
             
             try:
-                transcript = transcribe_audio(self.recorder.filename)
+                transcript = self.transcription_manager.transcribe_audio(self.recorder.filename)
                 
                 # If the user has tried to cut off the response, we need to make sure we dont process it
                 if not self.stop_response:
@@ -230,12 +231,12 @@ class Recorder:
 
 
     def start_main_thread(self):
-        """This starts the main thread and keeps a refrence to it"""
+        """This starts the main thread and keeps a reference to it"""
         self.timer = None
         
         if self.main_thread is not None and self.main_thread.is_alive():
-            #If the thread is alreddy running, cancel (without playing cancel sound) and start a new one
-            self.cancel_all(silent=True)#the slience is just so you dont hear cancel sound immediately followed by the start sound
+            #If the thread is already running, cancel (without playing cancel sound) and start a new one
+            self.cancel_all(silent=True)#the silence is just so you dont hear cancel sound immediately followed by the start sound
             self.main_thread.join()
 
             self.main_thread = threading.Thread(target=self.handle_hotkey)

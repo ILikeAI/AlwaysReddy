@@ -32,8 +32,11 @@ COMPLETION_MODEL = "gpt-4-0125-preview"
 
 
 
+### Transcription API Settings ###
+TRANSCRIPTION_API = "openai" # this will use the hosted openai api
 
-### VOICE SETTINGS ###
+
+### TTS SETTINGS ###
 PIPER_VOICE_JSON="en_en_US_amy_medium_en_US-amy-medium.onnx.json" #These are located in the piper_voices folder
 PIPER_VOICE_ONNX="en_US-amy-medium.onnx"
 TTS_ENGINE="openai" # 'piper' or 'openai' piper is local and fast but openai is better sounding
