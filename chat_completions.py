@@ -1,12 +1,6 @@
 import config
-from llm_apis.openai_api import OpenAIClient
-from llm_apis.togetherai_api import TogetherAIClient
-from llm_apis.anthropic_api import AnthropicClient
-from llm_apis.lm_studio import LM_StudioClient
-from llm_apis.ollama_api import OllamaClient
 import re
 from utils import to_clipboard
-import os
 
 class CompletionManager:
     def __init__(self, TTS_client,parent_client):
@@ -21,28 +15,33 @@ class CompletionManager:
     def setup_client(self):
         """Instantiates the appropriate AI client based on configuration file."""
         if config.COMPLETIONS_API == "openai":
+            from llm_apis.openai_api import OpenAIClient
             self.client = OpenAIClient()
+            
         elif config.COMPLETIONS_API == "together":
+            from llm_apis.togetherai_api import TogetherAIClient
             self.client = TogetherAIClient()
+
         elif config.COMPLETIONS_API == "anthropic":
+            from llm_apis.anthropic_api import AnthropicClient
             self.client = AnthropicClient()
 
         elif config.COMPLETIONS_API == "lm_studio":
-            if hasattr(config, 'LM_STUDIO_API_BASE_URL'):# if the config file has the LM_STUDIO_API_BASE_URL attribute
+            from llm_apis.lm_studio import LM_StudioClient
+            if hasattr(config, 'LM_STUDIO_API_BASE_URL'):
                 self.client = LM_StudioClient(base_url=config.LM_STUDIO_API_BASE_URL)
             else:
                 print("No LM_STUDIO_API_BASE_URL found in config.py, using default")
-                #Use the default base url
                 self.client = LM_StudioClient()
-            
+
         elif config.COMPLETIONS_API == "ollama":
-            if hasattr(config, 'OLLAMA_API_BASE_URL'):# if the config file has the OLLAMA_API_BASE_URL attribute
+            from llm_apis.ollama_api import OllamaClient
+            if hasattr(config, 'OLLAMA_API_BASE_URL'):
                 self.client = OllamaClient(base_url=config.OLLAMA_API_BASE_URL)
+                
             else:
                 print("No OLLAMA_API_BASE_URL found in config.py, using default")
-                #Use the default base url
                 self.client = OllamaClient()
-            
         else:
             raise ValueError("Unsupported completion API service configured")
                 

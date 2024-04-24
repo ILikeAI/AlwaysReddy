@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 from config import AUDIO_FILE_DIR
-from transcription_apis.openai_api import OpenAIClient
 import config
+
 # Load .env file if present
 load_dotenv()
 
@@ -14,7 +14,11 @@ class TranscriptionManager:
     def setup_client(self):
         """Instantiates the appropriate transcription client based on configuration file."""
         if config.TRANSCRIPTION_API == "openai":
+            from transcription_apis.openai_api import OpenAIClient
             self.client = OpenAIClient()
+        elif config.TRANSCRIPTION_API == "whisperx":
+            from transcription_apis.whisperx_api import WhisperXClient
+            self.client = WhisperXClient()
         else:
             raise ValueError("Unsupported transcription API service configured")
 
@@ -38,7 +42,6 @@ class TranscriptionManager:
             # Delete the audio file
             os.remove(full_path)
             return transcript
-
         except FileNotFoundError as e:
             raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
         except Exception as e:

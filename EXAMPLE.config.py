@@ -15,6 +15,7 @@
 # COMPLETION_MODEL = "local-model" # You dont need to update this
 # LM_STUDIO_API_BASE_URL = "http://localhost:1234/v1" #This should be the defualt
 
+
 ### Hosted APIS ###
 
 ## ANTHROPIC COMPLETIONS API EXAMPLE ##
@@ -30,10 +31,18 @@ COMPLETIONS_API = "openai"
 COMPLETION_MODEL = "gpt-4-0125-preview"
 
 
+### Transcription API Settings ###
 
+## Whisper X local transcription API EXAMPLE ##
+# TRANSCRIPTION_API = "whisperx" #local transcription!
+# WHISPER_MODEL = "tiny" # (tiny, base, small, medium, large) Turn this up to "base" if the transcription is too bad
+# TRANSCRIPTION_LANGUAGE = "en" 
+# WHISPER_BATCH_SIZE = 16
+# WHISPER_MODEL_PATH = None # you can point this to an existing model or leave it set to none
 
 ### Transcription API Settings ###
 TRANSCRIPTION_API = "openai" # this will use the hosted openai api
+
 
 
 ### TTS SETTINGS ###
