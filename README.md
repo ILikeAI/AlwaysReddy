@@ -44,7 +44,7 @@ Here is a video guide of the setup process: https://youtu.be/14wXj2ypLGU?si=zp13
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy` 
 2. cd into the directory `cd AlwaysReddy`
-3. Install reqs with `pip install -r requirements.txt` also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally.
+3. Install reqs with `pip install -r requirements.txt` also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
 5. Make a copy of the `config.py.example` file and rename the copy to `config.py`
 6. Make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file. 
 7. Run the assistant! `python main.py`
