@@ -15,6 +15,7 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - Voice chat with you via TTS and STT
 - Read from your clipboard (with `Ctrl + Shift + Space + Space` rapidly double tapping space).
 - Write text to your clipboard on request.
+- Can by run 100% locally
 
 ## Supported LLM servers:
 - OpenAI
@@ -43,11 +44,11 @@ Here is a video guide of the setup process: https://youtu.be/14wXj2ypLGU?si=zp13
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy` 
 2. cd into the directory `cd AlwaysReddy`
-3. Install reqs with `pip install -r requirements.txt`
-4. Make a copy of the `config.py.example` file and rename the copy to `config.py`
-5. Make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file. 
-6. Run the assistant! `python main.py`
-7. If you need ffmpeg installed run the `ffmpegsetup.bat` script as administrator in the scripts folder.
+3. Install reqs with `pip install -r requirements.txt` also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally.
+5. Make a copy of the `config.py.example` file and rename the copy to `config.py`
+6. Make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file. 
+7. Run the assistant! `python main.py`
+8. If you need ffmpeg installed run the `ffmpegsetup.bat` script as administrator in the scripts folder.
 
 **Important note:** You must have an OpenAI API key in the .env file, at this point the only transcription option is via the OpenAI API, I hope to support local whisper soon
 
