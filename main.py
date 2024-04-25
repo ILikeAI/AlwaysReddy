@@ -85,7 +85,7 @@ class Recorder:
                 transcript = self.transcription_manager.transcribe_audio(self.recorder.filename)
                 
                 # If the user has tried to cut off the response, we need to make sure we dont process it
-                if not self.stop_response:
+                if not self.stop_response and transcript:
                     # Handle response is where the magic happens
                     self.handle_response(transcript)
 
