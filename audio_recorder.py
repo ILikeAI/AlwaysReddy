@@ -60,7 +60,7 @@ class AudioRecorder:
         """Stops the current recording session, optionally cancelling the save."""
         if self.recording:
             self.recording = False
-            # Atom: potentially needed time.sleep(0.1)
+
             self.record_thread.join()
             if not cancel:
                 self.save_recording()

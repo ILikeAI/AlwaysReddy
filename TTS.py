@@ -226,7 +226,7 @@ class TTS:
         while self.queing or not self.audio_queue.empty(): 
 
             # If the stop response flag is set, break the loop
-            if self.parent_client.stop_response == True:
+            if self.parent_client.stop_response:
                 break
 
             # Set the running TTS flag to True

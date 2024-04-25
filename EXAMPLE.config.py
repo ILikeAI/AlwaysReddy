@@ -1,4 +1,6 @@
 ## MAKE A COPY OF THIS CALLED config.py
+import utils
+    
 
 ### COMPLETIONS API SETTINGS  ###
 # Just uncomment the ONE api you want to use
@@ -54,8 +56,8 @@ OPENAI_VOICE = "nova"
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 
 ### HOTKEYS ###
-CANCEL_HOTKEY = 'ctrl + alt + x'
-CLEAR_HISTORY_HOTKEY = 'ctrl + alt + f12'
+CANCEL_HOTKEY = 'shift + 1'
+CLEAR_HISTORY_HOTKEY = 'shift + 5'
 RECORD_HOTKEY = 'ctrl + shift + space'
 
 ### MISC ###
@@ -70,8 +72,9 @@ END_SEQ = "-CLIPEND-" #the model is instructed to place any text for the clipboa
 BASE_VOLUME = 1 
 FS = 48000 # 48000 #44100
 # see sounddevice.query_devices()
-OUT_DEVICE = "HD-Audio Generic: ALC1220 Analog (hw:2,0)"# 6 # 6 HD-Audio Generic: ALC1220 Analog (hw:2,0), ALSA (2 in, 2 out)
-IN_DEVICE = "KLIM Talk: USB Audio (hw:3,0)" # 8 KLIM Talk: USB Audio (hw:3,0), ALSA (1 in, 0 out)
+
+OUT_DEVICE = "pipewire" # utils.get_device_name('pipewire')# "HD-Audio Generic: ALC1220 Analog (hw:3,0)"# 6 # 6 HD-Audio Generic: ALC1220 Analog (hw:2,0), ALSA (2 in, 2 out)
+IN_DEVICE = utils.get_device_name('KLIM') # "KLIM Talk: USB Audio (hw:0,0)" # 8 KLIM Talk: USB Audio (hw:3,0), ALSA (1 in, 0 out)
 START_SOUND_VOLUME = 0.000003
 END_SOUND_VOLUME = 0.000003
 CANCEL_SOUND_VOLUME = 0.000009
