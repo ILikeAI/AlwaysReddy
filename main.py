@@ -10,7 +10,7 @@ from utils import read_clipboard, count_tokens, trim_messages
 import config
 from prompt import prompts
 
-class Recorder:
+class AlwaysReddy:
     def __init__(self):
         """Initialize the Recorder with default settings and objects."""
         self.recorder = AudioRecorder()
@@ -286,6 +286,6 @@ class Recorder:
 
 if __name__ == "__main__":
     try:
-        Recorder().run()
+        AlwaysReddy().run()
     except Exception as e:
         print(f"Failed to start the recorder: {e}")
