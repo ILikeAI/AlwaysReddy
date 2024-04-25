@@ -100,6 +100,7 @@ class TTS:
     
                 print("Adding to queue")
                 self.audio_queue.put((temp_output_file, sentence))
+                print("[Atom] Added to queue")
         except Exception as e:
             print(f"Error during TTS processing: {e}")
     
@@ -259,8 +260,10 @@ class TTS:
             self.last_sentence_spoken = sentence
             # Wait for the audio to finish playing
             sd.wait()
+            print("[Atom] Playing audio, sd.wait() finished")
             # Mark the task as done in the queue
             self.audio_queue.task_done()
+            print("[Atom] Playing audio, audio_queue.task_done()")
 
             try:
                 # If the audio file exists, remove it
@@ -289,11 +292,12 @@ class TTS:
         Stop the TTS process and clean up any temporary files.
         """
         # Print a message indicating that the TTS process is stopping
-        print("Stopping TTS")
+        print("[Atom] Stopping TTS")
 
         # Stop any currently playing audio
         sd.stop()
 
+        print("[Atom] Stopped TTS")
         # Attempt to clear the queue immediately to prevent any further processing
         while not self.audio_queue.empty():
             try:

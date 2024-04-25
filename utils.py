@@ -4,7 +4,6 @@ import tiktoken
 import sounddevice as sd
 import resampy
 import soundfile as sf
-import config
 
 def read_clipboard():
     """
@@ -208,5 +207,6 @@ def get_device_name(keyword):
         if not match:
             continue
 
+        print(f"[Atom] Using device: {device}")
         # Return the part before ", ALSA" if found
         return device["name"]
