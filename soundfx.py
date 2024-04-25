@@ -5,6 +5,8 @@ import config
 import scipy
 import threading
 from utils import resample
+import time
+
 
 def play_sound_file(file_name, volume):
     """
@@ -33,7 +35,8 @@ def play_sound_file(file_name, volume):
 
         # Play the combined data
         sd.play(combined_data, config.FS, device=config.OUT_DEVICE)
-        sd.wait()
+        while sd.get_stream().active:
+            time.sleep(0.5)
     except FileNotFoundError as e:
         raise FileNotFoundError(f"The sound file {file_name} was not found.") from e
     except Exception as e:

@@ -11,7 +11,7 @@ import tempfile
 import utils
 import shlex
 from utils import resample
-
+import time
 
 # Load .env file if present
 load_dotenv()
@@ -25,6 +25,7 @@ class TTS:
         Initialize the TTS class with the parent client and necessary attributes.
         
         """
+        self.stopping_flag = False
         self.service = config.TTS_ENGINE
         self.audio_queue = queue.Queue()
         self.parent_client = parent_client
@@ -98,9 +99,8 @@ class TTS:
                 
                 self.temp_files.append(temp_output_file)
     
-                print("Adding to queue")
                 self.audio_queue.put((temp_output_file, sentence))
-                print("[Atom] Added to queue")
+                # Atom: potentially needed time.sleep(0.5)
         except Exception as e:
             print(f"Error during TTS processing: {e}")
     
@@ -259,7 +259,12 @@ class TTS:
             print(f"Playing audio: {sentence}")
             self.last_sentence_spoken = sentence
             # Wait for the audio to finish playing
-            sd.wait()
+            while sd.get_stream().active and not sd.get_stream().stopped:
+                time.sleep(0.5)
+                if self.stopping_flag:
+                    break
+
+            self.stopping_flag = False
             print("[Atom] Playing audio, sd.wait() finished")
             # Mark the task as done in the queue
             self.audio_queue.task_done()
@@ -295,7 +300,7 @@ class TTS:
         print("[Atom] Stopping TTS")
 
         # Stop any currently playing audio
-        sd.stop()
+        self.stopping_flag = True
 
         print("[Atom] Stopped TTS")
         # Attempt to clear the queue immediately to prevent any further processing
@@ -319,7 +324,7 @@ class TTS:
             # Wait for the thread to finish
             self.play_audio_thread.join()
 
-        # Wait for the file deletion thread to fi   nish
+        # Wait for the file deletion thread to finish
         file_deletion_thread.join()
 
     def delete_temp_files(self):
