@@ -42,7 +42,7 @@ class TTS:
         # Delete any leftover temp files if any
         for file in os.listdir(config.AUDIO_FILE_DIR):
             if file.endswith(".wav"):
-                os.remove(f"{config.AUDIO_FILE_DIR}/{file}")
+                os.remove(os.path.join(config.AUDIO_FILE_DIR,file))
 
     def wait(self):
         """
@@ -287,7 +287,7 @@ class TTS:
         try:
             for file in os.listdir(config.AUDIO_FILE_DIR):
                 if file.endswith(".wav"):
-                    os.remove(f"{config.AUDIO_FILE_DIR}/{file}")
+                    os.remove(os.path.join(config.AUDIO_FILE_DIR,file))
         except Exception as e:
             print(f"Error deleting leftover files: {e}")
 
