@@ -23,7 +23,7 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - TogetherAI
 - LM Studio (local) Guide: https://youtu.be/3aXDOCibJV0?si=2LTMmaaFbBiTFcnT
 - Ollama (local) Guide: https://youtu.be/BMYwT58rtxw?si=LHTTm85XFEJ5bMUD
-  
+
 See how to swap models below
 
 ## Use cases:
@@ -34,9 +34,6 @@ I often use AlwaysReddy for the following things:
 - "From the comments in my clipboard what do the r/LocalLLaMA users think of X?"
 - Quick journal entries, I speedily list what I have done today and get it to write a journal entry to my clipboard before I shutdown the computer for the day.
 
-## Known issues:
-- Sometimes it will stop recording shortly after it starts recording without the hotkey being pressed. I need to investigate... 
-
 ### Setup: 
 Please Note that I have only tested on Winodws so far.
 
@@ -44,18 +41,53 @@ Here is a video guide of the setup process: https://youtu.be/14wXj2ypLGU?si=zp13
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy` 
 2. cd into the directory `cd AlwaysReddy`
-3. Install reqs with `pip install -r requirements.txt` also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
-5. Make a copy of the `config.py.example` file and rename the copy to `config.py`
-6. Make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file. 
-7. Run the assistant! `python main.py`
-8. If you need ffmpeg installed run the `ffmpegsetup.bat` script as administrator in the scripts folder.
+3. Create a virtual environment with `python -m venv venv`
+4. Activate the virtual environment:
+   - On Windows: `venv\Scripts\activate`
+   - On macOS/Linux: `source venv/bin/activate`
+5. Install reqs with `pip install -r requirements.txt` also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
+6. Make a copy of the `config.py.example` file and rename the copy to `config.py`
+7. Make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file. 
+8. Run the assistant! `python main.py`
+9. If you need ffmpeg installed run the `ffmpegsetup.bat` script as administrator in the scripts folder.
 
-**Important note:** You must have an OpenAI API key in the .env file, at this point the only transcription option is via the OpenAI API, I hope to support local whisper soon
+<details>
+<summary>Known issues</summary>
+
+- Sometimes it will stop recording shortly after it starts recording without the hotkey being pressed. I need to investigate...
+- Some users are reporting compatibility issues with Mac and Linux, but some have managed to get it working. We're working on improving cross-platform compatibility. 
+</details>
+
+### How to use local whisper transcription:
+1. Open the `config.py` file.
+2. Locate the "Transcription API Settings" section.
+3. Comment out the line `TRANSCRIPTION_API = "openai"` by adding a `#` at the beginning of the line.
+4. Uncomment the line `TRANSCRIPTION_API = "whisperx"` by removing the `#` at the beginning of the line.
+5. Adjust the `WHISPER_MODEL` and `TRANSCRIPTION_LANGUAGE` settings according to your preferences.
+6. Save the `config.py` file.
+
+Here's an example of how your `config.py` file should look like for local whisper transcription:
+
+```python
+### Transcription API Settings ###
+
+## OPENAI API TRANSCRIPTION EXAMPLE ##
+# TRANSCRIPTION_API = "openai"  # this will use the hosted openai api
+
+## Whisper X local transcription API EXAMPLE ##
+TRANSCRIPTION_API = "whisperx"  # local transcription!
+WHISPER_MODEL = "tiny"  # (tiny, base, small, medium, large) Turn this up to "base" if the transcription is too bad
+TRANSCRIPTION_LANGUAGE = "en"
+WHISPER_BATCH_SIZE = 16
+WHISPER_MODEL_PATH = None  # you can point this to an existing model or leave it set to none
+```
 
 ### How to use:
 There are currently only main 2 actions:
+
 Voice chat:
 - Press `Ctrl + Shift + Space`  to start dictating, you can talk for as long as you want, then press `Ctrl + Shift + Space` again to stop recording, a few seconds later you will get a voice response from the AI.
+
 Voice chat with context of your clipboard:
 - Double tap `Ctrl + Shift + Space` (or just hold `Ctrl + Shift` and quickly press `Space` Twice) This will give the AI the content of your clipboard so you can ask it to reference it, rewrite it, answer questions from its contents... whatever you like! 
 - Clear the assistants memory with `ctrl + alt + f12`.
@@ -64,7 +96,8 @@ Voice chat with context of your clipboard:
 All hotkeys can be edited in config.py
 
 ## How to swap servers or models
-To swap models open the config.py file and uncomment the seconds for the API you want to use. For example this is how you would use Claude 3 sonnet, if you wanted to use LM studio you would comment out the Anthropic section and uncomment the LM studio section.
+To swap models open the config.py file and uncomment the sections for the API you want to use. For example this is how you would use Claude 3 sonnet, if you wanted to use LM studio you would comment out the Anthropic section and uncomment the LM studio section.
+
 ```python
 ### COMPLETIONS API SETTINGS ###
 
@@ -83,7 +116,6 @@ COMPLETION_MODEL = "claude-3-sonnet-20240229"
 ## OPENAI COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "openai"
 # COMPLETION_MODEL = "gpt-4-0125-preview"
-
 ```
 
 ### How to use local TTS
