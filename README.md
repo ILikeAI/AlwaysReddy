@@ -13,9 +13,9 @@ Join the discord: https://discord.gg/v3Hb9za9B4
 ### Features:
 You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - Voice chat with you via TTS and STT
-- Read from your clipboard (with `Ctrl + Shift + Space + Space` rapidly double tapping space).
+- Read from your clipboard (with `Ctrl + Shift + Space + Space` rapidly double tapping space). NOTE: Linux has a different hotkey!
 - Write text to your clipboard on request.
-- Can by run 100% locally
+- Can be run 100% locally!!!
 
 ## Supported LLM servers:
 - OpenAI
@@ -35,7 +35,7 @@ I often use AlwaysReddy for the following things:
 - Quick journal entries, I speedily list what I have done today and get it to write a journal entry to my clipboard before I shutdown the computer for the day.
 
 ### Setup: 
-Please Note that I have only tested on Winodws so far.
+Please Note that I have only tested on Windows so far, although some users have it running on linux.
 
 Here is a video guide of the setup process: https://youtu.be/14wXj2ypLGU?si=zp13P1Krkt0Vxflo
 
@@ -49,7 +49,7 @@ Here is a video guide of the setup process: https://youtu.be/14wXj2ypLGU?si=zp13
 6. Make a copy of the `config.py.example` file and rename the copy to `config.py`
 7. Make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file. 
 8. Run the assistant! `python main.py`
-9. If you need ffmpeg installed run the `ffmpegsetup.bat` script as administrator in the scripts folder.
+9. If you need ffmpeg installed run the `ffmpegsetup.bat` script as administrator in the scripts folder. If you have troubles with this, try the steps steps here: https://github.com/openai/whisper#setup
 
 <details>
 <summary>Known issues</summary>
@@ -57,6 +57,30 @@ Here is a video guide of the setup process: https://youtu.be/14wXj2ypLGU?si=zp13
 - Sometimes it will stop recording shortly after it starts recording without the hotkey being pressed. I need to investigate...
 - Some users are reporting compatibility issues with Mac and Linux, but some have managed to get it working. We're working on improving cross-platform compatibility. 
 </details>
+
+### Linux Support and Considerations
+
+AlwaysReddy now has improved support for Linux users. However, there are a few things to keep in mind:
+
+1. **Running as Root**: Some Linux users, particularly those using the Wayland display protocol, may need to run AlwaysReddy with root privileges to allow the system to capture global hotkeys when the application is running in the background. To do this, use the following command:
+
+   ```
+   sudo python main.py
+   ```
+
+   Please note that running the application with root privileges should be done with caution and understanding of the potential security implications.
+
+2. **Updated Hotkeys**: For Linux users, the default hotkeys have been updated to avoid conflicts with system shortcuts. The new default hotkeys are:
+
+   - Start/Stop Recording: `Ctrl + Alt + R`
+   - Cancel Recording/TTS: `Ctrl + Alt + X`
+   - Clear Assistant's Memory: `Ctrl + Alt + C`
+
+   You can still customize these hotkeys in the `config.py` file if desired.
+
+3. **Known Issues**: Some people are hitting sample rate issues with the existing sound FX, there are fixes for that on their way.
+
+If you hit any problems running AlwaysReddy on Linux, please let me know by opening an issue it hitting me up on discord.
 
 ### How to use local whisper transcription:
 1. Open the `config.py` file.

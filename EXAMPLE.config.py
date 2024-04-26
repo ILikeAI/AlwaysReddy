@@ -1,3 +1,4 @@
+import sys
 ## MAKE A COPY OF THIS CALLED config.py
 
 ### COMPLETIONS API SETTINGS  ###
@@ -55,9 +56,19 @@ OPENAI_VOICE = "nova"
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 
 ### HOTKEYS ###
-CANCEL_HOTKEY = 'ctrl + alt + x'
-CLEAR_HISTORY_HOTKEY = 'ctrl + alt + f12'
-RECORD_HOTKEY = 'ctrl + shift + space'
+if sys.platform == "darwin":  # macOS  Note that I havent tested always reddy on mac yet but I believe this should work
+    CANCEL_HOTKEY = '<cmd>+<alt>+x'
+    CLEAR_HISTORY_HOTKEY = '<cmd>+<alt>+c'
+    RECORD_HOTKEY = '<cmd>+<alt>+r'
+elif sys.platform.startswith("linux"):  # Linux the hotkey lib we are using on linux does not allow you to use space in hotkeys, so we need different hotkeys for linux
+    CANCEL_HOTKEY = '<ctrl>+<alt>+x'
+    CLEAR_HISTORY_HOTKEY = '<ctrl>+<alt>+c'
+    RECORD_HOTKEY = '<ctrl>+<alt>+r'
+else:  # Default (Windows)
+    CANCEL_HOTKEY = 'ctrl + alt + x'
+    CLEAR_HISTORY_HOTKEY = 'ctrl + alt + f12' 
+    RECORD_HOTKEY = 'ctrl + shift + space'
+
 
 ### MISC ###
 HOTKEY_DELAY = 0.5
