@@ -100,7 +100,6 @@ class TTS:
                 self.temp_files.append(temp_output_file)
     
                 self.audio_queue.put((temp_output_file, sentence))
-                # Atom: potentially needed time.sleep(0.5)
         except Exception as e:
             print(f"Error during TTS processing: {e}")
     
@@ -151,7 +150,6 @@ class TTS:
         try:
             os.remove(output_file)
             command = f'echo "{text_to_speak}" | ./{exe_path} --model {onnx_file} --sample-rate ${config.FS} -c {json_file} --output_file {output_file}'
-            # [Atom] Generate file
             self.execute_cmd(command)
             return "success"
         except subprocess.CalledProcessError as e:
@@ -248,7 +246,6 @@ class TTS:
 
             try:
                 # Play the audio
-                # [Atom] resample data
                 resampled = resample(data, fs, config.FS)
                 sd.play(resampled, config.FS, device=config.OUT_DEVICE)
             except Exception as e:
@@ -265,10 +262,9 @@ class TTS:
                     break
 
             self.stopping_flag = False
-            print("[Atom] Playing audio, sd.wait() finished")
+
             # Mark the task as done in the queue
             self.audio_queue.task_done()
-            print("[Atom] Playing audio, audio_queue.task_done()")
 
             try:
                 # If the audio file exists, remove it
@@ -296,13 +292,9 @@ class TTS:
         """
         Stop the TTS process and clean up any temporary files.
         """
-        # Print a message indicating that the TTS process is stopping
-        print("[Atom] Stopping TTS")
-
         # Stop any currently playing audio
         self.stopping_flag = True
 
-        print("[Atom] Stopped TTS")
         # Attempt to clear the queue immediately to prevent any further processing
         while not self.audio_queue.empty():
             try:

@@ -207,6 +207,6 @@ def get_device_name(keyword):
         if not match:
             continue
 
-        print(f"[Atom] Using device: {device}")
+        print(f"Using device: {device}")
         # Return the part before ", ALSA" if found
         return device["name"]
