@@ -257,7 +257,7 @@ class Recorder:
         """
         Wrapper for the hotkey handler to include double tap detection for clipboard usage.
         """
-
+        self.tts.pause_voice(False)
         use_clipboard = self.was_double_tapped()
         print("use_clipboard:", use_clipboard)
         if use_clipboard:
