@@ -117,6 +117,7 @@ class Recorder:
         """Cancel the current TTS """
 
         print("Stopping text-to-speech...")
+        self.tts.set_asleep(False)
         self.tts.stop() 
         print("Text-to-speech cancelled.")
         
@@ -147,6 +148,9 @@ class Recorder:
                     play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME)
                     played_cancel_sfx 
             self.cancel_tts()
+
+    def trigger_asleep(self):
+        self.tts.set_asleep()
 
 
     def handle_response(self, transcript):
@@ -273,6 +277,7 @@ class Recorder:
         """Run the recorder, setting up hotkeys and entering the main loop."""
         keyboard.add_hotkey(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
         keyboard.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
+        keyboard.add_hotkey(config.SLEEP_HOTKEY, self.trigger_asleep)
         keyboard.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
         print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to give the AI access to read your clipboard.\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 

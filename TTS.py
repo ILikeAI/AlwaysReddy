@@ -35,6 +35,7 @@ class TTS:
         self.completion_client = None
         self.running_tts = False
         self.last_sentence_spoken = ""
+        self.is_asleep = False
         if self.service == "openai":
             self.OpenAIClient = OpenAI()
 
@@ -43,6 +44,14 @@ class TTS:
         for file in os.listdir(config.AUDIO_FILE_DIR):
             if file.endswith(".wav"):
                 os.remove(os.path.join(config.AUDIO_FILE_DIR,file))
+
+
+    def set_asleep(self, value = None):
+        if value is None:
+            self.is_asleep = not self.is_asleep
+        else:
+            self.is_asleep = value
+        print(f"Trigger sleep: {self.is_asleep}")
 
     def wait(self):
         """
@@ -91,6 +100,10 @@ class TTS:
             # If the TTS was successful, add the output file to the queue
             if result == "success":
                 print(f"Running TTS: {sentence}")
+
+                # This enables TTS in case it was disabled during previous cycle (ended a conversation with asleep enabled).
+                if self.is_asleep:
+                    self.set_asleep(False)
                 
                 # If the stop flag is set, return early
                 if self.parent_client.stop_response:
@@ -244,10 +257,14 @@ class TTS:
                 print(f"Error reading file {file_path}: {e}")
                 continue
 
+            while self.is_asleep:
+                time.sleep(1)
+
             try:
                 # Play the audio
-                resampled = resample(data, fs, config.FS)
-                sd.play(resampled, config.FS, device=config.OUT_DEVICE)
+                if not self.stopping_flag:
+                    resampled = resample(data, fs, config.FS)
+                    sd.play(resampled, config.FS, device=config.OUT_DEVICE)
             except Exception as e:
                 print(f"Error playing audio: {e}")
                 continue
