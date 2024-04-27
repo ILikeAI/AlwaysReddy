@@ -1,4 +1,4 @@
-## MAKE A COPY OF THIS CALLED config.py
+## MAKE A COPY OF THIS import utilsALLED config.py
 import utils
     
 
@@ -9,7 +9,7 @@ import utils
 
 ## OLLAMA COMPLETIONS API EXAMPLE ##
 COMPLETIONS_API = "ollama"
-COMPLETION_MODEL = "llama3:8b-instruct-fp16"
+COMPLETION_MODEL = "llama3:8b-instruct-fp16" # "TherapyLlama-8B-V1-Q5_K_M" # "llama3:8b-instruct-fp16"
 OLLAMA_API_BASE_URL = "http://localhost:11434" #This should be the defualt
 
 ## LM Studio COMPLETIONS API EXAMPLE ##
@@ -59,6 +59,8 @@ ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 CANCEL_HOTKEY = 'shift + 1'
 CLEAR_HISTORY_HOTKEY = 'shift + 5'
 RECORD_HOTKEY = 'ctrl + shift + space'
+SLEEP_HOTKEY = 'shift + 2'
+READ_ALOUD = "shift + 3"
 
 ### MISC ###
 HOTKEY_DELAY = 0.5
@@ -73,7 +75,7 @@ BASE_VOLUME = 1
 FS = 48000 # 48000 #44100
 # see sounddevice.query_devices()
 
-OUT_DEVICE = "pipewire" # utils.get_device_name('pipewire')# "HD-Audio Generic: ALC1220 Analog (hw:3,0)"# 6 # 6 HD-Audio Generic: ALC1220 Analog (hw:2,0), ALSA (2 in, 2 out)
+OUT_DEVICE = "pipewire"# utils.get_device_name('pipewire')# "HD-Audio Generic: ALC1220 Analog (hw:3,0)"# 6 # 6 HD-Audio Generic: ALC1220 Analog (hw:2,0), ALSA (2 in, 2 out)
 IN_DEVICE = utils.get_device_name('KLIM') # "KLIM Talk: USB Audio (hw:0,0)" # 8 KLIM Talk: USB Audio (hw:3,0), ALSA (1 in, 0 out)
 START_SOUND_VOLUME = 0.000003
 END_SOUND_VOLUME = 0.000003

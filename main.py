@@ -9,6 +9,7 @@ from soundfx import play_sound_FX
 from utils import read_clipboard, count_tokens, trim_messages
 import config
 from prompt import prompts
+import os
 
 class Recorder:
     def __init__(self):
@@ -273,11 +274,18 @@ class Recorder:
             self.timer = threading.Timer(0.2, self.start_main_thread)
             self.timer.start()
 
+    def read_aloud(self):
+        clipboard_text = read_clipboard()
+        sentences = clipboard_text.split(".")
+        for sentence in sentences:
+            self.tts.run_tts(sentence)
+
     def run(self):
         """Run the recorder, setting up hotkeys and entering the main loop."""
         keyboard.add_hotkey(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
         keyboard.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
         keyboard.add_hotkey(config.SLEEP_HOTKEY, self.pause_voice)
+        keyboard.add_hotkey(config.READ_ALOUD, self.read_aloud)
         keyboard.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
         print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to give the AI access to read your clipboard.\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 
