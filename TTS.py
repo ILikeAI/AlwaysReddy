@@ -35,7 +35,7 @@ class TTS:
         self.completion_client = None
         self.running_tts = False
         self.last_sentence_spoken = ""
-        self.is_asleep = False
+        self.is_paused = False
         if self.service == "openai":
             self.OpenAIClient = OpenAI()
 
@@ -46,12 +46,12 @@ class TTS:
                 os.remove(os.path.join(config.AUDIO_FILE_DIR,file))
 
 
-    def set_asleep(self, value = None):
+    def pause_voice(self, value = None):
         if value is None:
-            self.is_asleep = not self.is_asleep
+            self.is_paused = not self.is_paused
         else:
-            self.is_asleep = value
-        print(f"Trigger sleep: {self.is_asleep}")
+            self.is_paused = value
+        print(f"Trigger sleep: {self.is_paused}")
 
     def wait(self):
         """
@@ -102,8 +102,8 @@ class TTS:
                 print(f"Running TTS: {sentence}")
 
                 # This enables TTS in case it was disabled during previous cycle (ended a conversation with asleep enabled).
-                if self.is_asleep:
-                    self.set_asleep(False)
+                if self.is_paused:
+                    self.pause_voice(False)
                 
                 # If the stop flag is set, return early
                 if self.parent_client.stop_response:
@@ -257,7 +257,7 @@ class TTS:
                 print(f"Error reading file {file_path}: {e}")
                 continue
 
-            while self.is_asleep:
+            while self.is_paused:
                 time.sleep(1)
 
             try:
