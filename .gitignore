@@ -11,3 +11,4 @@ piper_voices/*
 !piper_voices/en_US-amy-medium.onnx
 test.ipynb
 config.py
+/venv
