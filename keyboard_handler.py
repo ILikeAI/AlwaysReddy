@@ -6,8 +6,8 @@ else:
     import keyboard
 
 class KeyboardHandler:
-    def __init__(self):
-        pass
+    def __init__(self, verbose=False):
+        self.verbose = verbose
 
     def add_hotkey(self, hotkey, callback):
         raise NotImplementedError("add_hotkey method must be implemented in subclasses")
@@ -24,13 +24,18 @@ class KeyboardLibraryHandler(KeyboardHandler):
             while True:
                 keyboard.wait()
         except KeyboardInterrupt:
-            print("Recorder stopped by user.")
+            if self.verbose:
+                print("Recorder stopped by user.")
         except Exception as e:
-            print(f"An error occurred: {e}")
+            if self.verbose:
+                import traceback
+                traceback.print_exc()
+            else:
+                print(f"An error occurred: {e}")
 
 class PynputHandler(KeyboardHandler):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, verbose=False):
+        super().__init__(verbose)
         self.hotkey_map = {}
 
     def add_hotkey(self, hotkey, callback):
@@ -41,12 +46,17 @@ class PynputHandler(KeyboardHandler):
             try:
                 hotkey_listener.join()
             except KeyboardInterrupt:
-                print("Recorder stopped by user.")
+                if self.verbose:
+                    print("Recorder stopped by user.")
             except Exception as e:
-                print(f"An error occurred: {e}")
+                if self.verbose:
+                    import traceback
+                    traceback.print_exc()
+                else:
+                    print(f"An error occurred: {e}")
 
-def get_keyboard_handler():
+def get_keyboard_handler(verbose=False):
     if sys.platform.startswith('linux'):
-        return PynputHandler()
+        return PynputHandler(verbose)
     else:
-        return KeyboardLibraryHandler()
+        return KeyboardLibraryHandler(verbose)

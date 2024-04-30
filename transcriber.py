@@ -7,18 +7,19 @@ import config
 load_dotenv()
 
 class TranscriptionManager:
-    def __init__(self):
+    def __init__(self, verbose=False):
         self.client = None
+        self.verbose = verbose
         self.setup_client()
 
     def setup_client(self):
         """Instantiates the appropriate transcription client based on configuration file."""
         if config.TRANSCRIPTION_API == "openai":
             from transcription_apis.openai_api import OpenAIClient
-            self.client = OpenAIClient()
+            self.client = OpenAIClient(verbose=self.verbose)
         elif config.TRANSCRIPTION_API == "whisperx":
             from transcription_apis.whisperx_api import WhisperXClient
-            self.client = WhisperXClient()
+            self.client = WhisperXClient(verbose=self.verbose)
         else:
             raise ValueError("Unsupported transcription API service configured")
 
@@ -39,10 +40,21 @@ class TranscriptionManager:
         try:
             full_path = os.path.join(AUDIO_FILE_DIR, file_path)
             transcript = self.client.transcribe_audio_file(full_path)
+            
             # Delete the audio file
             os.remove(full_path)
+            
+            if self.verbose:
+                print(f"Transcription successful for file: {file_path}")
+            
             return transcript
+        
         except FileNotFoundError as e:
+            if self.verbose:
+                print(f"The audio file {file_path} was not found.")
             raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
+        
         except Exception as e:
+            if self.verbose:
+                print(f"An error occurred during the transcription process: {e}")
             raise Exception(f"An error occurred during the transcription process: {e}") from e

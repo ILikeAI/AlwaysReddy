@@ -1,5 +1,6 @@
 import sys
 ## MAKE A COPY OF THIS CALLED config.py
+VERBOSE = False
 
 ### COMPLETIONS API SETTINGS  ###
 # Just uncomment the ONE api you want to use
@@ -35,32 +36,29 @@ COMPLETION_MODEL = "gpt-4-0125-preview"
 ### Transcription API Settings ###
 
 ## Whisper X local transcription API EXAMPLE ##
-# TRANSCRIPTION_API = "whisperx" #local transcription!
-# WHISPER_MODEL = "tiny" # (tiny, base, small, medium, large) Turn this up to "base" if the transcription is too bad
-# TRANSCRIPTION_LANGUAGE = "en" 
-# WHISPER_BATCH_SIZE = 16
-# WHISPER_MODEL_PATH = None # you can point this to an existing model or leave it set to none
+TRANSCRIPTION_API = "whisperx" #local transcription!
+WHISPER_MODEL = "tiny" # (tiny, base, small, medium, large) Turn this up to "base" if the transcription is too bad
+TRANSCRIPTION_LANGUAGE = "en" 
+WHISPER_BATCH_SIZE = 16
+WHISPER_MODEL_PATH = None # you can point this to an existing model or leave it set to none
 
-### Transcription API Settings ###
-TRANSCRIPTION_API = "openai" # this will use the hosted openai api
+## Transcription API Settings ###
+# TRANSCRIPTION_API = "openai" # this will use the hosted openai api
 
 
 
 ### TTS SETTINGS ###
+TTS_ENGINE="openai" # 'piper' or 'openai' piper is local and fast but openai is better sounding
+
 PIPER_VOICE_JSON="en_en_US_amy_medium_en_US-amy-medium.onnx.json" #These are located in the piper_voices folder
 PIPER_VOICE_ONNX="en_US-amy-medium.onnx"
-TTS_ENGINE="openai" # 'piper' or 'openai' piper is local and fast but openai is better sounding
 OPENAI_VOICE = "nova"
 
 ### PROMPTS ###
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 
 ### HOTKEYS ###
-if sys.platform == "darwin":  # macOS  Note that I havent tested always reddy on mac yet but I believe this should work
-    CANCEL_HOTKEY = '<cmd>+<alt>+x'
-    CLEAR_HISTORY_HOTKEY = '<cmd>+<alt>+c'
-    RECORD_HOTKEY = '<cmd>+<alt>+r'
-elif sys.platform.startswith("linux"):  # Linux the hotkey lib we are using on linux does not allow you to use space in hotkeys, so we need different hotkeys for linux
+if sys.platform.startswith("linux"):  # Linux the hotkey lib we are using on linux does not allow you to use space in hotkeys, so we need different hotkeys for linux
     CANCEL_HOTKEY = '<ctrl>+<alt>+x'
     CLEAR_HISTORY_HOTKEY = '<ctrl>+<alt>+c'
     RECORD_HOTKEY = '<ctrl>+<alt>+r'
@@ -86,3 +84,4 @@ END_SOUND_VOLUME = 0.000003
 CANCEL_SOUND_VOLUME = 0.000009
 MIN_RECORDING_DURATION = 0.3
 MAX_RECORDING_DURATION= 600 # If you record for more than 10 minutes, the recording will stop automatically
+

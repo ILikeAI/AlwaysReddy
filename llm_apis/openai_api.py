@@ -3,10 +3,10 @@ import os
 
 class OpenAIClient:
     """Client for interacting with OpenAI API."""
-    def __init__(self):
+    def __init__(self, verbose=False):
         self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-        
-    
+        self.verbose = verbose
+
     def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
         """Get completion from OpenAI API.
 
@@ -28,14 +28,14 @@ class OpenAIClient:
                 max_tokens=max_tokens,
                 stream=True
             )
-
             for chunk in stream:
-                
                 content = chunk.choices[0].delta.content
-                
                 if content != None:
                     yield content
-
-
         except Exception as e:
+            if self.verbose:
+                import traceback
+                traceback.print_exc()
+            else:
+                print(f"An error occurred streaming completion from OpenAI: {e}")
             raise RuntimeError(f"An error occurred streaming completion from OpenAI: {e}")

@@ -3,9 +3,9 @@ import os
 from pydub import AudioSegment
 
 class OpenAIClient:
-    def __init__(self):
-        
+    def __init__(self, verbose=False):
         self.client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        self.verbose = verbose
 
     def transcribe_audio_file(self, file_path):
         audio = AudioSegment.from_file(file_path)
@@ -22,8 +22,8 @@ class OpenAIClient:
         if file_size <= 24 * 1024 * 1024:
             with open(file_path, "rb") as audio_file:
                 transcript = self.client.audio.transcriptions.create(
-                    model="whisper-1", 
-                    file=audio_file, 
+                    model="whisper-1",
+                    file=audio_file,
                     response_format="text"
                 )
         else:
@@ -42,5 +42,7 @@ class OpenAIClient:
                 # Delete the temporary chunk file
                 os.remove(temp_chunk_path)
 
+        if self.verbose:
+            print(f"Transcription successful for file: {file_path}")
+
         return transcript
-    
