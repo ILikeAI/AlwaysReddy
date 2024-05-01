@@ -8,3 +8,5 @@ python-dotenv
 sounddevice
 soundfile
 tiktoken
+customtkinter
+tkinter
