@@ -1,6 +1,7 @@
-import sys
+
 ## MAKE A COPY OF THIS CALLED config.py
-VERBOSE = False
+VERBOSE = True
+
 
 ### COMPLETIONS API SETTINGS  ###
 # Just uncomment the ONE api you want to use
@@ -21,16 +22,16 @@ VERBOSE = False
 ### Hosted APIS ###
 
 ## ANTHROPIC COMPLETIONS API EXAMPLE ##
-# COMPLETIONS_API = "anthropic" 
-# COMPLETION_MODEL = "claude-3-sonnet-20240229" 
+COMPLETIONS_API = "anthropic" 
+COMPLETION_MODEL = "claude-3-sonnet-20240229" 
 
 ## TOGETHER COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "together"
 # COMPLETION_MODEL = "meta-llama/Llama-3-8b-chat-hf" 
 
 ## OPENAI COMPLETIONS API EXAMPLE ##
-COMPLETIONS_API = "openai"
-COMPLETION_MODEL = "gpt-4-0125-preview"
+# COMPLETIONS_API = "openai"
+# COMPLETION_MODEL = "gpt-4-0125-preview"
 
 
 ### Transcription API Settings ###
@@ -48,24 +49,21 @@ WHISPER_MODEL_PATH = None # you can point this to an existing model or leave it 
 
 
 ### TTS SETTINGS ###
-TTS_ENGINE="openai" # 'piper' or 'openai' piper is local and fast but openai is better sounding
-
 PIPER_VOICE_JSON="en_en_US_amy_medium_en_US-amy-medium.onnx.json" #These are located in the piper_voices folder
 PIPER_VOICE_ONNX="en_US-amy-medium.onnx"
+TTS_ENGINE="piper" # 'piper' or 'openai' piper is local and fast but openai is better sounding
 OPENAI_VOICE = "nova"
 
 ### PROMPTS ###
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 
 ### HOTKEYS ###
-if sys.platform.startswith("linux"):  # Linux the hotkey lib we are using on linux does not allow you to use space in hotkeys, so we need different hotkeys for linux
-    CANCEL_HOTKEY = '<ctrl>+<alt>+x'
-    CLEAR_HISTORY_HOTKEY = '<ctrl>+<alt>+c'
-    RECORD_HOTKEY = '<ctrl>+<alt>+r'
-else:  # Default (Windows)
-    CANCEL_HOTKEY = 'ctrl + alt + x'
-    CLEAR_HISTORY_HOTKEY = 'ctrl + alt + f12' 
-    RECORD_HOTKEY = 'ctrl + shift + space'
+CANCEL_HOTKEY = 'c+ctrl+shift'
+CLEAR_HISTORY_HOTKEY = 'ctrl+shift+x'
+RECORD_HOTKEY = 'ctrl+r'
+
+## Linux settings
+LINUX_NO_ROOT = True #If you are on linux and do not want to use root set this to True, use pynput which requires no root but does not allow some keys such as Space and Tab
 
 
 ### MISC ###
