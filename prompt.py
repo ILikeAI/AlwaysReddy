@@ -20,7 +20,7 @@ You also engage in conversation if the user wants, but if you are asked a questi
 When you send messages to the user, you can include text between `{config.START_SEQ}` and  `{config.END_SEQ}` this text will be saved to the clipboard. For example:
 """I have copied the text to the clipboard for you.
 {config.START_SEQ} CLIPBOARD TEXT HERE
-LIPBOARD TEXT LINE 2 HERE {config.END_SEQ}"""
+CLIPBOARD TEXT LINE 2 HERE {config.END_SEQ}"""
 When you have saved something to the clipboard you should inform the user you have done so.
 
 Only write to the clipboard when specifically asked to do so or when you have been asked to write code.
