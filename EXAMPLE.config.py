@@ -63,7 +63,7 @@ CLEAR_HISTORY_HOTKEY = 'ctrl+shift+x'
 RECORD_HOTKEY = 'ctrl+shift+space'
 
 ## Linux settings
-LINUX_NO_ROOT = True #If you are on linux and do not want to use root set this to True, use pynput which requires no root but does not allow some keys such as Space and Tab
+LINUX_NO_ROOT = False #If you are on linux and do not want to use root set this to True, use pynput which requires no root but does not allow some keys such as Space and Tab
 
 
 ### MISC ###
