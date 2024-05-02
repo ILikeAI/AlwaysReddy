@@ -58,9 +58,9 @@ OPENAI_VOICE = "nova"
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 
 ### HOTKEYS ###
-CANCEL_HOTKEY = 'c+ctrl+shift'
+CANCEL_HOTKEY = 'alt+ctrl+x'
 CLEAR_HISTORY_HOTKEY = 'ctrl+shift+x'
-RECORD_HOTKEY = 'ctrl+r'
+RECORD_HOTKEY = 'ctrl+shift+space'
 
 ## Linux settings
 LINUX_NO_ROOT = True #If you are on linux and do not want to use root set this to True, use pynput which requires no root but does not allow some keys such as Space and Tab
