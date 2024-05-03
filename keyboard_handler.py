@@ -28,6 +28,11 @@ def convert_to_pynput_format(hotkey):
             converted.append(part)
     return '+'.join(converted)
 
+def check_space_usage(hotkey):
+    """Check if 'space' is used in the hotkey and print a warning if so."""
+    if 'space' in hotkey.split('+'):
+        print("\nWARNING: 'space' key does not work on linux systems with pynput library. "
+              "To set a new hotkey run the 'hotkey_config_GUI.py' script.\n")
 
 class KeyboardHandler:
     def __init__(self, verbose=False):
@@ -65,6 +70,7 @@ class PynputHandler(KeyboardHandler):
     def add_hotkey(self, hotkey, callback):
         # Convert hotkey to pynput format
         pynput_hotkey = convert_to_pynput_format(hotkey)
+        check_space_usage(hotkey)  # Check for space usage
         self.hotkey_map[pynput_hotkey] = callback
 
     def start(self):
