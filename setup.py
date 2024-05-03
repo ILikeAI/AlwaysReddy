@@ -35,14 +35,18 @@ def create_run_files():
     if is_linux():
         with open('run_AlwaysReddy.sh', 'w') as f:
             f.write('#!/bin/bash\n')
-            f.write('source venv/bin/activate\n')
+            f.write('if [[ -z "$VIRTUAL_ENV" ]]; then\n')
+            f.write('    source venv/bin/activate\n')
+            f.write('fi\n')
             f.write('python3 main.py\n')
-        os.chmod('run_noroot.sh', 0o755)
+        os.chmod('run_AlwaysReddy.sh', 0o755)
         print("Created run files")
     else:
         with open('run_AlwaysReddy.bat', 'w') as f:
             f.write('@echo off\n')
-            f.write('venv\\Scripts\\activate\n')
+            f.write('if not defined VIRTUAL_ENV (\n')
+            f.write('    venv\\Scripts\\activate\n')
+            f.write(')\n')
             f.write('python main.py\n')
         print("Created run file")
 
