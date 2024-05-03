@@ -10,6 +10,7 @@ test.ipynb
 config.py
 /venv
 test.py
+.DS_Store
 
 # Ignore everything in the piper_tts directory
 /piper_tts/*
