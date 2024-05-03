@@ -44,9 +44,6 @@ class TranscriptionManager:
             # Delete the audio file
             os.remove(full_path)
             
-            if self.verbose:
-                print(f"Transcription successful for file: {file_path}")
-            
             return transcript
         
         except FileNotFoundError as e:

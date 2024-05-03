@@ -31,6 +31,22 @@ def copy_file(src, dest):
     shutil.copy(src, dest)
     print(f"Copied {src} to {dest}")
 
+def create_run_files():
+    if is_linux():
+        with open('run_AlwaysReddy.sh', 'w') as f:
+            f.write('#!/bin/bash\n')
+            f.write('source venv/bin/activate\n')
+            f.write('python3 main.py\n')
+        os.chmod('run_noroot.sh', 0o755)
+        print("Created run files")
+    else:
+        with open('run_AlwaysReddy.bat', 'w') as f:
+            f.write('@echo off\n')
+            f.write('venv\\Scripts\\activate\n')
+            f.write('python main.py\n')
+        print("Created run file")
+
+
 def main():
     # Check if the system is Linux and install xclip if necessary
     if is_linux():
@@ -47,6 +63,9 @@ def main():
     install_piper = input("Do you want to install Piper local TTS? (y/n): ")
     if install_piper.lower() == 'y':
         subprocess.run(['python', 'scripts/installpipertts.py'])
+
+    create_run_files()
+
 
 if __name__ == "__main__":
     main()
