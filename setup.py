@@ -32,7 +32,7 @@ def main():
         install_xclip()
 
     # Copy config.py.example to config.py
-    copy_file('config.py.EXAMPLE', 'config.py')
+    copy_file('EXAMPLE.config', 'config.py')
 
     # Copy .env.example to .env
     copy_file('.env.example', '.env')
