@@ -19,7 +19,10 @@ def copy_file(src, dest):
     If the destination file already exists, it prompts the user for confirmation to overwrite.
     """
     if os.path.exists(dest):
-        should_overwrite = input(f"{dest} already exists. Do you want to overwrite it? (y/n): ")
+        if dest == "config.py":
+            should_overwrite = input(f"{dest} already exists. Do you want to overwrite it? (y/n): ")
+        else:
+            should_overwrite = input(f"{dest} already exists. Do you want to overwrite it? This may be required after an update as new contents are added to the config file often.(y/n): ")
         if should_overwrite.lower() != 'y':
             print(f"Skipping {dest}")
             return
