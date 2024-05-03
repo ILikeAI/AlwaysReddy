@@ -1,5 +1,8 @@
 # Welcome to AlwaysReddy 🔊
-Hey, I'm Josh, the creator of AlwaysReddy. I am still a noob when it comes to programming and I'm really trying to develop my skills over the next year, I'm treating this project as an attempt to better develop my skills, with that in mind I would really appreciate it if you could point out issues and bad practices in my code (of which I'm sure there will be plenty). I would also appreciate if you would make your own improvements to the project so I can learn from your changes. Twitter: https://twitter.com/MindofMachine1
+Hey, I'm Josh, the creator of AlwaysReddy. I am still a little bit of a noob when it comes to programming and I'm really trying to develop my skills over the next year, I'm treating this project as an attempt to better develop my skills, with that in mind I would really appreciate it if you could point out issues and bad practices in my code (of which I'm sure there will be plenty). I would also appreciate if you would make your own improvements to the project so I can learn from your changes. Twitter: https://twitter.com/MindofMachine1
+
+If you think this project is cool and you want to say thanks, feel free to buy me a coffee if you can afford it. I love coffe...
+
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/ilikeai)
 
 
@@ -8,6 +11,7 @@ Hey, I'm Josh, the creator of AlwaysReddy. I am still a noob when it comes to pr
 ## Meet AlwaysReddy 
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
+It's like having voice ChatGPT running on your computer at all times, you just press a hotkey and it will listen to any questions you have, no need to swap windows or tabs, and if you want to give it context of some extra text, just copy the text and double tap the hotkey! 
 Join the discord: https://discord.gg/v3Hb9za9B4
 
 **Here is a demo video of me using it with Llama3** https://www.reddit.com/r/LocalLLaMA/comments/1ca510h/voice_chatting_with_llama_3_8b/
@@ -23,10 +27,12 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - OpenAI
 - Anthropic
 - TogetherAI
-- LM Studio (local) Guide: https://youtu.be/3aXDOCibJV0?si=2LTMmaaFbBiTFcnT
-- Ollama (local) Guide: https://youtu.be/BMYwT58rtxw?si=LHTTm85XFEJ5bMUD
+- LM Studio (local) - [Setup Guide](https://youtu.be/3aXDOCibJV0?si=2LTMmaaFbBiTFcnT)
+- Ollama (local) - [Setup Guide](https://youtu.be/BMYwT58rtxw?si=LHTTm85XFEJ5bMUD)
 
-See how to swap models below
+## Supported TTS systems:
+- Piper TTS (local and fast) [See how to change voice model](#how-to-add-new-voices-for-piper-tts)
+- OpenAI TTS API
 
 ## Use cases:
 I often use AlwaysReddy for the following things:
@@ -53,6 +59,7 @@ Here's an updated version of the setup sections for Linux and Windows:
 If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
 
 ### Setup for Linux:
+Linux support is super experimental but its working for me, contact me if you have any trouble.
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
 2. cd into the directory `cd AlwaysReddy`
@@ -67,41 +74,17 @@ Please note that on Linux, you need to run AlwaysReddy with root permissions as 
 
 To ensure that the script uses the modules installed in your virtual environment when running with `sudo`, use `sudo venv/bin/python` instead of `sudo python3`. This explicitly points to the Python executable within your virtual environment.
 
-If you prefer not to run with root permissions, you can set `LINUX_NO_ROOT = True` in the `config.py` file. But, this means you cannot use the `SPACE` key in your hotkeys. In this case, after setting `LINUX_NO_ROOT = True`, run `python3 hotkey_config_GUI.py` to set up new hotkeys that don't include the `SPACE` key. -- let me know if this is a pain in the butt, if you guys are all wanting to use it without root I will make that the default.
-
 If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
 
+If you prefer not to run it with root permissions, you can set `LINUX_NO_ROOT = True` in the `config.py` file. But, this means you cannot use the `SPACE` key in your hotkeys. In this case, after setting `LINUX_NO_ROOT = True`, run `python3 hotkey_config_GUI.py` to set up new hotkeys that don't include the `SPACE` key. -- let me know if this is a pain in the butt, if you guys are all wanting to use it without root I will make that the default. 
 
-<details>
-<summary>Known issues</summary>
-
-- Sometimes it will stop recording shortly after it starts recording without the hotkey being pressed. I need to investigate...
-- Some users are reporting compatibility issues with Mac and Linux, but some have managed to get it working. We're working on improving cross-platform compatibility. 
-</details>
-
-### Linux Support and Considerations
-
-AlwaysReddy now has improved support for Linux users. However, there are a few things to keep in mind:
-
-1. **Running as Root**: Some Linux users, particularly those using the Wayland display protocol, may need to run AlwaysReddy with root privileges to allow the system to capture global hotkeys when the application is running in the background. To do this, use the following command:
-
-   ```
-   sudo python main.py
-   ```
-
-   Please note that running the application with root privileges should be done with caution and understanding of the potential security implications.
-
-2. **Updated Hotkeys**: For Linux users, the default hotkeys have been updated to avoid conflicts with system shortcuts. The new default hotkeys are:
-
-   - Start/Stop Recording: `Ctrl + Alt + R`
-   - Cancel Recording/TTS: `Ctrl + Alt + X`
-   - Clear Assistant's Memory: `Ctrl + Alt + C`
-
-   You can still customize these hotkeys in the `config.py` file if desired.
-
-3. **Known Issues**: Some people are hitting sample rate issues with the existing sound FX, there are fixes for that on their way.
-
-If you hit any problems running AlwaysReddy on Linux, please let me know by opening an issue it hitting me up on discord.
+### How to add new voices for Piper TTS:
+1. Go to https://huggingface.co/rhasspy/piper-voices/tree/main and navigate to your desired language.
+2. Click on the name of the voice you want to try. There are different sized models available; I suggest using the medium size as it's pretty fast but still sounds great (for a locally run model).
+3. Listen to the sample in the "sample" folder to ensure you like the voice.
+4. Download the `.onnx` and `.json` files for the chosen voice.
+5. Create a new folder in the `piper_tts\voices` directory and give it a descriptive name. You will need to enter the name of this folder into the `config.py` file. For example: `PIPER_VOICE = "default_female_voice"`.
+6. Move the two downloaded files (`.onnx` and `.json`) into your newly created folder within the `piper_tts\voices` directory.
 
 ### How to use local whisper transcription:
 1. Open the `config.py` file.
