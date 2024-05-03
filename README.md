@@ -46,10 +46,11 @@ Here is a video guide of the setup process: https://youtu.be/14wXj2ypLGU?si=zp13
    - On Windows: `venv\Scripts\activate`
    - On macOS/Linux: `source venv/bin/activate`
 5. Install reqs with `pip install -r requirements.txt` also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
-6. Make a copy of the `config.py.example` file and rename the copy to `config.py`
-7. Make a copy of the `.env.example` file and rename it as `.env` and place your OpenAI API key in the file. 
+6. Run the setup script with `python setup.py`
+7. Open the `config.py` and `.env` files and update them with your settings and API key.
 8. Run the assistant! `python main.py`
-9. If you need ffmpeg installed run the `ffmpegsetup.bat` script as administrator in the scripts folder. If you have troubles with this, try the steps steps here: https://github.com/openai/whisper#setup
+
+If you get an error saying you need to install ffmpeg, try the steps steps here: https://github.com/openai/whisper#setup
 
 <details>
 <summary>Known issues</summary>

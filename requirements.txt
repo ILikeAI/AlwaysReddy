@@ -10,3 +10,4 @@ sounddevice
 soundfile
 tiktoken
 tkinter
+requests
