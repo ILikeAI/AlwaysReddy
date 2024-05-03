@@ -57,14 +57,14 @@ OPENAI_VOICE = "nova"
 ### PROMPTS ###
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 
-### HOTKEYS ###
+### HOTKEYS ### TO SET NEW HOTKEYS run the hotkey_setup.py script
 CANCEL_HOTKEY = 'alt+ctrl+x'
 CLEAR_HISTORY_HOTKEY = 'ctrl+shift+x'
 RECORD_HOTKEY = 'ctrl+shift+space'
 
 ## Linux settings
 LINUX_NO_ROOT = False #If you are on linux and do not want to use root set this to True, use pynput which requires no root but does not allow some keys such as Space and Tab
-
+# if you set this to true you will need to run hotkey_config_GUI.py and set the hotkeys that do not use space or tab
 
 ### MISC ###
 HOTKEY_DELAY = 0.5

@@ -35,22 +35,40 @@ I often use AlwaysReddy for the following things:
 - Quick journal entries, I speedily list what I have done today and get it to write a journal entry to my clipboard before I shutdown the computer for the day.
 
 ### Setup: 
-Please Note that I have only tested on Windows so far, although some users have it running on linux.
+Here's an updated version of the setup sections for Linux and Windows:
 
-Here is a video guide of the setup process: https://youtu.be/14wXj2ypLGU?si=zp13P1Krkt0Vxflo
+### Setup for Windows:
 
-1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy` 
+1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
 2. cd into the directory `cd AlwaysReddy`
 3. Create a virtual environment with `python -m venv venv`
-4. Activate the virtual environment:
-   - On Windows: `venv\Scripts\activate`
-   - On macOS/Linux: `source venv/bin/activate`
-5. Install reqs with `pip install -r requirements.txt` also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
+4. Activate the virtual environment: `venv\Scripts\activate`
+5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
 6. Run the setup script with `python setup.py`
 7. Open the `config.py` and `.env` files and update them with your settings and API key.
-8. Run the assistant! `python main.py`
+8. Run the assistant with `python main.py`
 
-If you get an error saying you need to install ffmpeg, try the steps steps here: https://github.com/openai/whisper#setup
+If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
+
+### Setup for Linux:
+
+1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
+2. cd into the directory `cd AlwaysReddy`
+3. Create a virtual environment with `python3 -m venv venv`
+4. Activate the virtual environment: `source venv/bin/activate`
+5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
+6. Run the setup script with `sudo venv/bin/python setup.py`
+7. Open the `config.py` and `.env` files and update them with your settings and API key.
+8. Run the assistant with `sudo venv/bin/python main.py`
+
+Please note that on Linux, you need to run AlwaysReddy with root permissions as the keyboard library requires root access. This allows you to use the `SPACE` key in your hotkeys.
+
+To ensure that the script uses the modules installed in your virtual environment when running with `sudo`, use `sudo venv/bin/python` instead of `sudo python3`. This explicitly points to the Python executable within your virtual environment.
+
+If you prefer not to run with root permissions, you can set `LINUX_NO_ROOT = True` in the `config.py` file. But, this means you cannot use the `SPACE` key in your hotkeys. In this case, after setting `LINUX_NO_ROOT = True`, run `python3 hotkey_config_GUI.py` to set up new hotkeys that don't include the `SPACE` key. -- let me know if this is a pain in the butt, if you guys are all wanting to use it without root I will make that the default.
+
+If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
+
 
 <details>
 <summary>Known issues</summary>
