@@ -179,8 +179,8 @@ class AlwaysReddy:
             if count_tokens(self.messages) > config.MAX_TOKENS:
                 self.messages = trim_messages(self.messages, config.MAX_TOKENS)
 
-            if self.verbose:
-                print("Transcription:\n", transcript)
+
+            print("Transcription:\n", transcript)
 
             # Make sure the user hasn't cut off the response
             if self.stop_response:
@@ -215,8 +215,8 @@ class AlwaysReddy:
                     self.last_message_was_cut_off = True
 
             self.messages.append({"role": "assistant", "content": response})
-            if self.verbose:
-                print("Response:\n", response)
+
+            print("Response:\n", response)
 
         except Exception as e:
             if self.verbose:
