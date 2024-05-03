@@ -9,6 +9,7 @@ import queue
 import config
 import tempfile
 import utils
+import platform
 
 # Load .env file if present
 load_dotenv()
@@ -84,7 +85,8 @@ class TTS:
             if self.service == "openai":
                 result = self.TTS_openai(sentence, temp_output_file)
             else:
-                result = self.TTS_piper(sentence, temp_output_file)
+                voice_folder = config.PIPER_VOICE
+                result = self.TTS_piper(sentence, temp_output_file, voice_folder)
             
             # If the TTS was successful, add the output file to the queue
             if result == "success":
@@ -111,59 +113,71 @@ class TTS:
     
         # Set queuing flag to False
         self.queing = False
-
-
-    def TTS_piper(self, text_to_speak, output_file):
+        
+    def TTS_piper(self, text_to_speak, output_file, voice_folder):
         """
-        Generate speech from text using the Piper TTS engine and save it to an output file.
+        This function uses the Piper TTS engine to convert text to speech.
         
         Args:
             text_to_speak (str): The text to be converted to speech.
-            output_file (str): The file path where the audio will be saved.
+            output_file (str): The path where the output audio file will be saved.
+            voice_folder (str): The folder containing the voice files for the TTS engine.
+            
+        Returns:
+            str: "success" if the TTS process was successful, "failed" otherwise.
         """
-        # Sanitize the input text by removing unsuitable characters
+        # Sanitize the text to be spoken
         text_to_speak = utils.sanitize_text(text_to_speak)
-        
-        # If there is no text left after sanitization, return "failed"
+
+        # If there's no text left after sanitization, return "failed"
         if not text_to_speak.strip():
             if self.verbose:
                 print("No text to speak after sanitization.")
             return "failed"
 
-        # Get the file names for the voice model and configuration
-        json_file_name = config.PIPER_VOICE_JSON
-        onnx_file_name = config.PIPER_VOICE_ONNX
+        # Determine the operating system
+        operating_system = platform.system()
+        if operating_system == "Windows":
+            piper_binary = os.path.join("piper_tts", "piper.exe")
+        else:
+            piper_binary = os.path.join("piper_tts", "piper")
 
-        # Define the paths for the Piper executable and voices directory
-        exe_path = r"piper\piper.exe"
-        voices_dir = r"piper_voices"
+        # Construct the path to the voice files
+        voice_path = os.path.join("piper_tts", "voices", voice_folder)
 
-        # Ensure the voice model and configuration file names have the correct extensions
-        json_file_name += ".json" if not json_file_name.endswith(".json") else ""
-        onnx_file_name += ".onnx" if not onnx_file_name.endswith(".onnx") else ""
-
-        # Construct the full paths for the voice model and configuration files
-        onnx_file = os.path.join(voices_dir, onnx_file_name)
-        json_file = os.path.join(voices_dir, json_file_name)
-
-        # Check if the Piper executable and voice files exist
-        if not all(map(os.path.exists, [exe_path, onnx_file, json_file])):
+        # If the voice folder doesn't exist, return "failed"
+        if not os.path.exists(voice_path):
             if self.verbose:
-                print("One or more required files do not exist:")
-                for file_path in [exe_path, onnx_file, json_file]:
-                    if not os.path.exists(file_path):
-                        print(f"{file_path} does not exist")
+                print(f"Voice folder '{voice_folder}' does not exist.")
             return "failed"
-        
-        # Try to run the Piper TTS command
+
+        # Find the model and JSON files in the voice folder
+        files = os.listdir(voice_path)
+        model_path = next((os.path.join(voice_path, f) for f in files if f.endswith('.onnx')), None)
+        json_path = next((os.path.join(voice_path, f) for f in files if f.endswith('.json')), None)
+
+        # If either the model or JSON file is missing, return "failed"
+        if not model_path or not json_path:
+            if self.verbose:
+                print("Required voice files not found.")
+            return "failed"
+
         try:
-            command = f'echo {text_to_speak} | {exe_path} -m {onnx_file} -c {json_file} -f {output_file}'
-            subprocess.run(['cmd.exe', '/c', command], capture_output=True, text=True)
+            # Construct and execute the Piper TTS command
+            command = [
+                piper_binary,
+                "-m", model_path,
+                "-c", json_path,
+                "-f", output_file
+            ]
+            process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=(None if self.verbose else subprocess.DEVNULL), stderr=subprocess.STDOUT)
+            process.communicate(text_to_speak.encode("utf-8"))
+            process.wait()
             if self.verbose:
                 print(f"Piper TTS command executed successfully.")
             return "success"
         except subprocess.CalledProcessError as e:
-            # If the command fails, print the error and return "failed"
+            # If the command fails, print an error message and return "failed"
             if self.verbose:
                 print(f"Error running Piper TTS command: {e}")
             return "failed"

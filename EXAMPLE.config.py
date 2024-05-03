@@ -1,6 +1,6 @@
 
 ## MAKE A COPY OF THIS CALLED config.py
-VERBOSE = True
+VERBOSE = False
 
 
 ### COMPLETIONS API SETTINGS  ###
