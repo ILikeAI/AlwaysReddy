@@ -1,8 +1,23 @@
 import os
 import shutil
 import subprocess
+import sys
+
+def is_linux():
+    return sys.platform.startswith('linux')
+
+def install_xclip():
+    try:
+        subprocess.check_call(['sudo', 'apt-get', 'install', '-y', 'xclip'])
+    except subprocess.CalledProcessError as e:
+        print(f"Error installing xclip: {e}")
+        sys.exit(1)
 
 def copy_file(src, dest):
+    """
+    Copies a file from the source path to the destination path.
+    If the destination file already exists, it prompts the user for confirmation to overwrite.
+    """
     if os.path.exists(dest):
         should_overwrite = input(f"{dest} already exists. Do you want to overwrite it? (y/n): ")
         if should_overwrite.lower() != 'y':
@@ -12,15 +27,18 @@ def copy_file(src, dest):
     print(f"Copied {src} to {dest}")
 
 def main():
+    # Check if the system is Linux and install xclip if necessary
+    if is_linux():
+        install_xclip()
+
     # Copy config.py.example to config.py
     copy_file('config.py.example', 'config.py')
 
     # Copy .env.example to .env
     copy_file('.env.example', '.env')
-
     print("Please open .env and enter your OpenAI API key.")
 
-    # Ask if they want to install Piper TTS
+    # Ask if the user wants to install Piper TTS
     install_piper = input("Do you want to install Piper local TTS? (y/n): ")
     if install_piper.lower() == 'y':
         subprocess.run(['python', 'scripts/installpipertts.py'])
