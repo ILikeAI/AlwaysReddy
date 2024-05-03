@@ -42,19 +42,16 @@ I often use AlwaysReddy for the following things:
 - "From the comments in my clipboard what do the r/LocalLLaMA users think of X?"
 - Quick journal entries, I speedily list what I have done today and get it to write a journal entry to my clipboard before I shutdown the computer for the day.
 
-### Setup: 
-Here's an updated version of the setup sections for Linux and Windows:
-
 ### Setup for Windows:
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
 2. cd into the directory `cd AlwaysReddy`
-3. Create a virtual environment with `python -m venv venv`
+3. Create a virtual environment with `python -m venv venv`-- This step is imortant, make sure to name it exactly `venv`
 4. Activate the virtual environment: `venv\Scripts\activate`
 5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
-6. Run the setup script with `python setup.py`
+6. Run the setup script with `python setup.py`. This will also create a run file `run_AlwaysReddy.bat`.
 7. Open the `config.py` and `.env` files and update them with your settings and API key.
-8. Run the assistant with `python main.py`
+8. Run the assistant with `run_AlwaysReddy.bat` or `python main.py`. The run file will automatically activate the virtual environment.
 
 If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
 
@@ -63,20 +60,20 @@ Linux support is super experimental but its working for me, contact me if you ha
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
 2. cd into the directory `cd AlwaysReddy`
-3. Create a virtual environment with `python3 -m venv venv`
+3. Create a virtual environment with `python3 -m venv venv`-- This step is imortant, make sure to name it exactly `venv`
 4. Activate the virtual environment: `source venv/bin/activate`
 5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
-6. Run the setup script with `sudo venv/bin/python setup.py`
+6. Run the setup script with `python3 setup.py`. This will also create a run file `run_AlwaysReddy.sh`.
 7. Open the `config.py` and `.env` files and update them with your settings and API key.
-8. Run the assistant with `sudo venv/bin/python main.py`
+8. Run the assistant with `./run_AlwaysReddy.sh` or `python3 main.py`. The run file will automatically activate the virtual environment.
 
-Please note that on Linux, you need to run AlwaysReddy with root permissions as the keyboard library requires root access. This allows you to use the `SPACE` key in your hotkeys.
-
-To ensure that the script uses the modules installed in your virtual environment when running with `sudo`, use `sudo venv/bin/python` instead of `sudo python3`. This explicitly points to the Python executable within your virtual environment.
+Please note that on linux we are using the pynput library which does not let us use space or tab in our hotkeys.
 
 If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
 
-If you prefer not to run it with root permissions, you can set `LINUX_NO_ROOT = True` in the `config.py` file. But, this means you cannot use the `SPACE` key in your hotkeys. In this case, after setting `LINUX_NO_ROOT = True`, run `python3 hotkey_config_GUI.py` to set up new hotkeys that don't include the `SPACE` key. -- let me know if this is a pain in the butt, if you guys are all wanting to use it without root I will make that the default. 
+### Troubleshooting:
+If you have issues try deleting the venv folder and starting again.
+Set VERBOSE = True in the config to get more detailed logs and error traces
 
 ### How to add new voices for Piper TTS:
 1. Go to https://huggingface.co/rhasspy/piper-voices/tree/main and navigate to your desired language.
