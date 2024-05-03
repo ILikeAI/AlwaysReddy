@@ -1,7 +1,6 @@
 import os
 import soundfile as sf
 import sounddevice as sd
-from openai import OpenAI
 from dotenv import load_dotenv
 import subprocess
 import threading
@@ -34,8 +33,13 @@ class TTS:
         self.last_sentence_spoken = ""
         self.verbose = verbose
         if self.service == "openai":
-            self.OpenAIClient = OpenAI()
-
+            from TTS_apis.openai_api import OpenAITTSClient
+            self.tts_client = OpenAITTSClient(verbose=self.verbose)
+        elif self.service == "piper":
+            from TTS_apis.piper_api import PiperTTSClient
+            self.tts_client = PiperTTSClient(verbose=self.verbose)
+        else:
+            raise ValueError("Unsupported TTS engine configured")
 
         # Delete any leftover temp files if any
         for file in os.listdir(config.AUDIO_FILE_DIR):
@@ -47,7 +51,6 @@ class TTS:
         Wait for the play_audio_thread to join.
         """
         self.play_audio_thread.join()
-
 
     def run_tts(self, sentence, output_dir=config.AUDIO_FILE_DIR):
         """
@@ -82,11 +85,7 @@ class TTS:
             temp_file.close()
     
             # Run the TTS using the appropriate service
-            if self.service == "openai":
-                result = self.TTS_openai(sentence, temp_output_file)
-            else:
-                voice_folder = config.PIPER_VOICE
-                result = self.TTS_piper(sentence, temp_output_file, voice_folder)
+            result = self.tts_client.tts(sentence, temp_output_file)
             
             # If the TTS was successful, add the output file to the queue
             if result == "success":
@@ -113,119 +112,6 @@ class TTS:
     
         # Set queuing flag to False
         self.queing = False
-        
-    def TTS_piper(self, text_to_speak, output_file, voice_folder):
-        """
-        This function uses the Piper TTS engine to convert text to speech.
-        
-        Args:
-            text_to_speak (str): The text to be converted to speech.
-            output_file (str): The path where the output audio file will be saved.
-            voice_folder (str): The folder containing the voice files for the TTS engine.
-            
-        Returns:
-            str: "success" if the TTS process was successful, "failed" otherwise.
-        """
-        # Sanitize the text to be spoken
-        text_to_speak = utils.sanitize_text(text_to_speak)
-
-        # If there's no text left after sanitization, return "failed"
-        if not text_to_speak.strip():
-            if self.verbose:
-                print("No text to speak after sanitization.")
-            return "failed"
-
-        # Determine the operating system
-        operating_system = platform.system()
-        if operating_system == "Windows":
-            piper_binary = os.path.join("piper_tts", "piper.exe")
-        else:
-            piper_binary = os.path.join("piper_tts", "piper")
-
-        # Construct the path to the voice files
-        voice_path = os.path.join("piper_tts", "voices", voice_folder)
-
-        # If the voice folder doesn't exist, return "failed"
-        if not os.path.exists(voice_path):
-            if self.verbose:
-                print(f"Voice folder '{voice_folder}' does not exist.")
-            return "failed"
-
-        # Find the model and JSON files in the voice folder
-        files = os.listdir(voice_path)
-        model_path = next((os.path.join(voice_path, f) for f in files if f.endswith('.onnx')), None)
-        json_path = next((os.path.join(voice_path, f) for f in files if f.endswith('.json')), None)
-
-        # If either the model or JSON file is missing, return "failed"
-        if not model_path or not json_path:
-            if self.verbose:
-                print("Required voice files not found.")
-            return "failed"
-
-        try:
-            # Construct and execute the Piper TTS command
-            command = [
-                piper_binary,
-                "-m", model_path,
-                "-c", json_path,
-                "-f", output_file
-            ]
-            process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=(None if self.verbose else subprocess.DEVNULL), stderr=subprocess.STDOUT)
-            process.communicate(text_to_speak.encode("utf-8"))
-            process.wait()
-            if self.verbose:
-                print(f"Piper TTS command executed successfully.")
-            return "success"
-        except subprocess.CalledProcessError as e:
-            # If the command fails, print an error message and return "failed"
-            if self.verbose:
-                print(f"Error running Piper TTS command: {e}")
-            return "failed"
-        
-    def TTS_openai(self, text_to_speak, output_file, model="tts-1", format="opus"):
-        """
-        Generate speech from text using the OpenAI TTS engine and save it to an output file.
-        
-        Args:
-            text (str): The text to be converted to speech.
-            output_file (str): The file path where the audio will be saved.
-            model (str): The model for TTS.
-            format (str): The response format for the audio.
-        """
-
-        # Remove characters not suitable for TTS, including additional symbols
-        text_to_speak = utils.sanitize_text(text_to_speak)
-        
-        # If there is no text after illegal characters are stripped
-        if not text_to_speak.strip():
-            if self.verbose:
-                print("No text to speak after sanitization.")
-            return "failed"
-        
-        try:
-            client = self.OpenAIClient
-            voice = config.OPENAI_VOICE
-            spoken_response = client.audio.speech.create(
-                model=model,
-                voice=voice,
-                response_format=format,
-                input=text_to_speak
-            )
-
-            with open(output_file, "wb") as f:
-                for chunk in spoken_response.iter_bytes(chunk_size=4096):
-                    f.write(chunk)
-
-            if self.verbose:
-                print(f"OpenAI TTS completed successfully.")
-            return "success"
-        except Exception as e:
-            if self.verbose:
-                import traceback
-                traceback.print_exc()
-            else:
-                print(f"Error occurred while getting OpenAI TTS: {e}")
-            return "failed"
 
     def play_audio(self):
         """
