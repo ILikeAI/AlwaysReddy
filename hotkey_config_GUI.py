@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import ttk  # Importing ttk for better styling options
 import re
-import keyboard
+from pynput.keyboard import Key
+from pynput import keyboard
 
 CONFIG_FILE_PATH = "config.py"
 
@@ -33,19 +34,35 @@ def save_hotkeys(hotkeys):
 def start_listening_for_hotkey(root, button, label, hotkey_name, hotkeys):
     current_keys = set()
 
-    def on_key_event(event):
-        if event.event_type == 'down':
-            current_keys.add(event.name.lower())
-        elif event.event_type == 'up' and event.name.lower() in current_keys:
-            hotkey_str = '+'.join(sorted(current_keys))
-            label.config(text=f"{hotkey_name}: {hotkey_str}")
-            hotkeys[hotkey_name] = hotkey_str
-            save_hotkeys(hotkeys)
-            keyboard.unhook_all()
-            button.config(text="Set", state="normal")
+    def on_key_press(key):
+        if isinstance(key, Key):
+            # special key pressed
+            current_keys.add(key.name)
+        else:
+            current_keys.add(key.char.lower())
+
+    def on_key_release(key):
+        if isinstance(key, Key):
+            # special key released
+            if key.name in current_keys:
+                hotkey_str = '+'.join(sorted(current_keys))
+                label.config(text=f"{hotkey_name}: {hotkey_str}")
+                hotkeys[hotkey_name] = hotkey_str
+                save_hotkeys(hotkeys)
+                listener.stop()
+                button.config(text="Set", state="normal")
+        else:
+            if key.char.lower() in current_keys:
+                hotkey_str = '+'.join(sorted(current_keys))
+                label.config(text=f"{hotkey_name}: {hotkey_str}")
+                hotkeys[hotkey_name] = hotkey_str
+                save_hotkeys(hotkeys)
+                listener.stop()
+                button.config(text="Set", state="normal")
 
     button.config(text="Listening...", state="disabled")
-    keyboard.hook(on_key_event)
+    listener = keyboard.Listener(on_press=on_key_press, on_release=on_key_release)
+    listener.start()
 
 def load_interface(root, hotkeys):
     style = ttk.Style()
