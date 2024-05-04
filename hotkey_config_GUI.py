@@ -35,15 +35,23 @@ def start_listening_for_hotkey(root, button, label, hotkey_name, hotkeys):
     current_keys = set()
 
     def on_key_press(key):
-        if isinstance(key, Key):
-            # special key pressed
+        if key == Key.ctrl_l or key == Key.ctrl_r:
+            current_keys.add("ctrl")
+        elif isinstance(key, Key):
             current_keys.add(key.name)
         else:
             current_keys.add(key.char.lower())
 
     def on_key_release(key):
-        if isinstance(key, Key):
-            # special key released
+        if key == Key.ctrl_l or key == Key.ctrl_r:
+            if "ctrl" in current_keys:
+                hotkey_str = '+'.join(sorted(current_keys))
+                label.config(text=f"{hotkey_name}: {hotkey_str}")
+                hotkeys[hotkey_name] = hotkey_str
+                save_hotkeys(hotkeys)
+                listener.stop()
+                button.config(text="Set", state="normal")
+        elif isinstance(key, Key):
             if key.name in current_keys:
                 hotkey_str = '+'.join(sorted(current_keys))
                 label.config(text=f"{hotkey_name}: {hotkey_str}")
@@ -63,6 +71,7 @@ def start_listening_for_hotkey(root, button, label, hotkey_name, hotkeys):
     button.config(text="Listening...", state="disabled")
     listener = keyboard.Listener(on_press=on_key_press, on_release=on_key_release)
     listener.start()
+
 
 def load_interface(root, hotkeys):
     style = ttk.Style()
