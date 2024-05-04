@@ -88,7 +88,7 @@ def main():
 
     # Copy .env.example to .env
     copy_file('.env.example', '.env')
-    print("Please open .env and enter your OpenAI API key.")
+    print("Please open .env and enter your API keys")
 
     # Ask if the user wants to install Piper TTS
     install_piper = input("Do you want to install Piper local TTS? (y/n): ")
