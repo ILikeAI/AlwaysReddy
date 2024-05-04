@@ -157,16 +157,9 @@ COMPLETION_MODEL = "claude-3-sonnet-20240229"
 ### How to use local TTS
 To use local TTS just open the config file and set `TTS_ENGINE="piper"`
 
-## How to add AlwaysReddy to Startup List
+## How to add AlwaysReddy to Startup List (Windows)
 To add AlwaysReddy to your startup list so it starts automatically on your computer startup, follow these steps:
-1. Press Windows key + R to open the "Run" dialog.
-2. Type "shell:startup" and press Enter. This will open the Startup folder.
-3. Copy the `startup_script.bat` from the `scripts` folder in the repo to into this folder.
-4. Right click the file and select edit, replace `DIR_TO_ALWAYSREDDY_REPO` with the directory to the main folder of the AlwaysReddy Repo
+1. run `venv\Scripts\activate`
+2. Run `python setup.py`, follow the prompts, it will ask you if you want to add AlwaysReddy to the startup list, press Y the confrim
 
-The file should end up looking something like this:
-```cmd
-cd C:\Users\Josh\Documents\GitHub\AlwaysReddy\
-python main.py
-pause
-```
+If you want to remove AlwaysReddy from the startup list you can follow the same steps again, only say no when asked if you want to add AlwaysReddy to the startup list and it will ask if you would like to remove it, press Y.
