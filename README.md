@@ -19,9 +19,17 @@ Join the discord: https://discord.gg/v3Hb9za9B4
 ### Features:
 You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - Voice chat with you via TTS and STT
-- Read from your clipboard (with `Ctrl + Shift + Space + Space` rapidly double tapping space). NOTE: Linux has a different hotkey!
+- Read from your clipboard (with `Ctrl + Alt + R + R` rapidly double tapping R). NOTE: Linux has a different hotkey!
 - Write text to your clipboard on request.
 - Can be run 100% locally!!!
+
+### Use cases:
+I often use AlwaysReddy for the following things:
+- When I have just learned a new concept I will often explain the concept aloud to AlwaysReddy and have it save the concept (in roughly my words) into a note.
+- "What is X called?" Often I know how to roughly describe something but cant remember what it is called, AlwaysReddy is handy for quickly giving me the answer without me having to open the browser.
+- "Can you proof read the text in my clipboard before I send it?"
+- "From the comments in my clipboard what do the r/LocalLLaMA users think of X?"
+- Quick journal entries, I speedily list what I have done today and get it to write a journal entry to my clipboard before I shutdown the computer for the day.
 
 ## Supported LLM servers:
 - OpenAI
@@ -34,13 +42,7 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - Piper TTS (local and fast) [See how to change voice model](#how-to-add-new-voices-for-piper-tts)
 - OpenAI TTS API
 
-## Use cases:
-I often use AlwaysReddy for the following things:
-- When I have just learned a new concept I will often explain the concept aloud to AlwaysReddy and have it save the concept (in roughly my words) into a note.
-- "What is X called?" Often I know how to roughly describe something but cant remember what it is called, AlwaysReddy is handy for quickly giving me the answer without me having to open the browser.
-- "Can you proof read the text in my clipboard before I send it?"
-- "From the comments in my clipboard what do the r/LocalLLaMA users think of X?"
-- Quick journal entries, I speedily list what I have done today and get it to write a journal entry to my clipboard before I shutdown the computer for the day.
+## Setup:
 
 ### Setup for Windows:
 
@@ -71,9 +73,26 @@ Please note that on linux we are using the pynput library which does not let us 
 
 If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
 
-### Troubleshooting:
+## Troubleshooting:
 If you have issues try deleting the venv folder and starting again.
 Set VERBOSE = True in the config to get more detailed logs and error traces
+
+## How to:
+### How to use AlwaysReddy:
+There are currently only main 2 actions:
+
+Voice chat:
+- Press `Ctrl + Alt + R`  to start dictating, you can talk for as long as you want, then press `Ctrl + Alt + R` again to stop recording, a few seconds later you will get a voice response from the AIal
+
+Voice chat with context of your clipboard:
+- Double tap `Ctrl + Alt + R` (or just hold `Ctrl + Alt` and quickly press `R` Twice) This will give the AI the content of your clipboard so you can ask it to reference it, rewrite it, answer questions from its contents... whatever you like! 
+- Clear the assistants memory with `Alt + Shift 1`.
+- Cancel recording or TTS with `Ctrl + Alt + E`
+
+**Please let me know if you think of better hotkey defaults!**
+
+All hotkeys can be edited in config.py
+
 
 ### How to add new voices for Piper TTS:
 1. Go to https://huggingface.co/rhasspy/piper-voices/tree/main and navigate to your desired language.
@@ -106,19 +125,6 @@ TRANSCRIPTION_LANGUAGE = "en"
 WHISPER_BATCH_SIZE = 16
 WHISPER_MODEL_PATH = None  # you can point this to an existing model or leave it set to none
 ```
-
-### How to use:
-There are currently only main 2 actions:
-
-Voice chat:
-- Press `Ctrl + Shift + Space`  to start dictating, you can talk for as long as you want, then press `Ctrl + Shift + Space` again to stop recording, a few seconds later you will get a voice response from the AI.
-
-Voice chat with context of your clipboard:
-- Double tap `Ctrl + Shift + Space` (or just hold `Ctrl + Shift` and quickly press `Space` Twice) This will give the AI the content of your clipboard so you can ask it to reference it, rewrite it, answer questions from its contents... whatever you like! 
-- Clear the assistants memory with `ctrl + alt + f12`.
-- Cancel recording or TTS with `ctrl + alt + x`
-
-All hotkeys can be edited in config.py
 
 ## How to swap servers or models
 To swap models open the config.py file and uncomment the sections for the API you want to use. For example this is how you would use Claude 3 sonnet, if you wanted to use LM studio you would comment out the Anthropic section and uncomment the LM studio section.
