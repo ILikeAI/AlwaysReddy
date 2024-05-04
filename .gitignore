@@ -16,4 +16,6 @@ test.py
 
 # But don't ignore the voices folder
 !/piper_tts/voices/
+
 run_AlwaysReddy.sh
+run_AlwaysReddy.bat
