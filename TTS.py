@@ -1,14 +1,12 @@
 import os
 import soundfile as sf
-import sounddevice as sd
+import pyaudio
 from dotenv import load_dotenv
-import subprocess
 import threading
 import queue
 import config
 import tempfile
-import utils
-import platform
+import time
 
 # Load .env file if present
 load_dotenv()
@@ -20,7 +18,6 @@ class TTS:
     def __init__(self, parent_client, verbose=False):
         """
         Initialize the TTS class with the parent client and necessary attributes.
-        
         """
         self.service = config.TTS_ENGINE
         self.audio_queue = queue.Queue()
@@ -32,6 +29,8 @@ class TTS:
         self.running_tts = False
         self.last_sentence_spoken = ""
         self.verbose = verbose
+        self.stop_playback = False
+
         if self.service == "openai":
             from TTS_apis.openai_api import OpenAITTSClient
             self.tts_client = OpenAITTSClient(verbose=self.verbose)
@@ -44,7 +43,7 @@ class TTS:
         # Delete any leftover temp files if any
         for file in os.listdir(config.AUDIO_FILE_DIR):
             if file.endswith(".wav"):
-                os.remove(os.path.join(config.AUDIO_FILE_DIR,file))
+                os.remove(os.path.join(config.AUDIO_FILE_DIR, file))
 
     def wait(self):
         """
@@ -94,8 +93,6 @@ class TTS:
                 
                 # If the stop flag is set, return early
                 if self.parent_client.stop_response:
-                    if self.verbose:
-                        print("STOP TTS IS TRUE")
                     return
                 
                 self.temp_files.append(temp_output_file)
@@ -119,8 +116,8 @@ class TTS:
         """
         # While there are items in the queue or the queuing flag is set
         while self.queing or not self.audio_queue.empty():
-            # If the stop response flag is set, break the loop
-            if self.parent_client.stop_response:
+            # If the stop response flag or stop_playback flag is set, break the loop
+            if self.parent_client.stop_response or self.stop_playback:
                 break
 
             # Set the running TTS flag to True
@@ -141,8 +138,26 @@ class TTS:
                 continue
 
             try:
-                # Play the audio
-                sd.play(data, fs)
+                # Play the audio using pyaudio
+                p = pyaudio.PyAudio()
+                stream = p.open(format=pyaudio.paFloat32,
+                                channels=1,
+                                rate=fs,
+                                output=True)
+                
+                # Write the audio data to the stream in chunks
+                chunk_size = 1024
+                for i in range(0, len(data), chunk_size):
+                    chunk = data[i:i + chunk_size]
+                    stream.write(chunk.tobytes())
+                    
+                    # Check if the stop_playback flag is set
+                    if self.stop_playback:
+                        break
+                
+                stream.stop_stream()
+                stream.close()
+                p.terminate()
             except Exception as e:
                 if self.verbose:
                     print(f"Error playing audio: {e}")
@@ -151,8 +166,6 @@ class TTS:
             if self.verbose:
                 print(f"Playing audio: {sentence}")
             self.last_sentence_spoken = sentence
-            # Wait for the audio to finish playing
-            sd.wait()
             # Mark the task as done in the queue
             self.audio_queue.task_done()
 
@@ -188,7 +201,11 @@ class TTS:
             print("Stopping TTS")
 
         # Stop any currently playing audio
-        sd.stop()
+        # Set the stop_playback flag to signal the play_audio thread to stop
+        self.stop_playback = True
+        
+        # Wait for a short duration to allow the play_audio thread to stop
+        time.sleep(0.2)
 
         # Attempt to clear the queue immediately to prevent any further processing
         while not self.audio_queue.empty():
@@ -196,9 +213,7 @@ class TTS:
                 # Try to get an item from the queue without waiting
                 self.audio_queue.get_nowait()
             except queue.Empty:
-                # If the queue is empty, print a message and continue to the next iteration
-                if self.verbose:
-                    print("Queue is empty")
+                # If the queue is empty, continue to the next iteration
                 continue
             # Mark the task as done in the queue
             self.audio_queue.task_done()
@@ -214,6 +229,9 @@ class TTS:
 
         # Wait for the file deletion thread to finish
         file_deletion_thread.join()
+        
+        # Reset the stop_playback flag
+        self.stop_playback = False
 
     def delete_temp_files(self):
         """
