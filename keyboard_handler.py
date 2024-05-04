@@ -1,9 +1,13 @@
 import config
+import platform
 
-if config.LINUX_NO_ROOT:
-    from pynput import keyboard as pynput_keyboard
-else:
+operating_system = platform.system()
+if operating_system == "Windows":
     import keyboard
+
+else:
+    from pynput import keyboard as pynput_keyboard
+
     
 
 def convert_to_pynput_format(hotkey):
@@ -27,8 +31,7 @@ def convert_to_pynput_format(hotkey):
 def check_space_usage(hotkey):
     """Check if 'space' is used in the hotkey and print a warning if so."""
     if 'space' in hotkey.split('+'):
-        print("WARNING: 'space' key may not be recognized by pynput on some systems. "
-              "Consider setting a different hotkey or update the config to set LINUX_NO_ROOT to true and run as root if on Linux."
+        print("\nWARNING: 'space' key does not work on linux systems with pynput library. "
               "To set a new hotkey run the 'hotkey_config_GUI.py' script.\n")
 
 class KeyboardHandler:
@@ -85,10 +88,11 @@ class PynputHandler(KeyboardHandler):
                     print(f"An error occurred: {e}")
 
 def get_keyboard_handler(verbose=False):
-    if config.LINUX_NO_ROOT:
-        return PynputHandler(verbose)
-    else:
+    if operating_system == "Windows":
         return KeyboardLibraryHandler(verbose)
+    else:
+        return PynputHandler(verbose)
+
 
 
 

@@ -1,7 +1,13 @@
+import sys
 import tkinter as tk
-from tkinter import ttk  # Importing ttk for better styling options
+from tkinter import ttk
 import re
-import keyboard
+
+if sys.platform.startswith('linux'):
+    from pynput.keyboard import Key
+    from pynput import keyboard
+else:
+    import keyboard
 
 CONFIG_FILE_PATH = "config.py"
 
@@ -30,13 +36,57 @@ def save_hotkeys(hotkeys):
             else:
                 file.write(line)
 
-def start_listening_for_hotkey(root, button, label, hotkey_name, hotkeys):
+def start_listening_for_hotkey_linux(root, button, label, hotkey_name, hotkeys):
+    current_keys = set()
+
+    def on_key_press(key):
+        if key == Key.ctrl_l or key == Key.ctrl_r:
+            current_keys.add("ctrl")
+        elif isinstance(key, Key):
+            current_keys.add(key.name)
+        else:
+            current_keys.add(key.char.lower())
+
+    def on_key_release(key):
+        if key == Key.ctrl_l or key == Key.ctrl_r:
+            if "ctrl" in current_keys:
+                hotkey_str = '+'.join(sorted(current_keys))
+                label.config(text=f"{hotkey_name}: {hotkey_str}")
+                hotkeys[hotkey_name] = hotkey_str
+                save_hotkeys(hotkeys)
+                listener.stop()
+                button.config(text="Set", state="normal")
+        elif isinstance(key, Key):
+            if key.name in current_keys:
+                hotkey_str = '+'.join(sorted(current_keys))
+                label.config(text=f"{hotkey_name}: {hotkey_str}")
+                hotkeys[hotkey_name] = hotkey_str
+                save_hotkeys(hotkeys)
+                listener.stop()
+                button.config(text="Set", state="normal")
+        else:
+            if key.char.lower() in current_keys:
+                hotkey_str = '+'.join(sorted(current_keys))
+                label.config(text=f"{hotkey_name}: {hotkey_str}")
+                hotkeys[hotkey_name] = hotkey_str
+                save_hotkeys(hotkeys)
+                listener.stop()
+                button.config(text="Set", state="normal")
+
+    button.config(text="Listening...", state="disabled")
+    listener = keyboard.Listener(on_press=on_key_press, on_release=on_key_release)
+    listener.start()
+
+def start_listening_for_hotkey_windows(root, button, label, hotkey_name, hotkeys):
     current_keys = set()
 
     def on_key_event(event):
         if event.event_type == 'down':
-            current_keys.add(event.name.lower())
-        elif event.event_type == 'up' and event.name.lower() in current_keys:
+            if event.name.isalpha():
+                current_keys.add(event.name.lower())
+            else:
+                current_keys.add(event.name)
+        elif event.event_type == 'up' and event.name in current_keys:
             hotkey_str = '+'.join(sorted(current_keys))
             label.config(text=f"{hotkey_name}: {hotkey_str}")
             hotkeys[hotkey_name] = hotkey_str
@@ -49,9 +99,7 @@ def start_listening_for_hotkey(root, button, label, hotkey_name, hotkeys):
 
 def load_interface(root, hotkeys):
     style = ttk.Style()
-    style.theme_use('clam')  # Using clam theme for better button styling
-
-    # Define style for buttons
+    style.theme_use('clam')
     style.configure('TButton', background='#88C0D0', foreground='white', borderwidth=1)
     style.map('TButton', 
               background=[('active', '#81A1C1')], 
@@ -67,6 +115,7 @@ def load_interface(root, hotkeys):
         label.pack(side=tk.LEFT, padx=10)
         button = ttk.Button(frame, text="Set", style='TButton')
         button.pack(side=tk.LEFT, padx=10)
+        start_listening_for_hotkey = start_listening_for_hotkey_linux if sys.platform.startswith('linux') else start_listening_for_hotkey_windows
         button['command'] = lambda b=button, l=label, n=hotkey_name: start_listening_for_hotkey(root, b, l, n, hotkeys)
 
 def main():
