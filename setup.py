@@ -108,12 +108,12 @@ def main():
             print("Skipping adding AlwaysReddy to startup.")
 
         # Ask if the user wants to remove the project from startup
-        if not added_to_startup:
-            remove_from_startup_prompt = input("Do you want to remove AlwaysReddy from startup? (y/n): ")
-            if remove_from_startup_prompt.lower() == 'y':
-                remove_from_startup()
-            else:
-                print("Skipping removing AlwaysReddy from startup.")
+        # if not added_to_startup:
+        #     remove_from_startup_prompt = input("If AlwaysReddy is already in your startup list, would you like to remove it? (y/n): ")
+        #     if remove_from_startup_prompt.lower() == 'y':
+        #         remove_from_startup()
+        #     else:
+        #         print("Skipping removing AlwaysReddy from startup.")
 
 if __name__ == "__main__":
     main()
