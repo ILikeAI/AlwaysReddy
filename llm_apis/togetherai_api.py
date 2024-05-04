@@ -3,14 +3,14 @@ import os
 
 class TogetherAIClient:
     """Client for interacting with the TogetherAI API."""
-    def __init__(self):
+    def __init__(self, verbose=False):
         """Initialize the TogetherAI client with the API key and base URL."""
         self.client = OpenAI(
             api_key=os.environ.get("TOGETHER_API_KEY"),
             base_url="https://api.together.xyz/v1",
         )
-        
-    
+        self.verbose = verbose
+
     def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
         """Get completion from the TogetherAI API.
 
@@ -36,6 +36,10 @@ class TogetherAIClient:
                 content = chunk.choices[0].delta.content
                 if content is not None:
                     yield content
-
         except Exception as e:
+            if self.verbose:
+                import traceback
+                traceback.print_exc()
+            else:
+                print(f"An error occurred streaming completion from TogetherAI API: {e}")
             raise RuntimeError(f"An error occurred streaming completion from TogetherAI API: {e}")

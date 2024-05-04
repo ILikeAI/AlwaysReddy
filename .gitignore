@@ -4,11 +4,13 @@ __pycache__
 .env
 audio_files/*
 !audio_files/temp_files_live_here.txt
-
-piper_voices/*
-
-!piper_voices/en_en_US_amy_medium_en_US-amy-medium.onnx.json
-!piper_voices/en_US-amy-medium.onnx
 test.ipynb
 config.py
 /venv
+test.py
+# Ignore everything in the piper_tts directory
+/piper_tts/*
+# But don't ignore the voices folder
+!/piper_tts/voices/
+run_AlwaysReddy.sh
+run_AlwaysReddy.bat

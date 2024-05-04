@@ -2,9 +2,10 @@ from anthropic import Anthropic
 import os
 
 class AnthropicClient:
-    def __init__(self):
+    def __init__(self, verbose=False):
         """Initialize the Anthropic client with the API key."""
         self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+        self.verbose = verbose
 
     def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
         """Stream completion from the Anthropic API.
@@ -34,7 +35,10 @@ class AnthropicClient:
             with stream as stream:
                 for text in stream.text_stream:
                     yield text
-
         except Exception as e:
+            if self.verbose:
+                import traceback
+                traceback.print_exc()
+            else:
+                print(f"An error occurred streaming completion from Anthropic API: {e}")
             raise RuntimeError(f"An error occurred streaming completion from Anthropic API: {e}")
-

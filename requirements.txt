@@ -5,6 +5,9 @@ numpy
 openai
 pydub
 python-dotenv
+pynput
 sounddevice
 soundfile
 tiktoken
+requests
+pyaudio
