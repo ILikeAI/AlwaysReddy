@@ -91,7 +91,7 @@ Voice chat:
 
 Voice chat with context of your clipboard:
 - Double tap `Ctrl + Alt + R` (or just hold `Ctrl + Alt` and quickly press `R` Twice) This will give the AI the content of your clipboard so you can ask it to reference it, rewrite it, answer questions from its contents... whatever you like! 
-- Clear the assistants memory with `Alt + Shift 1`.
+- Clear the assistants memory with `Ctrl + Alt + W`.
 - Cancel recording or TTS with `Ctrl + Alt + E`
 
 **Please let me know if you think of better hotkey defaults!**
