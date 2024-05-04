@@ -1,7 +1,9 @@
 # Welcome to AlwaysReddy 🔊
 Hey, I'm Josh, the creator of AlwaysReddy. I am still a little bit of a noob when it comes to programming and I'm really trying to develop my skills over the next year, I'm treating this project as an attempt to better develop my skills, with that in mind I would really appreciate it if you could point out issues and bad practices in my code (of which I'm sure there will be plenty). I would also appreciate if you would make your own improvements to the project so I can learn from your changes. Twitter: https://twitter.com/MindofMachine1
 
-If you think this project is cool and you want to say thanks, feel free to buy me a coffee if you can afford it. I love coffe...
+Contact me: joshlikesai@gmail.com
+
+If you think this project is cool and you want to say thanks, feel free to buy me a coffee if you can afford it. I love coffee...
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/ilikeai)
 
@@ -73,6 +75,9 @@ Please note that on linux we are using the pynput library which does not let us 
 
 If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
 
+## Known Issues:
+- For me it crashes if I spam the record hotkey, I havent worked out why just yet.
+
 ## Troubleshooting:
 If you have issues try deleting the venv folder and starting again.
 Set VERBOSE = True in the config to get more detailed logs and error traces
@@ -126,7 +131,7 @@ WHISPER_BATCH_SIZE = 16
 WHISPER_MODEL_PATH = None  # you can point this to an existing model or leave it set to none
 ```
 
-## How to swap servers or models
+### How to swap servers or models
 To swap models open the config.py file and uncomment the sections for the API you want to use. For example this is how you would use Claude 3 sonnet, if you wanted to use LM studio you would comment out the Anthropic section and uncomment the LM studio section.
 
 ```python
