@@ -14,7 +14,7 @@ If you think this project is cool and you want to say thanks, feel free to buy m
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
 It's like having voice ChatGPT running on your computer at all times, you just press a hotkey and it will listen to any questions you have, no need to swap windows or tabs, and if you want to give it context of some extra text, just copy the text and double tap the hotkey! 
-Join the discord: https://discord.gg/v3Hb9za9B4
+Join the discord: https://discord.gg/su44drSBzb
 
 **Here is a demo video of me using it with Llama3** https://www.reddit.com/r/LocalLLaMA/comments/1ca510h/voice_chatting_with_llama_3_8b/
 
