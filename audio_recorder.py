@@ -94,3 +94,11 @@ class AudioRecorder:
                     traceback.print_exc()
                 else:
                     print(f"Failed to save recording: {e}")
+
+if __name__ == "__main__":
+    recorder = AudioRecorder(verbose=True)
+    recorder.start_recording()
+    time.sleep(5)
+    recorder.stop_recording()
+    time.sleep(1)
+    
