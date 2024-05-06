@@ -286,7 +286,7 @@ class AlwaysReddy:
         keyboard_handler.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
         keyboard_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
 
-        print(f"\n\nPress '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to give the AI access to read your clipboard (I suggest holding all but the last key down then quickly double tapping the last key).\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
+        print(f"\n\nPress '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to the record hotkey to give AlwaysReddy the content currently copied in your clipboard.\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 
         keyboard_handler.start()
 
