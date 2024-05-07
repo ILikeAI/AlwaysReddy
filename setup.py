@@ -98,21 +98,13 @@ def main():
 
     if is_windows():
         # Ask if the user wants to add the project to startup
-        added_to_startup = False
         add_to_startup_prompt = input("Do you want to add AlwaysReddy to startup? (y/n): ")
         if add_to_startup_prompt.lower() == 'y':
             run_file = 'run_AlwaysReddy.bat'
-            added_to_startup = add_to_startup(run_file)
         else:
             print("Skipping adding AlwaysReddy to startup.")
 
-        # Ask if the user wants to remove the project from startup
-        # if not added_to_startup:
-        #     remove_from_startup_prompt = input("If AlwaysReddy is already in your startup list, would you like to remove it? (y/n): ")
-        #     if remove_from_startup_prompt.lower() == 'y':
-        #         remove_from_startup()
-        #     else:
-        #         print("Skipping removing AlwaysReddy from startup.")
+
 
 if __name__ == "__main__":
     main()
