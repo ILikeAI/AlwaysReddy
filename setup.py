@@ -61,7 +61,6 @@ def add_to_startup(run_file):
             f.write(f"start cmd /k \"{run_file}\"\n")
         print(f"Added {run_file} to startup")
 
-        print("To remove AlwaysReddy from startup, run this script again and choose the 'Remove from startup' option.")
         return True
     else:
         print("Startup setup is only available for Windows.")
