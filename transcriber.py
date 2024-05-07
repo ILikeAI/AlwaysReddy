@@ -17,9 +17,9 @@ class TranscriptionManager:
         if config.TRANSCRIPTION_API == "openai":
             from transcription_apis.openai_api import OpenAIClient
             self.client = OpenAIClient(verbose=self.verbose)
-        elif config.TRANSCRIPTION_API == "whisperx":
-            from transcription_apis.whisperx_api import WhisperXClient
-            self.client = WhisperXClient(verbose=self.verbose)
+        elif config.TRANSCRIPTION_API == "FasterWhisper":
+            from transcription_apis.faster_whisper_api import FasterWhisperClient
+            self.client = FasterWhisperClient(verbose=self.verbose)
         else:
             raise ValueError("Unsupported transcription API service configured")
 

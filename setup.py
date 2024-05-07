@@ -3,6 +3,8 @@ import shutil
 import subprocess
 import sys
 import platform
+from scripts.installpipertts import setup_piper_tts
+
 
 def is_windows():
     return sys.platform == 'win32'
@@ -44,9 +46,6 @@ def create_run_files():
 
 def add_to_startup(run_file):
     if is_windows():
-        print("Adding AlwaysReddy to startup may trigger antivirus alerts.")
-        print("Please ensure that your antivirus software allows the necessary permissions.")
-        print("If you encounter any issues, you can remove AlwaysReddy from startup using the provided option.")
         confirm = input("Are you sure you want to add AlwaysReddy to startup? (y/n): ")
         if confirm.lower() != 'y':
             print("Skipping adding AlwaysReddy to startup.")
@@ -92,27 +91,20 @@ def main():
     # Ask if the user wants to install Piper TTS
     install_piper = input("Do you want to install Piper local TTS? (y/n): ")
     if install_piper.lower() == 'y':
-        subprocess.run(['python', 'scripts/installpipertts.py'])
+        setup_piper_tts()
+
 
     create_run_files()
 
     if is_windows():
         # Ask if the user wants to add the project to startup
-        added_to_startup = False
         add_to_startup_prompt = input("Do you want to add AlwaysReddy to startup? (y/n): ")
         if add_to_startup_prompt.lower() == 'y':
             run_file = 'run_AlwaysReddy.bat'
-            added_to_startup = add_to_startup(run_file)
         else:
             print("Skipping adding AlwaysReddy to startup.")
 
-        # Ask if the user wants to remove the project from startup
-        # if not added_to_startup:
-        #     remove_from_startup_prompt = input("If AlwaysReddy is already in your startup list, would you like to remove it? (y/n): ")
-        #     if remove_from_startup_prompt.lower() == 'y':
-        #         remove_from_startup()
-        #     else:
-        #         print("Skipping removing AlwaysReddy from startup.")
+
 
 if __name__ == "__main__":
     main()
