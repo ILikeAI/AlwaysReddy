@@ -102,6 +102,3 @@ def setup_piper_tts():
     os.remove(binary_path)
 
     print("Piper TTS setup completed successfully.")
-
-# Run the setup
-setup_piper_tts()

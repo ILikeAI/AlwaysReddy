@@ -10,10 +10,20 @@ If you think this project is cool and you want to say thanks, feel free to buy m
 
 **Pull Requests Welcome!**
 
+## Sections
+- [Meet AlwaysReddy](#meet-alwaysreddy)
+- [Supported LLM servers](#supported-llm-servers)
+- [Supported TTS systems](#supported-tts-systems)
+- [Setup](#setup)
+- [Known Issues](#known-issues)
+- [Troubleshooting](#troubleshooting)
+- [How to](#how-to)
+
 ## Meet AlwaysReddy 
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
 It's like having voice ChatGPT running on your computer at all times, you just press a hotkey and it will listen to any questions you have, no need to swap windows or tabs, and if you want to give it context of some extra text, just copy the text and double tap the hotkey! 
+
 Join the discord: https://discord.gg/su44drSBzb
 
 **Here is a demo video of me using it with Llama3** https://www.reddit.com/r/LocalLLaMA/comments/1ca510h/voice_chatting_with_llama_3_8b/
@@ -46,13 +56,53 @@ I often use AlwaysReddy for the following things:
 
 ## Setup:
 
+<details>
+<summary>GPU Setup Instructions</summary>
+
+## GPU Acceleration
+
+To use GPU acceleration with the faster-whisper API, follow these steps:
+
+1. Check if CUDA is already installed:
+   - Open a terminal or command prompt.
+   - Run the following command:
+     ```
+     nvcc --version
+     ```
+   - If CUDA is installed, you should see output similar to:
+     ```
+     nvcc: NVIDIA (R) Cuda compiler driver
+     Copyright (c) 2005-2021 NVIDIA Corporation
+     Built on Sun_Feb_14_21:12:58_PST_2021
+     Cuda compilation tools, release 11.2, V11.2.152
+     Build cuda_11.2.r11.2/compiler.29618528_0
+     ```
+   - Note down the CUDA version (e.g., 11.2 in the example above).
+
+2. If CUDA is not installed or you want to install a different version:
+   - Visit the official NVIDIA CUDA Toolkit website: [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
+   - Download and install the appropriate CUDA Toolkit version for your system.
+
+3. Install PyTorch with CUDA support based on your system and CUDA version. Follow the instructions on the official PyTorch website: [PyTorch Installation](https://pytorch.org/get-started/locally/)
+
+   Example command for CUDA 11.6:
+   ```
+   pip install torch==1.12.0+cu116 -f https://download.pytorch.org/whl/torch_stable.html
+   ```
+
+4. In the `config.py` file, set `USE_GPU = True` to enable GPU acceleration.
+
+
+
+</details>
+
 ### Setup for Windows:
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
 2. cd into the directory `cd AlwaysReddy`
 3. Create a virtual environment with `python -m venv venv`-- This step is imortant, make sure to name it exactly `venv`
 4. Activate the virtual environment: `venv\Scripts\activate`
-5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
+5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r faster_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
 6. Run the setup script with `python setup.py`. This will also create a run file `run_AlwaysReddy.bat`.
 7. Open the `config.py` and `.env` files and update them with your settings and API key.
 8. Run the assistant with `run_AlwaysReddy.bat` or `python main.py`. The run file will automatically activate the virtual environment.
@@ -66,7 +116,7 @@ Linux support is super experimental but its working for me, contact me if you ha
 2. cd into the directory `cd AlwaysReddy`
 3. Create a virtual environment with `python3 -m venv venv`-- This step is imortant, make sure to name it exactly `venv`
 4. Activate the virtual environment: `source venv/bin/activate`
-5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r local_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
+5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r faster_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
 6. Run the setup script with `python3 setup.py`. This will also create a run file `run_AlwaysReddy.sh`.
 7. Open the `config.py` and `.env` files and update them with your settings and API key.
 8. Run the assistant with `./run_AlwaysReddy.sh` or `python3 main.py`. The run file will automatically activate the virtual environment.
@@ -111,11 +161,13 @@ All hotkeys can be edited in config.py
 1. Open the `config.py` file.
 2. Locate the "Transcription API Settings" section.
 3. Comment out the line `TRANSCRIPTION_API = "openai"` by adding a `#` at the beginning of the line.
-4. Uncomment the line `TRANSCRIPTION_API = "whisperx"` by removing the `#` at the beginning of the line.
+4. Uncomment the line `TRANSCRIPTION_API = "faster-whisper"` by removing the `#` at the beginning of the line.
 5. Adjust the `WHISPER_MODEL` and `TRANSCRIPTION_LANGUAGE` settings according to your preferences.
 6. Save the `config.py` file.
 
 Here's an example of how your `config.py` file should look like for local whisper transcription:
+
+Available models: tiny.en, tiny, base.en, base, small.en, small, medium.en, medium, large-v1, large-v2, large-v3, large, distil-large-v2, distil-medium.en, distil-small.en, distil-large-v3
 
 ```python
 ### Transcription API Settings ###
@@ -123,13 +175,15 @@ Here's an example of how your `config.py` file should look like for local whispe
 ## OPENAI API TRANSCRIPTION EXAMPLE ##
 # TRANSCRIPTION_API = "openai"  # this will use the hosted openai api
 
-## Whisper X local transcription API EXAMPLE ##
-TRANSCRIPTION_API = "whisperx"  # local transcription!
-WHISPER_MODEL = "tiny"  # (tiny, base, small, medium, large) Turn this up to "base" if the transcription is too bad
-TRANSCRIPTION_LANGUAGE = "en"
-WHISPER_BATCH_SIZE = 16
-WHISPER_MODEL_PATH = None  # you can point this to an existing model or leave it set to none
+## Faster Whisper local transcription ###
+TRANSCRIPTION_API = "FasterWhisper" # this will use the local whisper model
+
+# Supported models: 
+WHISPER_MODEL = "tiny.en" # If you prefer not to use english set it to "tiny", if the transcription quality is too low then set it to "base" but this will be a little slower
+
 ```
+
+Note: The default whisper model is english only, try setting WHISPER_MODEL to 'tiny' or 'base' for other languages
 
 ### How to swap servers or models
 To swap models open the config.py file and uncomment the sections for the API you want to use. For example this is how you would use Claude 3 sonnet, if you wanted to use LM studio you would comment out the Anthropic section and uncomment the LM studio section.

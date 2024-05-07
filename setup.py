@@ -3,6 +3,8 @@ import shutil
 import subprocess
 import sys
 import platform
+from scripts.installpipertts import setup_piper_tts
+
 
 def is_windows():
     return sys.platform == 'win32'
@@ -44,9 +46,6 @@ def create_run_files():
 
 def add_to_startup(run_file):
     if is_windows():
-        print("Adding AlwaysReddy to startup may trigger antivirus alerts.")
-        print("Please ensure that your antivirus software allows the necessary permissions.")
-        print("If you encounter any issues, you can remove AlwaysReddy from startup using the provided option.")
         confirm = input("Are you sure you want to add AlwaysReddy to startup? (y/n): ")
         if confirm.lower() != 'y':
             print("Skipping adding AlwaysReddy to startup.")
@@ -92,7 +91,8 @@ def main():
     # Ask if the user wants to install Piper TTS
     install_piper = input("Do you want to install Piper local TTS? (y/n): ")
     if install_piper.lower() == 'y':
-        subprocess.run(['python', 'scripts/installpipertts.py'])
+        setup_piper_tts()
+
 
     create_run_files()
 
