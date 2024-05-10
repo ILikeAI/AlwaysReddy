@@ -5,9 +5,8 @@ import queue
 import config
 import tempfile
 import time
-
 from pydub import AudioSegment
-from pydub.playback import play
+from pydub.playback import _play_with_simpleaudio
 
 # Load .env file if present
 load_dotenv()
@@ -31,6 +30,7 @@ class TTS:
         self.last_sentence_spoken = ""
         self.verbose = verbose
         self.stop_playback = False
+        self.playback_stopped = threading.Event()
 
         if self.service == "openai":
             from TTS_apis.openai_api import OpenAITTSClient
@@ -131,9 +131,21 @@ class TTS:
                 continue
 
             try:
-                # Load and play the audio file using pydub
+                # Load the audio file using pydub
                 audio = AudioSegment.from_file(file_path)
-                play(audio)
+
+                # Play the audio using _play_with_simpleaudio
+                playback = _play_with_simpleaudio(audio)
+
+                # Wait for the playback to finish or for the stop_playback flag to be set
+                while playback.is_playing() and not self.stop_playback:
+                    time.sleep(0.1)
+
+                # If the stop_playback flag is set, stop the playback
+                if self.stop_playback:
+                    playback.stop()
+                    self.playback_stopped.set()
+
             except Exception as e:
                 if self.verbose:
                     print(f"Error playing audio: {e}")
@@ -159,7 +171,7 @@ class TTS:
         # Set the running TTS flag to False
         self.running_tts = False
 
-        # Delete any leftover temp files if any this is just to be safe and should not be needed
+        # Delete any leftover temp files if any (this is just to be safe and should not be needed)
         try:
             for file in os.listdir(config.AUDIO_FILE_DIR):
                 if file.endswith(".wav") or file.endswith(".mp3"):
@@ -176,12 +188,11 @@ class TTS:
         if self.verbose:
             print("Stopping TTS")
 
-        # Stop any currently playing audio
         # Set the stop_playback flag to signal the play_audio thread to stop
         self.stop_playback = True
-        
-        # Wait for a short duration to allow the play_audio thread to stop
-        time.sleep(0.2)
+
+        # Wait for the playback to stop or for a timeout of 1 second
+        self.playback_stopped.wait(timeout=0.1)
 
         # Attempt to clear the queue immediately to prevent any further processing
         while not self.audio_queue.empty():
@@ -206,8 +217,9 @@ class TTS:
         # Wait for the file deletion thread to finish
         file_deletion_thread.join()
         
-        # Reset the stop_playback flag
+        # Reset the stop_playback flag and the playback_stopped event
         self.stop_playback = False
+        self.playback_stopped.clear()
 
     def delete_temp_files(self):
         """
