@@ -1,12 +1,13 @@
 import os
-import soundfile as sf
-import pyaudio
 from dotenv import load_dotenv
 import threading
 import queue
 import config
 import tempfile
 import time
+
+from pydub import AudioSegment
+from pydub.playback import play
 
 # Load .env file if present
 load_dotenv()
@@ -42,7 +43,7 @@ class TTS:
 
         # Delete any leftover temp files if any
         for file in os.listdir(config.AUDIO_FILE_DIR):
-            if file.endswith(".wav"):
+            if file.endswith(".wav") or file.endswith(".mp3"):
                 os.remove(os.path.join(config.AUDIO_FILE_DIR, file))
 
     def wait(self):
@@ -79,7 +80,7 @@ class TTS:
     
         try:
             # Create a temporary file in the output directory
-            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
+            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".mp3")
             temp_output_file = temp_file.name
             temp_file.close()
     
@@ -130,34 +131,9 @@ class TTS:
                 continue
 
             try:
-                # Read the audio data from the file
-                data, fs = sf.read(file_path, dtype='float32')
-            except Exception as e:
-                if self.verbose:
-                    print(f"Error reading file {file_path}: {e}")
-                continue
-
-            try:
-                # Play the audio using pyaudio
-                p = pyaudio.PyAudio()
-                stream = p.open(format=pyaudio.paFloat32,
-                                channels=1,
-                                rate=fs,
-                                output=True)
-                
-                # Write the audio data to the stream in chunks
-                chunk_size = 1024
-                for i in range(0, len(data), chunk_size):
-                    chunk = data[i:i + chunk_size]
-                    stream.write(chunk.tobytes())
-                    
-                    # Check if the stop_playback flag is set
-                    if self.stop_playback:
-                        break
-                
-                stream.stop_stream()
-                stream.close()
-                p.terminate()
+                # Load and play the audio file using pydub
+                audio = AudioSegment.from_file(file_path)
+                play(audio)
             except Exception as e:
                 if self.verbose:
                     print(f"Error playing audio: {e}")
@@ -186,7 +162,7 @@ class TTS:
         # Delete any leftover temp files if any this is just to be safe and should not be needed
         try:
             for file in os.listdir(config.AUDIO_FILE_DIR):
-                if file.endswith(".wav"):
+                if file.endswith(".wav") or file.endswith(".mp3"):
                     os.remove(os.path.join(config.AUDIO_FILE_DIR, file))
         except Exception as e:
             if self.verbose:

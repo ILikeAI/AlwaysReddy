@@ -8,7 +8,7 @@ class OpenAITTSClient:
         self.client = OpenAI()
         self.verbose = verbose
 
-    def tts(self, text_to_speak, output_file, model="tts-1", format="opus"):
+    def tts(self, text_to_speak, output_file, model="tts-1", format="mp3"):
         """
         Generate speech from text using the OpenAI TTS engine and save it to an output file.
         

@@ -10,4 +10,4 @@ sounddevice
 soundfile
 tiktoken
 requests
-pyaudio
+simpleaudio
