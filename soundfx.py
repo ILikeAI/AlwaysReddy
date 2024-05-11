@@ -1,9 +1,11 @@
+
 import simpleaudio as sa
 from pydub import AudioSegment
 from pydub.playback import play
 import config
 import threading
 import os
+import math
 
 def play_sound_file(file_name, volume, verbose=False):
     try:
@@ -15,6 +17,10 @@ def play_sound_file(file_name, volume, verbose=False):
         elif file_name.lower().endswith(".mp3"):
             # Load and play MP3 file using pydub
             audio = AudioSegment.from_file(file_name, format="mp3")
+            # Adjust volume
+            if volume != 1.0:
+                decibels = 10 * math.log10(volume)
+                audio = audio + decibels
             play(audio)
         else:
             raise ValueError(f"Unsupported audio file format: {file_name}")
@@ -51,4 +57,3 @@ def play_sound_FX(name, volume=1.0, verbose=False):
             traceback.print_exc()
         else:
             print(f"An error occurred while attempting to play sound FX: {e}")
-
