@@ -37,7 +37,6 @@ class FasterWhisperClient:
 
             transcript = ""
             for segment in segments:
-                print(segment.text)
                 transcript += segment.text + " "
 
             if self.verbose:
