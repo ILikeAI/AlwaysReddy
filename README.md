@@ -47,7 +47,7 @@ I often use AlwaysReddy for the following things:
 - OpenAI
 - Anthropic
 - TogetherAI
-- LM Studio (local) - [Setup Guide](https://youtu.be/3aXDOCibJV0?si=2LTMmaaFbBiTFcnT)
+- LM Studio (local) - [Setup Guide](https://youtu.be/b6MPdboJEfk)
 - Ollama (local) - [Setup Guide](https://youtu.be/BMYwT58rtxw?si=LHTTm85XFEJ5bMUD)
 
 ## Supported TTS systems:
