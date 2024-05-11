@@ -96,6 +96,8 @@ To use GPU acceleration with the faster-whisper API, follow these steps:
 
 </details>
 
+**Note:** Whenver you pull a new version of AlwaysReddy you may want to run the setup script again and copy the config file again as I am updating this project all the time and often the contexts of the config.py change.
+
 ### Setup for Windows:
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
