@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 import threading
 import queue
 import config
@@ -7,9 +6,6 @@ import tempfile
 import time
 from pydub import AudioSegment
 from pydub.playback import _play_with_simpleaudio
-
-# Load .env file if present
-load_dotenv()
 
 class TTS:
     """
@@ -139,7 +135,7 @@ class TTS:
 
                 # Wait for the playback to finish or for the stop_playback flag to be set
                 while playback.is_playing() and not self.stop_playback:
-                    time.sleep(0.1)
+                    time.sleep(0.01)
 
                 # If the stop_playback flag is set, stop the playback
                 if self.stop_playback:
@@ -192,7 +188,7 @@ class TTS:
         self.stop_playback = True
 
         # Wait for the playback to stop or for a timeout of 1 second
-        self.playback_stopped.wait(timeout=0.1)
+        self.playback_stopped.wait(timeout=0.01)
 
         # Attempt to clear the queue immediately to prevent any further processing
         while not self.audio_queue.empty():
