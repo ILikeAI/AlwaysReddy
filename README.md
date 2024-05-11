@@ -96,6 +96,8 @@ To use GPU acceleration with the faster-whisper API, follow these steps:
 
 </details>
 
+**Note:** Whenver you pull a new version of AlwaysReddy you may want to run the setup script again and copy the config file again as I am updating this project all the time and often the contexts of the config.py change.
+
 ### Setup for Windows:
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
@@ -126,7 +128,7 @@ Please note that on linux we are using the pynput library which does not let us 
 If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
 
 ## Known Issues:
-- For me it crashes if I spam the record hotkey, I havent worked out why just yet.
+- On linux it only detects hotkey presses when the application is in foucs, this is a major issue as the whole point of the project is to have it run in the background, if you want to help out this would be a great place to start poking around!
 
 ## Troubleshooting:
 If you have issues try deleting the venv folder and starting again.

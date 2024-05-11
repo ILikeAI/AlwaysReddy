@@ -1,28 +1,50 @@
-import soundfile as sf
-import sounddevice as sd
-import numpy as np
 import config
 import threading
+import os
+import math
+import time
+import pyaudio
+import wave
+import numpy as np
 
 def play_sound_file(file_name, volume, verbose=False):
-    """
-    Play a sound file at a given volume, followed by a period of silence.
-
-    Args:
-        file_name (str): The path to the sound file to be played.
-        volume (float): The volume at which to play the sound file.
-        verbose (bool, optional): Whether to print verbose output. Defaults to False.
-
-    Raises:
-        FileNotFoundError: If the sound file does not exist.
-        Exception: If there is an error reading or playing the sound file.
-    """
     try:
-        with sf.SoundFile(file_name, 'r') as sound_file:
-            data = sound_file.read(dtype='int16')
-            silence = np.zeros((sound_file.samplerate, data.shape[1]), dtype='int16')
-            sd.play(np.concatenate((data * volume, silence)), sound_file.samplerate)
-            sd.wait()
+        # Load the audio file using wave
+        with wave.open(file_name, 'rb') as audio_file:
+            # Create a PyAudio instance
+            p = pyaudio.PyAudio()
+
+            # Open a stream for playback
+            stream = p.open(format=p.get_format_from_width(audio_file.getsampwidth()),
+                            channels=audio_file.getnchannels(),
+                            rate=audio_file.getframerate(),
+                            output=True)
+
+            # Adjust volume if volume != 1.0
+            if volume != 1.0:
+                # Read audio data into memory
+                data = audio_file.readframes(audio_file.getnframes())
+                audio = np.frombuffer(data, dtype=np.int16)
+                
+                # Adjust volume
+                audio = np.multiply(audio, volume).astype(np.int16)
+
+                # Write adjusted audio data to the stream
+                stream.write(audio.tobytes())
+            else:
+                # Read audio data in chunks and write to the stream
+                data = audio_file.readframes(1024)
+                while data:
+                    stream.write(data)
+                    data = audio_file.readframes(1024)
+
+            # Stop and close the stream
+            stream.stop_stream()
+            stream.close()
+
+            # Terminate the PyAudio instance
+            p.terminate()
+
     except FileNotFoundError as e:
         if verbose:
             print(f"The sound file {file_name} was not found.")
@@ -36,25 +58,21 @@ def play_sound_file(file_name, volume, verbose=False):
         raise Exception(f"An error occurred while playing the sound file: {e}") from e
 
 def play_sound_FX(name, volume=1.0, verbose=False):
-    """
-    Play a sound effect with a specified name and volume.
-    This function adjusts the volume based on a base volume setting and plays the sound asynchronously in a separate thread.
-
-    Args:
-        name (str): The name of the sound effect to be played.
-        volume (float, optional): The volume at which to play the sound effect. Defaults to 1.0.
-        verbose (bool, optional): Whether to print verbose output. Defaults to False.
-    """
     try:
         volume *= config.BASE_VOLUME
-        sound_file_name = f"sounds/recording-{name}.mp3"
-        
+        sound_file_name = f"sounds/recording-{name}"
         if verbose:
             print(f"Playing sound FX: {sound_file_name}")
-        
-        # Create a thread to play the sound asynchronously
+        if os.path.exists(sound_file_name + ".wav"):
+            sound_file_name += ".wav"
+        elif os.path.exists(sound_file_name + ".mp3"):
+            sound_file_name += ".mp3"
+        else:
+            raise FileNotFoundError(f"No sound file found for {name}")
+
         sound_thread = threading.Thread(target=play_sound_file, args=(sound_file_name, volume, verbose))
         sound_thread.start()
+        sound_thread.join()  # Wait for the thread to complete
     except Exception as e:
         if verbose:
             import traceback

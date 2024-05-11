@@ -1,15 +1,10 @@
 import os
-import soundfile as sf
-import pyaudio
-from dotenv import load_dotenv
 import threading
 import queue
 import config
 import tempfile
-import time
-
-# Load .env file if present
-load_dotenv()
+import pyaudio
+import wave
 
 class TTS:
     """
@@ -30,7 +25,10 @@ class TTS:
         self.last_sentence_spoken = ""
         self.verbose = verbose
         self.stop_playback = False
+        self.playback_stopped = threading.Event()
 
+
+        ## NOTE: For now all TTS services need to return wav files.
         if self.service == "openai":
             from TTS_apis.openai_api import OpenAITTSClient
             self.tts_client = OpenAITTSClient(verbose=self.verbose)
@@ -42,7 +40,7 @@ class TTS:
 
         # Delete any leftover temp files if any
         for file in os.listdir(config.AUDIO_FILE_DIR):
-            if file.endswith(".wav"):
+            if file.endswith(".wav") or file.endswith(".mp3"):
                 os.remove(os.path.join(config.AUDIO_FILE_DIR, file))
 
     def wait(self):
@@ -79,7 +77,7 @@ class TTS:
     
         try:
             # Create a temporary file in the output directory
-            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
+            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".mp3")
             temp_output_file = temp_file.name
             temp_file.close()
     
@@ -130,34 +128,33 @@ class TTS:
                 continue
 
             try:
-                # Read the audio data from the file
-                data, fs = sf.read(file_path, dtype='float32')
-            except Exception as e:
-                if self.verbose:
-                    print(f"Error reading file {file_path}: {e}")
-                continue
+                # Load the audio file using wave
+                with wave.open(file_path, 'rb') as audio_file:
+                    # Create a PyAudio instance
+                    p = pyaudio.PyAudio()
 
-            try:
-                # Play the audio using pyaudio
-                p = pyaudio.PyAudio()
-                stream = p.open(format=pyaudio.paFloat32,
-                                channels=1,
-                                rate=fs,
-                                output=True)
-                
-                # Write the audio data to the stream in chunks
-                chunk_size = 1024
-                for i in range(0, len(data), chunk_size):
-                    chunk = data[i:i + chunk_size]
-                    stream.write(chunk.tobytes())
-                    
-                    # Check if the stop_playback flag is set
+                    # Open a stream for playback
+                    stream = p.open(format=p.get_format_from_width(audio_file.getsampwidth()),
+                                    channels=audio_file.getnchannels(),
+                                    rate=audio_file.getframerate(),
+                                    output=True)
+
+                    # Read audio data in chunks and write to the stream
+                    data = audio_file.readframes(1024)
+                    while data and not self.stop_playback:
+                        stream.write(data)
+                        data = audio_file.readframes(1024)
+
+                    # Stop and close the stream
+                    stream.stop_stream()
+                    stream.close()
+
+                    # Terminate the PyAudio instance
+                    p.terminate()
+
                     if self.stop_playback:
-                        break
-                
-                stream.stop_stream()
-                stream.close()
-                p.terminate()
+                        self.playback_stopped.set()
+
             except Exception as e:
                 if self.verbose:
                     print(f"Error playing audio: {e}")
@@ -183,10 +180,10 @@ class TTS:
         # Set the running TTS flag to False
         self.running_tts = False
 
-        # Delete any leftover temp files if any this is just to be safe and should not be needed
+        # Delete any leftover temp files if any (this is just to be safe and should not be needed)
         try:
             for file in os.listdir(config.AUDIO_FILE_DIR):
-                if file.endswith(".wav"):
+                if file.endswith(".wav") or file.endswith(".mp3"):
                     os.remove(os.path.join(config.AUDIO_FILE_DIR, file))
         except Exception as e:
             if self.verbose:
@@ -200,12 +197,11 @@ class TTS:
         if self.verbose:
             print("Stopping TTS")
 
-        # Stop any currently playing audio
         # Set the stop_playback flag to signal the play_audio thread to stop
         self.stop_playback = True
-        
-        # Wait for a short duration to allow the play_audio thread to stop
-        time.sleep(0.2)
+
+        # Wait for the playback to stop or for a timeout of 1 second
+        self.playback_stopped.wait(timeout=0.01)
 
         # Attempt to clear the queue immediately to prevent any further processing
         while not self.audio_queue.empty():
@@ -230,8 +226,9 @@ class TTS:
         # Wait for the file deletion thread to finish
         file_deletion_thread.join()
         
-        # Reset the stop_playback flag
+        # Reset the stop_playback flag and the playback_stopped event
         self.stop_playback = False
+        self.playback_stopped.clear()
 
     def delete_temp_files(self):
         """
