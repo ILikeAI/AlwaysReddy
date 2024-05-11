@@ -126,7 +126,7 @@ Please note that on linux we are using the pynput library which does not let us 
 If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
 
 ## Known Issues:
-- For me it crashes if I spam the record hotkey, I havent worked out why just yet.
+- On linux it only detects hotkey presses when the application is in foucs, this is a major issue as the whole point of the project is to have it run in the background, if you want to help out this would be a great place to start poking around!
 
 ## Troubleshooting:
 If you have issues try deleting the venv folder and starting again.
