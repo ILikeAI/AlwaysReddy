@@ -1,29 +1,50 @@
-
-import simpleaudio as sa
-from pydub import AudioSegment
-from pydub.playback import play
 import config
 import threading
 import os
 import math
+import time
+import pyaudio
+import wave
+import numpy as np
 
 def play_sound_file(file_name, volume, verbose=False):
     try:
-        if file_name.lower().endswith(".wav"):
-            # Load and play WAV file using simpleaudio
-            wave_obj = sa.WaveObject.from_wave_file(file_name)
-            play_obj = wave_obj.play()
-            play_obj.wait_done()
-        elif file_name.lower().endswith(".mp3"):
-            # Load and play MP3 file using pydub
-            audio = AudioSegment.from_file(file_name, format="mp3")
-            # Adjust volume
+        # Load the audio file using wave
+        with wave.open(file_name, 'rb') as audio_file:
+            # Create a PyAudio instance
+            p = pyaudio.PyAudio()
+
+            # Open a stream for playback
+            stream = p.open(format=p.get_format_from_width(audio_file.getsampwidth()),
+                            channels=audio_file.getnchannels(),
+                            rate=audio_file.getframerate(),
+                            output=True)
+
+            # Adjust volume if volume != 1.0
             if volume != 1.0:
-                decibels = 10 * math.log10(volume)
-                audio = audio + decibels
-            play(audio)
-        else:
-            raise ValueError(f"Unsupported audio file format: {file_name}")
+                # Read audio data into memory
+                data = audio_file.readframes(audio_file.getnframes())
+                audio = np.frombuffer(data, dtype=np.int16)
+                
+                # Adjust volume
+                audio = np.multiply(audio, volume).astype(np.int16)
+
+                # Write adjusted audio data to the stream
+                stream.write(audio.tobytes())
+            else:
+                # Read audio data in chunks and write to the stream
+                data = audio_file.readframes(1024)
+                while data:
+                    stream.write(data)
+                    data = audio_file.readframes(1024)
+
+            # Stop and close the stream
+            stream.stop_stream()
+            stream.close()
+
+            # Terminate the PyAudio instance
+            p.terminate()
+
     except FileNotFoundError as e:
         if verbose:
             print(f"The sound file {file_name} was not found.")
@@ -48,6 +69,7 @@ def play_sound_FX(name, volume=1.0, verbose=False):
             sound_file_name += ".mp3"
         else:
             raise FileNotFoundError(f"No sound file found for {name}")
+
         sound_thread = threading.Thread(target=play_sound_file, args=(sound_file_name, volume, verbose))
         sound_thread.start()
         sound_thread.join()  # Wait for the thread to complete

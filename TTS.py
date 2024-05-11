@@ -4,8 +4,8 @@ import queue
 import config
 import tempfile
 import time
-from pydub import AudioSegment
-from pydub.playback import _play_with_simpleaudio
+import pyaudio
+import wave
 
 class TTS:
     """
@@ -127,20 +127,32 @@ class TTS:
                 continue
 
             try:
-                # Load the audio file using pydub
-                audio = AudioSegment.from_file(file_path)
+                # Load the audio file using wave
+                with wave.open(file_path, 'rb') as audio_file:
+                    # Create a PyAudio instance
+                    p = pyaudio.PyAudio()
 
-                # Play the audio using _play_with_simpleaudio
-                playback = _play_with_simpleaudio(audio)
+                    # Open a stream for playback
+                    stream = p.open(format=p.get_format_from_width(audio_file.getsampwidth()),
+                                    channels=audio_file.getnchannels(),
+                                    rate=audio_file.getframerate(),
+                                    output=True)
 
-                # Wait for the playback to finish or for the stop_playback flag to be set
-                while playback.is_playing() and not self.stop_playback:
-                    time.sleep(0.01)
+                    # Read audio data in chunks and write to the stream
+                    data = audio_file.readframes(1024)
+                    while data and not self.stop_playback:
+                        stream.write(data)
+                        data = audio_file.readframes(1024)
 
-                # If the stop_playback flag is set, stop the playback
-                if self.stop_playback:
-                    playback.stop()
-                    self.playback_stopped.set()
+                    # Stop and close the stream
+                    stream.stop_stream()
+                    stream.close()
+
+                    # Terminate the PyAudio instance
+                    p.terminate()
+
+                    if self.stop_playback:
+                        self.playback_stopped.set()
 
             except Exception as e:
                 if self.verbose:

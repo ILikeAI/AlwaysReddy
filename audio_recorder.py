@@ -5,12 +5,9 @@ import os
 import numpy as np
 from collections import deque
 import wave
-from ctypes import * # This is used to suppress ALSA error messages on linux
 import time
-
-# This file looks way more complicated than it could of been because on linux ALSA was giving me all sorts of gross warnings which is apparently normal
-# So i followed this to suppress them : https://blog.yjl.im/2012/11/pyaudio-portaudio-and-alsa-messages.html
-
+import sys
+from ctypes import *
 
 class AudioRecorder:
     """A class to handle the recording of audio using the PyAudio library."""
@@ -27,17 +24,26 @@ class AudioRecorder:
         self.start_time = None
         self.verbose = verbose
         
-        # Load ALSA library and set error handler
-        self.ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
-        self.asound = cdll.LoadLibrary('libasound.so')
-        self.c_error_handler = self.ERROR_HANDLER_FUNC(self.py_error_handler)
-        self.asound.snd_lib_error_set_handler(self.c_error_handler)
+        # Load ALSA library and set error handler for Linux
+        if sys.platform.startswith('linux'):
+            self.ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+            self.asound = cdll.LoadLibrary('libasound.so')
+            self.c_error_handler = self.ERROR_HANDLER_FUNC(self.py_error_handler)
+            self.asound.snd_lib_error_set_handler(self.c_error_handler)
         
         # Create PyAudio object and open the stream
         self.audio = pyaudio.PyAudio()
-        self.stream = self.audio.open(format=pyaudio.paInt16, channels=1,
-                                      rate=config.FS, input=True,
-                                      frames_per_buffer=512, start=False)
+        self.stream = None
+        try:
+            self.stream = self.audio.open(format=pyaudio.paInt16, channels=1,
+                                          rate=config.FS, input=True,
+                                          frames_per_buffer=512, start=False)
+        except Exception as e:
+            if self.verbose:
+                import traceback
+                traceback.print_exc()
+            else:
+                print(f"Failed to open audio stream: {e}")
 
     def py_error_handler(self, filename, line, function, err, fmt):
         """A custom error handler to suppress ALSA error messages."""
@@ -49,7 +55,7 @@ class AudioRecorder:
         
         This method starts the recording thread and the audio stream.
         """
-        if not self.recording:
+        if not self.recording and self.stream is not None:
             self.recording = True
             self.frames.clear()
             self.start_time = time.time()  # Set the start time when recording starts
@@ -98,7 +104,8 @@ class AudioRecorder:
         if self.recording:
             self.recording = False
             self.record_thread.join()
-            self.stream.stop_stream()
+            if self.stream is not None:
+                self.stream.stop_stream()
             if not cancel:
                 self.save_recording()
 
@@ -129,14 +136,8 @@ class AudioRecorder:
 
     def __del__(self):
         """Clean up resources when the AudioRecorder is deleted."""
-        self.stream.close()
+        if self.stream is not None:
+            self.stream.close()
         self.audio.terminate()
-        self.asound.snd_lib_error_set_handler(None)
-
-if __name__ == "__main__":
-    recorder = AudioRecorder(verbose=True)
-    recorder.start_recording()
-    time.sleep(5)
-    print(f"Recording duration: {recorder.duration:.2f} seconds")
-    recorder.stop_recording()
-    time.sleep(1)
+        if sys.platform.startswith('linux'):
+            self.asound.snd_lib_error_set_handler(None)
