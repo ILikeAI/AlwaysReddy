@@ -33,8 +33,7 @@ class AlwaysReddy:
     def clear_messages(self):
         """Clear the message history."""
         # TODO Eventually i would like to keep track of conversations and be able to switch between them
-        if self.verbose:
-            print("Clearing messages...")
+        print("Clearing messages...")
         self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
 
     def was_double_tapped(self, threshold=0.2):
@@ -172,7 +171,7 @@ class AlwaysReddy:
             if self.clipboard_text:
                 self.messages.append({"role": "user", "content": transcript + f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
                 self.clipboard_text = None
-                print("Using the text in your clipboard...")
+                print("\nUsing the text in your clipboard...")
             else:
                 self.messages.append({"role": "user", "content": transcript})
 
@@ -181,7 +180,7 @@ class AlwaysReddy:
                 self.messages = trim_messages(self.messages, config.MAX_TOKENS)
 
 
-            print("Transcription:\n", transcript)
+            print("\nTranscription:\n", transcript)
 
             # Make sure the user hasn't cut off the response
             if self.stop_response:
@@ -217,7 +216,7 @@ class AlwaysReddy:
 
             self.messages.append({"role": "assistant", "content": response})
 
-            print("Response:\n", response)
+            print("\nResponse:\n", response)
 
         except Exception as e:
             if self.verbose:
