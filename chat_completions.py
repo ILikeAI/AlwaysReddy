@@ -31,6 +31,10 @@ class CompletionManager:
             from llm_apis.perplexity_api import PerplexityClient
             self.client = PerplexityClient(verbose=self.verbose)
 
+        elif config.COMPLETIONS_API == "openrouter":
+            from llm_apis.openrouter_api import OpenRouterClient
+            self.client = OpenRouterClient(verbose=self.verbose)
+
         elif config.COMPLETIONS_API == "lm_studio":
             from llm_apis.lm_studio import LM_StudioClient
             if hasattr(config, 'LM_STUDIO_API_BASE_URL'):
