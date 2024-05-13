@@ -27,6 +27,10 @@ class CompletionManager:
             from llm_apis.anthropic_api import AnthropicClient
             self.client = AnthropicClient(verbose=self.verbose)
 
+        elif config.COMPLETIONS_API == "perplexity":
+            from llm_apis.perplexity_api import PerplexityClient
+            self.client = PerplexityClient(verbose=self.verbose)
+
         elif config.COMPLETIONS_API == "lm_studio":
             from llm_apis.lm_studio import LM_StudioClient
             if hasattr(config, 'LM_STUDIO_API_BASE_URL'):
