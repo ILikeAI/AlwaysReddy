@@ -46,7 +46,7 @@ class KeyboardHandler:
 
 class KeyboardLibraryHandler(KeyboardHandler):
     def add_hotkey(self, hotkey, callback):
-        keyboard.add_hotkey(hotkey, callback)
+        keyboard.add_hotkey(hotkey, callback, suppress=config.SUPPRESS_NATIVE_HOTKEYS)
 
     def start(self):
         try:
