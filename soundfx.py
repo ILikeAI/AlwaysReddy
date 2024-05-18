@@ -6,6 +6,7 @@ import time
 import pyaudio
 import wave
 import numpy as np
+import platform
 
 def play_sound_file(file_name, volume, verbose=False):
     try:
@@ -72,7 +73,9 @@ def play_sound_FX(name, volume=1.0, verbose=False):
 
         sound_thread = threading.Thread(target=play_sound_file, args=(sound_file_name, volume, verbose))
         sound_thread.start()
-        sound_thread.join()  # Wait for the thread to complete
+
+        if platform.system() != "Windows":
+            sound_thread.join()  # Wait for the thread to complete
     except Exception as e:
         if verbose:
             import traceback
