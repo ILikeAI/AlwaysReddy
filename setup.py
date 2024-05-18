@@ -10,11 +10,22 @@ def is_windows():
     return sys.platform == 'win32'
 
 def install_linux_dependencies():
-    try:
-        subprocess.check_call(['sudo', 'apt-get', 'install', '-y', 'xclip', 'ffmpeg', 'portaudio19-dev'])
-    except subprocess.CalledProcessError as e:
-        print(f"Error installing Linux dependencies: {e}")
-        sys.exit(1)
+    package_managers = {
+        'apt-get': ['sudo', 'apt-get', 'install', '-y', 'xclip', 'ffmpeg', 'portaudio19-dev'],
+        'pacman': ['sudo', 'pacman', '-Sy', 'xclip', 'ffmpeg', 'portaudio']
+    }
+
+    for manager, command in package_managers.items():
+        try:
+            subprocess.check_call(command)
+            print(f"Successfully installed dependencies using {manager}")
+            return
+        except subprocess.CalledProcessError as e:
+            print(f"Error installing dependencies using {manager}: {e}")
+            continue
+
+    print("Unable to install dependencies. Please install them manually.")
+    sys.exit(1)
 
 def copy_file(src, dest):
     """
