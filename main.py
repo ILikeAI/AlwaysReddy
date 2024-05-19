@@ -35,6 +35,7 @@ class AlwaysReddy:
         # TODO Eventually i would like to keep track of conversations and be able to switch between them
         print("Clearing messages...")
         self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
+        self.last_message_was_cut_off = False
 
     def was_double_tapped(self, threshold=0.2):
         """
