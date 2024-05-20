@@ -259,7 +259,7 @@ class AlwaysReddy:
         """
         Wrapper for the hotkey handler to include double tap detection for clipboard usage.
         """
-        use_clipboard = self.was_double_tapped()
+        use_clipboard = self.was_double_tapped(config.RECORD_HOTKEY_DELAY)
         if self.verbose:
             print("use_clipboard:", use_clipboard)
         if use_clipboard:
@@ -277,7 +277,7 @@ class AlwaysReddy:
             self.timer = None
             self.start_main_thread()
         else:
-            self.timer = threading.Timer(0.2, self.start_main_thread)
+            self.timer = threading.Timer(config.RECORD_HOTKEY_DELAY, self.start_main_thread)
             self.timer.start()
 
     def run(self):
