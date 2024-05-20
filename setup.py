@@ -92,8 +92,8 @@ def main():
     if not is_windows():
         install_linux_dependencies()
 
-    # Copy config.py.example to config.py
-    copy_file('EXAMPLE.config', 'config.py')
+    # Copy config_default.py to config.py
+    copy_file('config_default.py', 'config.py')
 
     # Copy .env.example to .env
     copy_file('.env.example', '.env')
