@@ -23,6 +23,7 @@ class AudioRecorder:
         self.record_thread = None
         self.start_time = None
         self.verbose = verbose
+        self.FS = 16000
         
         # Load ALSA library and set error handler for Linux
         if sys.platform.startswith('linux'):
@@ -36,7 +37,7 @@ class AudioRecorder:
         self.stream = None
         try:
             self.stream = self.audio.open(format=pyaudio.paInt16, channels=1,
-                                          rate=config.FS, input=True,
+                                          rate=self.FS, input=True,
                                           frames_per_buffer=512, start=False)
         except Exception as e:
             if self.verbose:
@@ -122,7 +123,7 @@ class AudioRecorder:
                 with wave.open(filename, 'wb') as wf:
                     wf.setnchannels(1)
                     wf.setsampwidth(self.audio.get_sample_size(pyaudio.paInt16))
-                    wf.setframerate(config.FS)
+                    wf.setframerate(self.FS)
                     wf.writeframes(recording.tobytes())
                 if self.verbose:
                     print(f"Recording saved to {filename}")

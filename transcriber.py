@@ -7,7 +7,7 @@ import config
 load_dotenv()
 
 class TranscriptionManager:
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=config.VERBOSE):
         self.client = None
         self.verbose = verbose
         self.setup_client()
@@ -20,6 +20,9 @@ class TranscriptionManager:
         elif config.TRANSCRIPTION_API == "FasterWhisper":
             from transcription_apis.faster_whisper_api import FasterWhisperClient
             self.client = FasterWhisperClient(verbose=self.verbose)
+        elif config.TRANSCRIPTION_API == "TransformersWhisper":
+            from transcription_apis.transformers_whisper_api import TransformersWhisperClient
+            self.client = TransformersWhisperClient(verbose=self.verbose)
         else:
             raise ValueError("Unsupported transcription API service configured")
 
