@@ -104,7 +104,7 @@ To use GPU acceleration with the faster-whisper API, follow these steps:
 2. cd into the directory `cd AlwaysReddy`
 3. Create a virtual environment with `python -m venv venv`-- This step is imortant, make sure to name it exactly `venv`
 4. Activate the virtual environment: `venv\Scripts\activate`
-5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r faster_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
+5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r faster_whisper_requirements.txt` or `pip install -r transformer_whisper_requirements.txt` if you want to run whisper locally.
 6. Run the setup script with `python setup.py`. This will also create a run file `run_AlwaysReddy.bat`.
 7. Open the `config.py` and `.env` files and update them with your settings and API key.
 8. Run the assistant with `run_AlwaysReddy.bat` or `python main.py`. The run file will automatically activate the virtual environment.
@@ -118,7 +118,7 @@ Linux support is super experimental but its working for me, contact me if you ha
 2. cd into the directory `cd AlwaysReddy`
 3. Create a virtual environment with `python3 -m venv venv`-- This step is imortant, make sure to name it exactly `venv`
 4. Activate the virtual environment: `source venv/bin/activate`
-5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r faster_whisper_requirements.txt` if you want to run whisper locally. - check the setup steps here if you have troubles using local whisper https://github.com/m-bain/whisperX
+5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r faster_whisper_requirements.txt` or `pip install -r transformer_whisper_requirements.txt` if you want to run whisper locally.
 6. Run the setup script with `python3 setup.py`. This will also create a run file `run_AlwaysReddy.sh`.
 7. Open the `config.py` and `.env` files and update them with your settings and API key.
 8. Run the assistant with `./run_AlwaysReddy.sh` or `python3 main.py`. The run file will automatically activate the virtual environment.
@@ -159,7 +159,7 @@ All hotkeys can be edited in config.py
 5. Create a new folder in the `piper_tts\voices` directory and give it a descriptive name. You will need to enter the name of this folder into the `config.py` file. For example: `PIPER_VOICE = "default_female_voice"`.
 6. Move the two downloaded files (`.onnx` and `.json`) into your newly created folder within the `piper_tts\voices` directory.
 
-### How to use local whisper transcription:
+### How to use local faster-whisper transcription:
 1. Open the `config.py` file.
 2. Locate the "Transcription API Settings" section.
 3. Comment out the line `TRANSCRIPTION_API = "openai"` by adding a `#` at the beginning of the line.
@@ -167,9 +167,10 @@ All hotkeys can be edited in config.py
 5. Adjust the `WHISPER_MODEL` and `TRANSCRIPTION_LANGUAGE` settings according to your preferences.
 6. Save the `config.py` file.
 
+Available models with faster-whisper: tiny.en, tiny, base.en, base, small.en, small, medium.en, medium, large-v1, large-v2, large-v3, large, distil-large-v2, distil-medium.en, distil-small.en, distil-large-v3
+
 Here's an example of how your `config.py` file should look like for local whisper transcription:
 
-Available models: tiny.en, tiny, base.en, base, small.en, small, medium.en, medium, large-v1, large-v2, large-v3, large, distil-large-v2, distil-medium.en, distil-small.en, distil-large-v3
 
 ```python
 ### Transcription API Settings ###
