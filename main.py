@@ -255,6 +255,16 @@ class AlwaysReddy:
             self.main_thread = threading.Thread(target=self.handle_hotkey)
             self.main_thread.start()
 
+    def use_clipboard(self):
+        try:
+            self.clipboard_text = read_clipboard()
+        except Exception as e:
+            if self.verbose:
+                import traceback
+                traceback.print_exc()
+            else:
+                print(f"Failed to read from clipboard: {e}")
+
     def handle_hotkey_wrapper(self):
         """
         Wrapper for the hotkey handler to include double tap detection for clipboard usage.
@@ -263,14 +273,7 @@ class AlwaysReddy:
         if self.verbose:
             print("use_clipboard:", use_clipboard)
         if use_clipboard:
-            try:
-                self.clipboard_text = read_clipboard()
-            except Exception as e:
-                if self.verbose:
-                    import traceback
-                    traceback.print_exc()
-                else:
-                    print(f"Failed to read from clipboard: {e}")
+            self.use_clipboard()
 
         if self.timer is not None:
             self.timer.cancel()
@@ -280,14 +283,45 @@ class AlwaysReddy:
             self.timer = threading.Timer(config.RECORD_HOTKEY_DELAY, self.start_main_thread)
             self.timer.start()
 
+    def handle_held_hotkey_wrapper(self, is_pressed):
+        """
+        Wrapper for the held (push-to-talk) hotkey handler.
+        """
+        self.start_main_thread()
+
+    def handle_held_clipboard_hotkey_wrapper(self, is_pressed):
+        """
+        Wrapper for the held (push-to-talk) hotkey handler with clipboard usage.
+        """
+        if is_pressed:
+            self.use_clipboard()
+
+        self.start_main_thread()
+
     def run(self):
         """Run the recorder, setting up hotkeys and entering the main loop."""
         keyboard_handler = get_keyboard_handler(verbose=self.verbose)
-        keyboard_handler.add_hotkey(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
-        keyboard_handler.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
-        keyboard_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
 
-        print(f"\n\nPress '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to the record hotkey to give AlwaysReddy the content currently copied in your clipboard.\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
+        print()
+        if config.RECORD_HOTKEY:
+            keyboard_handler.add_hotkey(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
+            print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\n\tDouble tap to give AlwaysReddy the content currently copied in your clipboard.")
+
+        if config.RECORD_HELD_HOTKEY:
+            keyboard_handler.add_held_hotkey(config.RECORD_HELD_HOTKEY, self.handle_held_hotkey_wrapper)
+            print(f"Hold '{config.RECORD_HELD_HOTKEY}' to start recording, release to stop and transcribe.")
+
+        if config.RECORD_HELD_CLIPBOARD_HOTKEY:
+            keyboard_handler.add_held_hotkey(config.RECORD_HELD_CLIPBOARD_HOTKEY, self.handle_held_clipboard_hotkey_wrapper)
+            print(f"Hold '{config.RECORD_HELD_CLIPBOARD_HOTKEY}' to start recording, release to stop and transcribe\n\tand give AlwaysReddy the content currently copied in your clipboard.")
+
+        if config.CANCEL_HOTKEY:
+            keyboard_handler.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
+            print(f"Press '{config.CANCEL_HOTKEY}' to cancel recording.")
+
+        if config.CLEAR_HISTORY_HOTKEY:
+            keyboard_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
+            print(f"Press '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 
         keyboard_handler.start()
 
