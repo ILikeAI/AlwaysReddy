@@ -1,6 +1,6 @@
 import pyaudio
 import threading
-import config
+from config_loader import config
 import os
 import numpy as np
 from collections import deque

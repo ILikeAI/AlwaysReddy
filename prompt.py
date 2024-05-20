@@ -1,4 +1,4 @@
-import config 
+from config_loader import config 
 
 prompts = {"default_prompt":{"description":"PLACEHOLDER", "messages":[
     {"role": "system", "content": f'''This message contains instructions on how you should behave.

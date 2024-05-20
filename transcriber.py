@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from config import AUDIO_FILE_DIR
-import config
+from config_loader import config
 
 # Load .env file if present
 load_dotenv()

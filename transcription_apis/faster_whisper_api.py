@@ -5,7 +5,7 @@ except ModuleNotFoundError:
     raise
 
 import os
-import config
+from config_loader import config
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" # This is a workaround for a bug 
 

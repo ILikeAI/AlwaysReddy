@@ -1,4 +1,4 @@
-import config
+from config_loader import config
 import threading
 import os
 import math

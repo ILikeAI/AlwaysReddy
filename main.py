@@ -7,7 +7,7 @@ import TTS
 from chat_completions import CompletionManager
 from soundfx import play_sound_FX
 from utils import read_clipboard, count_tokens, trim_messages
-import config
+from config_loader import config
 from prompt import prompts
 
 class AlwaysReddy:

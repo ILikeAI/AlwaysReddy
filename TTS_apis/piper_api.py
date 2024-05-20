@@ -1,6 +1,6 @@
 import os
 import subprocess
-import config
+from config_loader import config
 import utils
 import platform
 

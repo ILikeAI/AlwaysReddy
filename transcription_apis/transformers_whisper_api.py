@@ -3,7 +3,7 @@ import wave
 import numpy as np
 import torch
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
-import config
+from config_loader import config
 
 class TransformersWhisperClient:
     def __init__(self, verbose=config.VERBOSE):

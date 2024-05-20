@@ -1,7 +1,7 @@
 import os
 import threading
 import queue
-import config
+from config_loader import config
 import tempfile
 import pyaudio
 import wave
@@ -26,7 +26,6 @@ class TTS:
         self.verbose = verbose
         self.stop_playback = False
         self.playback_stopped = threading.Event()
-
 
         ## NOTE: For now all TTS services need to return wav files.
         if self.service == "openai":

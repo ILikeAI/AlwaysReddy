@@ -1,4 +1,4 @@
-import config
+from config_loader import config
 import re
 from utils import to_clipboard
 

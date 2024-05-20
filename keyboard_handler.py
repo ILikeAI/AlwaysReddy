@@ -1,4 +1,4 @@
-import config
+from config_loader import config
 import platform
 
 operating_system = platform.system()

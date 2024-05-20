@@ -1,5 +1,5 @@
 from openai import OpenAI
-import config
+from config_loader import config
 import utils
 
 class OpenAITTSClient:
