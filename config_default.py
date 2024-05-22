@@ -72,11 +72,12 @@ ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 CANCEL_HOTKEY = 'alt+ctrl+e'
 CLEAR_HISTORY_HOTKEY = 'alt+ctrl+w'
 RECORD_HOTKEY = 'alt+ctrl+r'
+
+RECORD_HOTKEY_DELAY = 0.2 # Seconds to wait for RECORD_HOTKEY double tap before starting recording
 SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
 
 
 ### MISC ###
-HOTKEY_DELAY = 0.5
 AUDIO_FILE_DIR = "audio_files"
 MAX_TOKENS = 8000 #Max tokens allowed in memory at once
 START_SEQ = "-CLIPSTART-" #the model is instructed to place any text for the clipboard between the start and end seq
