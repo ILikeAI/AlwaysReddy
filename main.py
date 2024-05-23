@@ -25,7 +25,6 @@ class AlwaysReddy:
         self.completion_client = CompletionManager(TTS_client=self.tts, parent_client=self, verbose=self.verbose)
         self.tts.completion_client = self.completion_client
         self.recording_stop_time = None
-        self.timer = None
         self.main_thread = None
         self.stop_response = False
         self.last_message_was_cut_off = False
@@ -36,21 +35,6 @@ class AlwaysReddy:
         print("Clearing messages...")
         self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
         self.last_message_was_cut_off = False
-
-    def was_double_tapped(self, threshold=0.2):
-        """
-        Check if the hotkey was double tapped within a given threshold.
-
-        Args:
-            threshold (float): The time threshold for double tapping.
-
-        Returns:
-            bool: True if double tapped, False otherwise.
-        """
-        current_time = time.time()
-        double_tapped = current_time - self.last_press_time < threshold
-        self.last_press_time = current_time
-        return double_tapped
 
     def start_recording(self):
         """Start the audio recording process and set a timeout for automatic stopping."""
@@ -241,53 +225,59 @@ class AlwaysReddy:
 
     def start_main_thread(self):
         """This starts the main thread and keeps a reference to it."""
-        self.timer = None
-
         if self.main_thread is not None and self.main_thread.is_alive():
             # If the thread is already running, cancel (without playing cancel sound) and start a new one
             self.cancel_all(silent=True)  # the silence is just so you dont hear cancel sound immediately followed by the start sound
             self.main_thread.join()
 
-            self.main_thread = threading.Thread(target=self.handle_hotkey)
-            self.main_thread.start()
+        self.main_thread = threading.Thread(target=self.handle_hotkey)
+        self.main_thread.start()
 
-        else:
-            self.main_thread = threading.Thread(target=self.handle_hotkey)
-            self.main_thread.start()
+    def use_clipboard(self):
+        try:
+            self.clipboard_text = read_clipboard()
+            if self.verbose:
+                print("Using clipboard...")
+        except Exception as e:
+            if self.verbose:
+                import traceback
+                traceback.print_exc()
+            else:
+                print(f"Failed to read from clipboard: {e}")
 
-    def handle_hotkey_wrapper(self):
+    def handle_hotkey_wrapper(self, is_pressed):
         """
-        Wrapper for the hotkey handler to include double tap detection for clipboard usage.
+        Wrapper for the hotkey handler to handle push-to-talk and double tap detection for clipboard usage.
         """
-        use_clipboard = self.was_double_tapped(config.RECORD_HOTKEY_DELAY)
-        if self.verbose:
-            print("use_clipboard:", use_clipboard)
-        if use_clipboard:
-            try:
-                self.clipboard_text = read_clipboard()
-            except Exception as e:
-                if self.verbose:
-                    import traceback
-                    traceback.print_exc()
-                else:
-                    print(f"Failed to read from clipboard: {e}")
-
-        if self.timer is not None:
-            self.timer.cancel()
-            self.timer = None
-            self.start_main_thread()
+        within_delay = time.time() - self.last_press_time < config.RECORD_HOTKEY_DELAY
+        if is_pressed:
+            self.last_press_time = time.time()
+            if self.is_recording and within_delay:
+                self.use_clipboard()
+                return
+            self.start_main_thread() # start recording
         else:
-            self.timer = threading.Timer(config.RECORD_HOTKEY_DELAY, self.start_main_thread)
-            self.timer.start()
+            if self.is_recording and not within_delay:
+                self.start_main_thread() # stop recording
 
     def run(self):
         """Run the recorder, setting up hotkeys and entering the main loop."""
         keyboard_handler = get_keyboard_handler(verbose=self.verbose)
-        keyboard_handler.add_hotkey(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
-        keyboard_handler.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
-        keyboard_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
 
-        print(f"\n\nPress '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe.\nDouble tap to the record hotkey to give AlwaysReddy the content currently copied in your clipboard.\nPress '{config.CANCEL_HOTKEY}' to cancel recording.\nPress '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
+        print()
+        if config.RECORD_HOTKEY:
+            keyboard_handler.add_held_hotkey(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
+            print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe."
+                  f"\n\tAlternatively hold it down to record until you release."
+                  f"\n\tDouble tap to give AlwaysReddy the content currently copied in your clipboard.")
+
+        if config.CANCEL_HOTKEY:
+            keyboard_handler.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
+            print(f"Press '{config.CANCEL_HOTKEY}' to cancel recording.")
+
+        if config.CLEAR_HISTORY_HOTKEY:
+            keyboard_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
+            print(f"Press '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 
         keyboard_handler.start()
 

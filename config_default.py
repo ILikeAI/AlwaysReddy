@@ -69,9 +69,10 @@ OPENAI_VOICE = "nova"
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 
 ### HOTKEYS ###
+# Hotkeys can be set to None to disable them
 CANCEL_HOTKEY = 'alt+ctrl+e'
 CLEAR_HISTORY_HOTKEY = 'alt+ctrl+w'
-RECORD_HOTKEY = 'alt+ctrl+r'
+RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
 
 RECORD_HOTKEY_DELAY = 0.2 # Seconds to wait for RECORD_HOTKEY double tap before starting recording
 SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
