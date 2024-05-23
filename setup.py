@@ -12,7 +12,8 @@ def is_windows():
 def install_linux_dependencies():
     package_managers = {
         'apt-get': ['sudo', 'apt-get', 'install', '-y', 'xclip', 'ffmpeg', 'portaudio19-dev'],
-        'pacman': ['sudo', 'pacman', '-Sy', 'xclip', 'ffmpeg', 'portaudio']
+        'pacman': ['sudo', 'pacman', '-Sy', 'xclip', 'ffmpeg', 'portaudio'],
+        'brew': ['brew', 'install', 'xclip', 'ffmpeg', 'portaudio']
     }
 
     for manager, command in package_managers.items():
