@@ -139,7 +139,8 @@ Set VERBOSE = True in the config to get more detailed logs and error traces
 There are currently only main 2 actions:
 
 Voice chat:
-- Press `Ctrl + Alt + R`  to start dictating, you can talk for as long as you want, then press `Ctrl + Alt + R` again to stop recording, a few seconds later you will get a voice response from the AIal
+- Press `Ctrl + Alt + R`  to start dictating, you can talk for as long as you want, then press `Ctrl + Alt + R` again to stop recording, a few seconds later you will get a voice response from the AI
+- You can also hold `Ctrl + Alt + R` to record and release it when you're done to get the transcription.
 
 Voice chat with context of your clipboard:
 - Double tap `Ctrl + Alt + R` (or just hold `Ctrl + Alt` and quickly press `R` Twice) This will give the AI the content of your clipboard so you can ask it to reference it, rewrite it, answer questions from its contents... whatever you like! 
