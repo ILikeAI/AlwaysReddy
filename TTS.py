@@ -34,6 +34,9 @@ class TTS:
         elif self.service == "piper":
             from TTS_apis.piper_api import PiperTTSClient
             self.tts_client = PiperTTSClient(verbose=self.verbose)
+        elif self.service == "mac":
+            from TTS_apis.macTTS import MacTTSClient
+            self.tts_client = MacTTSClient(verbose=self.verbose)
         else:
             raise ValueError("Unsupported TTS engine configured")
 

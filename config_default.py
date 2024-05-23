@@ -60,7 +60,7 @@ TRANSCRIPTION_API = "openai" # this will use the hosted openai api
 
 
 ### TTS SETTINGS ###
-TTS_ENGINE="openai" # 'piper' or 'openai' piper is local and fast but openai is better sounding
+TTS_ENGINE="openai" # 'piper' or 'openai' or 'mac'(mac is only for macos)
 
 PIPER_VOICE = "default_female_voice"
 OPENAI_VOICE = "nova"
