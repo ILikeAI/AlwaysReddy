@@ -9,10 +9,29 @@ from scripts.installpipertts import setup_piper_tts
 def is_windows():
     return sys.platform == 'win32'
 
+def is_macos():
+    return sys.platform == 'darwin'
+
 def install_linux_dependencies():
     package_managers = {
         'apt-get': ['sudo', 'apt-get', 'install', '-y', 'xclip', 'ffmpeg', 'portaudio19-dev'],
-        'pacman': ['sudo', 'pacman', '-Sy', 'xclip', 'ffmpeg', 'portaudio'],
+        'pacman': ['sudo', 'pacman', '-Sy', 'xclip', 'ffmpeg', 'portaudio']
+    }
+
+    for manager, command in package_managers.items():
+        try:
+            subprocess.check_call(command)
+            print(f"Successfully installed dependencies using {manager}")
+            return
+        except subprocess.CalledProcessError as e:
+            print(f"Error installing dependencies using {manager}: {e}")
+            continue
+
+    print("Unable to install dependencies. Please install them manually.")
+    sys.exit(1)
+
+def install_macos_dependencies():
+    package_managers = {
         'brew': ['brew', 'install', 'xclip', 'ffmpeg', 'portaudio']
     }
 
@@ -27,6 +46,7 @@ def install_linux_dependencies():
 
     print("Unable to install dependencies. Please install them manually.")
     sys.exit(1)
+
 
 def copy_file(src, dest):
     """
@@ -90,7 +110,9 @@ def remove_from_startup():
 
 def main():
     # Check if the system is Linux and install dependencies if necessary
-    if not is_windows():
+    if is_macos():
+        install_macos_dependencies()
+    elif not is_windows():
         install_linux_dependencies()
 
     # Copy config_default.py to config.py
