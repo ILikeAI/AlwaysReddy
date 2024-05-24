@@ -68,13 +68,11 @@ OPENAI_VOICE = "nova"
 ### PROMPTS ###
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 
-### HOTKEYS ###
-# Hotkeys can be set to None to disable them
-# AHK-Mod: Use keycodes from https://www.autohotkey.com/docs/Hotkeys.htm
+# uses AHK keycodes
 CANCEL_HOTKEY = '^XButton2'
 CLEAR_HISTORY_HOTKEY = '^!#XButton1' 
+RECORD_MODIFIER = 'Control' # press and hold only works with ahk if there is a modifier to release as it doesn't detect regular key releases.  This modifier should be used in the RECORD_HOTKEY variable.
 RECORD_HOTKEY = '^XButton1' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
-
 RECORD_HOTKEY_DELAY = 0.2 # Seconds to wait for RECORD_HOTKEY double tap before starting recording
 SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
 

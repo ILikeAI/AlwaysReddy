@@ -2,7 +2,6 @@ import time
 import threading
 from audio_recorder import AudioRecorder
 from transcriber import TranscriptionManager
-# from keyboard_handler import get_keyboard_handler
 import TTS
 from chat_completions import CompletionManager
 from soundfx import play_sound_FX
@@ -251,6 +250,7 @@ class AlwaysReddy:
         Wrapper for the hotkey handler to handle push-to-talk and double tap detection for clipboard usage.
         """
         within_delay = time.time() - self.last_press_time < config.RECORD_HOTKEY_DELAY
+        
         if is_pressed:
             self.last_press_time = time.time()
             if self.is_recording and within_delay:
@@ -263,25 +263,39 @@ class AlwaysReddy:
 
     def run(self):
         """Run the recorder, setting up hotkeys and entering the main loop."""
-        ahk = AHK()
+        self.ahk = AHK()  # Store AHK instance as a class attribute
 
-        print()
         if config.RECORD_HOTKEY:
-            ahk.key_down(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
+            self.record_hotkey_held = False
             print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe."
                   f"\n\tAlternatively hold it down to record until you release."
                   f"\n\tDouble tap to give AlwaysReddy the content currently copied in your clipboard.")
+            
+            def _ahk_hotkey_callback():
+                if not self.record_hotkey_held:
+                    self.record_hotkey_held = True
+                    self.handle_hotkey_wrapper(True)  # Trigger on key down
+
+                    # Loop to check for key release
+                    while self.ahk.key_state(config.RECORD_MODIFIER, mode='P'):
+                        time.sleep(0.1)
+
+                    # Hotkey is released
+                    self.record_hotkey_held = False
+                    self.handle_hotkey_wrapper(False)  # Trigger on key up
+                    
+            self.ahk.add_hotkey(config.RECORD_HOTKEY, _ahk_hotkey_callback)
 
         if config.CANCEL_HOTKEY:
-            ahk.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
+            self.ahk.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
             print(f"Press '{config.CANCEL_HOTKEY}' to cancel recording.")
 
         if config.CLEAR_HISTORY_HOTKEY:
-            ahk.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
+            self.ahk.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
             print(f"Press '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 
-        ahk.start_hotkeys()  # start the hotkey process thread
-        ahk.block_forever()  # stops the script from exiting
+        self.ahk.start_hotkeys()
+        self.ahk.block_forever()
 
 if __name__ == "__main__":
     try:
