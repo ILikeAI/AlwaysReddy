@@ -11,3 +11,4 @@ soundfile
 tiktoken
 requests
 PyAudio
+ahk

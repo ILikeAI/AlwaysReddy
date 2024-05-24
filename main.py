@@ -2,13 +2,14 @@ import time
 import threading
 from audio_recorder import AudioRecorder
 from transcriber import TranscriptionManager
-from keyboard_handler import get_keyboard_handler
+# from keyboard_handler import get_keyboard_handler
 import TTS
 from chat_completions import CompletionManager
 from soundfx import play_sound_FX
 from utils import read_clipboard, count_tokens, trim_messages
 from config_loader import config
 from prompt import prompts
+from ahk import AHK
 
 class AlwaysReddy:
     def __init__(self):
@@ -262,24 +263,25 @@ class AlwaysReddy:
 
     def run(self):
         """Run the recorder, setting up hotkeys and entering the main loop."""
-        keyboard_handler = get_keyboard_handler(verbose=self.verbose)
+        ahk = AHK()
 
         print()
         if config.RECORD_HOTKEY:
-            keyboard_handler.add_held_hotkey(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
+            ahk.key_down(config.RECORD_HOTKEY, self.handle_hotkey_wrapper)
             print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe."
                   f"\n\tAlternatively hold it down to record until you release."
                   f"\n\tDouble tap to give AlwaysReddy the content currently copied in your clipboard.")
 
         if config.CANCEL_HOTKEY:
-            keyboard_handler.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
+            ahk.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
             print(f"Press '{config.CANCEL_HOTKEY}' to cancel recording.")
 
         if config.CLEAR_HISTORY_HOTKEY:
-            keyboard_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
+            ahk.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
             print(f"Press '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 
-        keyboard_handler.start()
+        ahk.start_hotkeys()  # start the hotkey process thread
+        ahk.block_forever()  # stops the script from exiting
 
 if __name__ == "__main__":
     try:
