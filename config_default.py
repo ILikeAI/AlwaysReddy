@@ -7,6 +7,7 @@ USE_GPU = False  # Set to True to use GPU acceleration. Refer to the README for 
 ### COMPLETIONS API SETTINGS  ###
 # Just uncomment the ONE api you want to use
 
+
 ### LOCAL OPTIONS ###
 
 ## OLLAMA COMPLETIONS API EXAMPLE ##
@@ -42,13 +43,13 @@ COMPLETION_MODEL = "gpt-4-0125-preview"
 # COMPLETIONS_API = "openrouter"
 # COMPLETION_MODEL = "openai/gpt-3.5-turbo"
 
+
 ### Transcription API Settings ###
 
 ## Faster Whisper local transcription ###
 # TRANSCRIPTION_API = "FasterWhisper" # this will use the local whisper model
 # WHISPER_MODEL = "tiny.en" # If you prefer not to use english set it to "tiny", if the transcription quality is too low then set it to "base" but this will be a little slower
 # BEAM_SIZE = 5
-
 
 ## Transformers Whisper local transcription ###
 # TRANSCRIPTION_API = "TransformersWhisper"
@@ -58,23 +59,25 @@ COMPLETION_MODEL = "gpt-4-0125-preview"
 TRANSCRIPTION_API = "openai" # this will use the hosted openai api
 
 
-
 ### TTS SETTINGS ###
 TTS_ENGINE="openai" # 'piper' or 'openai' or 'mac'(mac is only for macos)
 
 PIPER_VOICE = "default_female_voice"
 OPENAI_VOICE = "nova"
 
+
 ### PROMPTS ###
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
 
-# uses AHK keycodes
+
+### HOTKEYS ###
+# Hotkeys can be set to None to disable them
+# for more info on hotkey syntax, see: https://www.autohotkey.com/docs/Hotkeys.htm and https://www.autohotkey.com/docs/v1/KeyList.htm
+# note: native hotkeys are suppressed by default.  you can pass through the native functions by adding a "~" to the beginning of the hotkey (e.g. '~^XButton2')
 CANCEL_HOTKEY = '^XButton2'
-CLEAR_HISTORY_HOTKEY = '^!#XButton1' 
-RECORD_MODIFIER = 'Control' # press and hold only works with ahk if there is a modifier to release as it doesn't detect regular key releases.  This modifier should be used in the RECORD_HOTKEY variable.
+CLEAR_HISTORY_HOTKEY = '^!#XButton1'
 RECORD_HOTKEY = '^XButton1' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
-RECORD_HOTKEY_DELAY = 0.2 # Seconds to wait for RECORD_HOTKEY double tap before starting recording
-SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
+RECORD_HOTKEY_DELAY = 0.5 # Seconds to wait for RECORD_HOTKEY double tap before starting recording
 
 
 ### MISC ###

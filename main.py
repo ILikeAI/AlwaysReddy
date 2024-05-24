@@ -250,7 +250,6 @@ class AlwaysReddy:
         Wrapper for the hotkey handler to handle push-to-talk and double tap detection for clipboard usage.
         """
         within_delay = time.time() - self.last_press_time < config.RECORD_HOTKEY_DELAY
-        
         if is_pressed:
             self.last_press_time = time.time()
             if self.is_recording and within_delay:
@@ -260,31 +259,24 @@ class AlwaysReddy:
         else:
             if self.is_recording and not within_delay:
                 self.start_main_thread() # stop recording
-
+    
     def run(self):
         """Run the recorder, setting up hotkeys and entering the main loop."""
-        self.ahk = AHK()  # Store AHK instance as a class attribute
-
+        self.ahk = AHK()                                                                # store AHK instance as a class attribute
         if config.RECORD_HOTKEY:
             self.record_hotkey_held = False
-            print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe."
-                  f"\n\tAlternatively hold it down to record until you release."
-                  f"\n\tDouble tap to give AlwaysReddy the content currently copied in your clipboard.")
-            
             def _ahk_hotkey_callback():
                 if not self.record_hotkey_held:
                     self.record_hotkey_held = True
-                    self.handle_hotkey_wrapper(True)  # Trigger on key down
-
-                    # Loop to check for key release
-                    while self.ahk.key_state(config.RECORD_MODIFIER, mode='P'):
-                        time.sleep(0.1)
-
-                    # Hotkey is released
+                    self.handle_hotkey_wrapper(True)                                    # trigger on key down
+                else:
                     self.record_hotkey_held = False
-                    self.handle_hotkey_wrapper(False)  # Trigger on key up
-                    
-            self.ahk.add_hotkey(config.RECORD_HOTKEY, _ahk_hotkey_callback)
+                    self.handle_hotkey_wrapper(False)                                   # trigger on key up
+            self.ahk.add_hotkey(config.RECORD_HOTKEY, _ahk_hotkey_callback)             # keydown
+            self.ahk.add_hotkey(config.RECORD_HOTKEY + " Up", _ahk_hotkey_callback)     # keyup
+            print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe."
+                  f"\n\tAlternatively hold it down to record until you release."
+                  f"\n\tDouble tap to give AlwaysReddy the content currently copied in your clipboard.")
 
         if config.CANCEL_HOTKEY:
             self.ahk.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
@@ -294,8 +286,8 @@ class AlwaysReddy:
             self.ahk.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
             print(f"Press '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 
-        self.ahk.start_hotkeys()
-        self.ahk.block_forever()
+        self.ahk.start_hotkeys()                                                        # start hotkey process thread
+        self.ahk.block_forever()                                                        # prevent process from exiting 
 
 if __name__ == "__main__":
     try:
