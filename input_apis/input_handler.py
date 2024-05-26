@@ -15,8 +15,8 @@ class InputHandler:
 
 def get_input_handler(verbose=False):
     if platform.system() == "Windows":
-        from input_apis.keyboard_library_handler import KeyboardLibraryHandler
-        return KeyboardLibraryHandler(verbose)
+        from input_apis.autohotkey_handler import AutohotkeyHandler
+        return AutohotkeyHandler(verbose)
     else:
         from input_apis.pynput_handler import PynputHandler
         return PynputHandler(verbose)
