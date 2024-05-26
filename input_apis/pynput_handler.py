@@ -1,58 +1,7 @@
-from config_loader import config
-import platform
+from input_apis.input_handler import InputHandler
+import pynput.keyboard as pynput_keyboard
 
-operating_system = platform.system()
-if operating_system == "Windows":
-    import keyboard
-else:
-    from pynput import keyboard as pynput_keyboard
-
-class KeyboardHandler:
-    def __init__(self, verbose=False):
-        self.verbose = verbose
-
-    def add_hotkey(self, hotkey, callback):
-        raise NotImplementedError("add_hotkey method must be implemented in subclasses")
-
-    def add_held_hotkey(self, hotkey, callback):
-        raise NotImplementedError("add_held_hotkey method must be implemented in subclasses")
-
-    def start(self):
-        raise NotImplementedError("start method must be implemented in subclasses")
-
-class KeyboardLibraryHandler(KeyboardHandler):
-    def __init__(self, verbose=False):
-        super().__init__(verbose)
-        self.held_hotkeys = {}
-
-    def add_hotkey(self, hotkey, callback):
-        keyboard.add_hotkey(hotkey, callback, suppress=config.SUPPRESS_NATIVE_HOTKEYS)
-
-    def add_held_hotkey(self, hotkey, callback):
-        self.held_hotkeys[hotkey] = False
-        keyboard.add_hotkey(hotkey, lambda: self.handle_held_callback(hotkey, callback, is_pressed=True), suppress=config.SUPPRESS_NATIVE_HOTKEYS)
-        keyboard.add_hotkey(hotkey, lambda: self.handle_held_callback(hotkey, callback, is_pressed=False), suppress=config.SUPPRESS_NATIVE_HOTKEYS, trigger_on_release=True)
-
-    def handle_held_callback(self, hotkey, callback, is_pressed):
-        if is_pressed != self.held_hotkeys[hotkey]:
-            callback(is_pressed=is_pressed)
-            self.held_hotkeys[hotkey] = is_pressed
-
-    def start(self):
-        try:
-            while True:
-                keyboard.wait()
-        except KeyboardInterrupt:
-            if self.verbose:
-                print("Recorder stopped by user.")
-        except Exception as e:
-            if self.verbose:
-                import traceback
-                traceback.print_exc()
-            else:
-                print(f"An error occurred: {e}")
-
-class PynputHandler(KeyboardHandler):
+class PynputHandler(InputHandler):
     def __init__(self, verbose=False):
         super().__init__(verbose)
         self.hotkeys: list = []
@@ -162,13 +111,3 @@ class PynputHandler(KeyboardHandler):
                 traceback.print_exc()
             else:
                 print(f"An error occurred: {e}")
-
-def get_keyboard_handler(verbose=False):
-    if operating_system == "Windows":
-        return KeyboardLibraryHandler(verbose)
-    else:
-        return PynputHandler(verbose)
-
-
-
-
