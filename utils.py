@@ -21,25 +21,6 @@ def to_clipboard(text):
     """
     clipboard.copy(text)
 
-def count_tokens(messages, model="gpt-3.5-turbo"):
-    """
-    Count the tokens in the given messages using the specified model.
-
-    Args:
-    messages (list): A list of messages to count tokens from.
-    model (str): The model to use for token counting. Defaults to "gpt-3.5-turbo".
-
-    Returns:
-    int: The total count of tokens in the messages.
-    """
-    enc = tiktoken.encoding_for_model(model)
-    msg_token_count = 0
-    for message in messages:
-        for key, value in message.items():
-            msg_token_count += len(enc.encode(value))  # Add tokens in set message
-
-    return msg_token_count
-
 def sanitize_text(text):
     """
     Remove disallowed characters from a string and replace certain symbols with their text equivalents.
@@ -66,7 +47,7 @@ def sanitize_text(text):
     
     return sanitized_text
 
-def trim_messages(messages, max_tokens):
+def _trim_messages(messages, max_tokens):
     """
     Trim the messages to fit within the maximum token limit.
 
@@ -80,7 +61,7 @@ def trim_messages(messages, max_tokens):
     msg_token_count = 0
 
     while True:
-        msg_token_count = count_tokens(messages)
+        msg_token_count = _count_tokens(messages)
         if msg_token_count <= max_tokens:
             break
         # Remove the oldest non-system message
@@ -95,4 +76,40 @@ def trim_messages(messages, max_tokens):
         del messages[first_non_system_msg_index]
         first_non_system_msg_index = next((i for i, message in enumerate(messages) if message.get('role') != 'system'), None)
 
+    return messages
+           
+
+def _count_tokens(messages, model="gpt-3.5-turbo"):
+    """
+    Count the tokens in the given messages using the specified model.
+
+    Args:
+    messages (list): A list of messages to count tokens from.
+    model (str): The model to use for token counting. Defaults to "gpt-3.5-turbo".
+
+    Returns:
+    int: The total count of tokens in the messages.
+    """
+    enc = tiktoken.encoding_for_model(model)
+    msg_token_count = 0
+    for message in messages:
+        for key, value in message.items():
+            msg_token_count += len(enc.encode(value))  # Add tokens in set message
+
+    return msg_token_count
+
+
+def maintain_token_limit(messages, max_tokens):
+    """
+    Maintain the token limit by trimming messages if the token count exceeds the maximum limit.
+
+    Args:
+    messages (list): A list of messages to maintain.
+    max_tokens (int): The maximum number of tokens allowed.
+
+    Returns:
+    list: The trimmed list of messages.
+    """
+    if _count_tokens(messages) > max_tokens:
+        messages = _trim_messages(messages, max_tokens)
     return messages

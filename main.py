@@ -6,7 +6,7 @@ from input_apis.input_handler import get_input_handler
 import TTS
 from chat_completions import CompletionManager
 from soundfx import play_sound_FX
-from utils import read_clipboard, count_tokens, trim_messages
+from utils import read_clipboard
 from config_loader import config
 from prompt import prompts
 
@@ -83,19 +83,6 @@ class AlwaysReddy:
                 else:
                     print(f"An error occurred during transcription: {e}")
 
-    def how_long_to_speak_first_word(self, first_word_time):
-        """
-        Calculate and print the delay between the end of recording and the first word spoken by TTS.
-        This is really just for testing purposes.
-
-        Args:
-            first_word_time (float): The timestamp of the first word spoken by TTS.
-        """
-        if self.recording_stop_time:
-            if self.verbose:
-                print(f"Response delay for first word: {first_word_time - self.recording_stop_time} seconds")
-            self.recording_stop_time = None
-
     def cancel_recording(self):
         """Cancel the current recording."""
         if self.is_recording:
@@ -159,11 +146,6 @@ class AlwaysReddy:
                 print("\nUsing the text in your clipboard...")
             else:
                 self.messages.append({"role": "user", "content": transcript})
-
-            # Make sure token count is within limits
-            if count_tokens(self.messages) > config.MAX_TOKENS:
-                self.messages = trim_messages(self.messages, config.MAX_TOKENS)
-
 
             print("\nTranscription:\n", transcript)
 
@@ -233,18 +215,6 @@ class AlwaysReddy:
         self.main_thread = threading.Thread(target=self.handle_hotkey)
         self.main_thread.start()
 
-    def use_clipboard(self):
-        try:
-            self.clipboard_text = read_clipboard()
-            if self.verbose:
-                print("Using clipboard...")
-        except Exception as e:
-            if self.verbose:
-                import traceback
-                traceback.print_exc()
-            else:
-                print(f"Failed to read from clipboard: {e}")
-
     def handle_hotkey_wrapper(self, is_pressed):
         """
         Wrapper for the hotkey handler to handle push-to-talk and double tap detection for clipboard usage.
@@ -253,7 +223,9 @@ class AlwaysReddy:
         if is_pressed:
             self.last_press_time = time.time()
             if self.is_recording and within_delay:
-                self.use_clipboard()
+                self.clipboard_text = read_clipboard()
+                if self.verbose:
+                    print("Using clipboard...")
                 return
             self.start_main_thread() # start recording
         else:
