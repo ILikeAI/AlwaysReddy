@@ -26,16 +26,23 @@ def activate_virtualenv():
     os_name = platform.system()
     if os_name == 'Windows':
         activate_script = os.path.join('venv', 'Scripts', 'activate.bat')
-        subprocess.run(['cmd', '/c', activate_script])
+        # Launches a new command prompt with the virtual environment activated
+        subprocess.run(['cmd', '/k', activate_script])
     elif os_name in ('Linux', 'Darwin'):
         activate_script = os.path.join('venv', 'bin', 'activate')
-        subprocess.run(['bash', '-c', f'source {activate_script}'])
+        # Launches a new bash shell with the virtual environment activated
+        subprocess.run(['bash', '-c', f'source {activate_script} && exec $SHELL'])
     else:
-        print(f"[!] Unsupported OS: {os_name}")
+        print(f"Unsupported OS: {os_name}")
         sys.exit(1)
 
 def install_dependencies(requirements_file):
-    command = ["python", "-m", "pip", "install", "-r", os.path.join("requirements", requirements_file)]
+    if is_windows():
+        python_executable = os.path.join('venv', 'Scripts', 'python')
+    else:
+        python_executable = os.path.join('venv', 'bin', 'python3')
+
+    command = [python_executable, "-m", "pip", "install", "-r", os.path.join("requirements", requirements_file)]
 
     try:
         subprocess.check_call(command)
@@ -100,7 +107,7 @@ def create_run_files():
         with open('run_AlwaysReddy.sh', 'w') as f:
             f.write('#!/bin/bash\n')
             f.write('source venv/bin/activate\n')
-            f.write('python main.py\n')
+            f.write('python3 main.py\n')
         os.chmod('run_AlwaysReddy.sh', 0o755)
         print("[+] Created run file for Linux/macOS")
 
@@ -138,7 +145,7 @@ def main():
     else:
         create_virtualenv()
 
-    activate_virtualenv()
+    
 
     # Check if the system is Linux or macOS and install dependencies if necessary
     if is_macos():
@@ -190,6 +197,8 @@ def main():
 
     print()
     print("===== Setup Complete =====")
+
+    activate_virtualenv()
 
 if __name__ == "__main__":
     main()
