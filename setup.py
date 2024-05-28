@@ -5,6 +5,7 @@ import sys
 import platform
 from scripts.installpipertts import setup_piper_tts
 
+
 def is_windows():
     return sys.platform == 'win32'
 
@@ -21,9 +22,27 @@ def create_virtualenv(force_create=False):
     else:
         print("[!] Virtual environment already exists.")
 
+def activate_virtualenv():
+    os_name = platform.system()
+    if os_name == 'Windows':
+        activate_script = os.path.join('venv', 'Scripts', 'activate.bat')
+        # Launches a new command prompt with the virtual environment activated
+        subprocess.run(['cmd', '/k', activate_script])
+    elif os_name in ('Linux', 'Darwin'):
+        activate_script = os.path.join('venv', 'bin', 'activate')
+        # Launches a new bash shell with the virtual environment activated
+        subprocess.run(['bash', '-c', f'source {activate_script} && exec $SHELL'])
+    else:
+        print(f"Unsupported OS: {os_name}")
+        sys.exit(1)
+
 def install_dependencies(requirements_file):
-    venv_python = os.path.join('venv', 'bin', 'python') if not is_windows() else os.path.join('venv', 'Scripts', 'python')
-    command = [venv_python, "-m", "pip", "install", "-r", os.path.join("requirements", requirements_file)]
+    if is_windows():
+        python_executable = os.path.join('venv', 'Scripts', 'python')
+    else:
+        python_executable = os.path.join('venv', 'bin', 'python3')
+
+    command = [python_executable, "-m", "pip", "install", "-r", os.path.join("requirements", requirements_file)]
 
     try:
         subprocess.check_call(command)
@@ -33,13 +52,22 @@ def install_dependencies(requirements_file):
         sys.exit(1)
 
 def install_linux_dependencies():
-    try:
-        subprocess.check_call(['sudo', 'apt-get', 'update'])
-        subprocess.check_call(['sudo', 'apt-get', 'install', '-y', 'libasound-dev', 'portaudio19-dev', 'libportaudio2', 'libportaudiocpp0', 'ffmpeg'])
-        print("[+] Successfully installed Linux dependencies.")
-    except subprocess.CalledProcessError as e:
-        print(f"[-] Error installing Linux dependencies: {e}")
-        sys.exit(1)
+    package_managers = {
+        'apt-get': ['sudo', 'apt-get', 'install', '-y', 'xclip', 'ffmpeg', 'portaudio19-dev'],
+        'pacman': ['sudo', 'pacman', '-Sy', 'xclip', 'ffmpeg', 'portaudio']
+    }
+
+    for manager, command in package_managers.items():
+        try:
+            subprocess.check_call(command)
+            print(f"[+] Successfully installed dependencies using {manager}")
+            return
+        except subprocess.CalledProcessError as e:
+            print(f"[-] Error installing dependencies using {manager}: {e}")
+            continue
+
+    print("[-] Unable to install dependencies. Please install them manually.")
+    sys.exit(1)
 
 def install_macos_dependencies():
     try:
@@ -51,8 +79,15 @@ def install_macos_dependencies():
         sys.exit(1)
 
 def copy_file(src, dest):
+    """
+    Copies a file from the source path to the destination path.
+    If the destination file already exists, it prompts the user for confirmation to overwrite.
+    """
     if os.path.exists(dest):
-        should_overwrite = input(f"[?] {dest} already exists. Do you want to overwrite it? (y/n): ")
+        if dest == "config.py":
+            should_overwrite = input(f"[?] {dest} already exists. Do you want to overwrite it? (y/n): ")
+        else:
+            should_overwrite = input(f"[?] {dest} already exists. Do you want to overwrite it? (y/n): ")
         if should_overwrite.lower() != 'y':
             print(f"[!] Skipping {dest}")
             return
@@ -110,6 +145,8 @@ def main():
     else:
         create_virtualenv()
 
+    
+
     # Check if the system is Linux or macOS and install dependencies if necessary
     if is_macos():
         install_macos_dependencies()
@@ -160,6 +197,8 @@ def main():
 
     print()
     print("===== Setup Complete =====")
+
+    activate_virtualenv()
 
 if __name__ == "__main__":
     main()

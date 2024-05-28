@@ -31,9 +31,13 @@ Join the discord: https://discord.gg/su44drSBzb
 ### Features:
 You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - Voice chat with you via TTS and STT
-- Read from your clipboard (with `Ctrl + Alt + R + R` rapidly double tapping R). NOTE: Linux has a different hotkey!
+- Read from your clipboard (with `Ctrl + Alt + R + R` rapidly double tapping R).
 - Write text to your clipboard on request.
 - Can be run 100% locally!!!
+- Supports Windows, Mac (experimental), linux (super duper experimental, see [Known Issues](#known-issues))
+
+### Are you a linux wizard?
+If you are and you're willing to help please consider look at the [Known Issues](#known-issues), I'm pretty stuck here!
 
 ### Use cases:
 I often use AlwaysReddy for the following things:
@@ -49,10 +53,12 @@ I often use AlwaysReddy for the following things:
 - TogetherAI
 - LM Studio (local) - [Setup Guide](https://youtu.be/b6MPdboJEfk)
 - Ollama (local) - [Setup Guide](https://youtu.be/BMYwT58rtxw?si=LHTTm85XFEJ5bMUD)
+- Perplexity
 
 ## Supported TTS systems:
 - Piper TTS (local and fast) [See how to change voice model](#how-to-add-new-voices-for-piper-tts)
 - OpenAI TTS API
+- Default mac TTS
 
 ## Setup:
 
@@ -96,39 +102,31 @@ To use GPU acceleration with the faster-whisper API, follow these steps:
 
 </details>
 
-**Note:** Whenver you pull a new version of AlwaysReddy you may want to run the setup script again and copy the config file again as I am updating this project all the time and often the contexts of the config.py change.
-
-### Setup for Windows:
+### Setup for Windows, macOS, and Linux:
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
-2. cd into the directory `cd AlwaysReddy`
-3. Create a virtual environment with `python -m venv venv`-- This step is imortant, make sure to name it exactly `venv`
-4. Activate the virtual environment: `venv\Scripts\activate`
-5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r faster_whisper_requirements.txt` or `pip install -r transformer_whisper_requirements.txt` if you want to run whisper locally.
-6. Run the setup script with `python setup.py`. This will also create a run file `run_AlwaysReddy.bat`.
-7. Open the `config.py` and `.env` files and update them with your settings and API key.
-8. Run the assistant with `run_AlwaysReddy.bat` or `python main.py`. The run file will automatically activate the virtual environment.
+2. Navigate into the directory: `cd AlwaysReddy`
+3. Run the setup script with `python setup.py` on windows or `python3 setup.py` on mac and linux.
+4. Open the `config.py` and `.env` files and update them with your settings and API keys.
 
-If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
+If you encounter any issues during the setup process, please refer to the [Troubleshooting](#troubleshooting) section below.
 
-### Setup for Linux:
-Linux support is super experimental but its working for me, contact me if you have any trouble.
+## How to Run
+### Running on Windows:
+- Double-click on the `run_AlwaysReddy.bat` file created during the setup process.
 
-1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
-2. cd into the directory `cd AlwaysReddy`
-3. Create a virtual environment with `python3 -m venv venv`-- This step is imortant, make sure to name it exactly `venv`
-4. Activate the virtual environment: `source venv/bin/activate`
-5. Install requirements with `pip install -r requirements.txt`. Also run `pip install -r faster_whisper_requirements.txt` or `pip install -r transformer_whisper_requirements.txt` if you want to run whisper locally.
-6. Run the setup script with `python3 setup.py`. This will also create a run file `run_AlwaysReddy.sh`.
-7. Open the `config.py` and `.env` files and update them with your settings and API key.
-8. Run the assistant with `./run_AlwaysReddy.sh` or `python3 main.py`. The run file will automatically activate the virtual environment.
+OR run `python main.py` from the command prompt or terminal.
+- Activate the venv `venv\Scripts\activate` then run the main script directly `python main.py`.
 
-Please note that on linux we are using the pynput library which does not let us use space or tab in our hotkeys.
+### Running on macOS and Linux:
+- Open a terminal, navigate to the AlwaysReddy directory, and run `./run_AlwaysReddy.sh`.
 
-If you get an error saying you need to install ffmpeg, try the steps here: https://github.com/openai/whisper#setup
+OR run `python3 main.py` from the command prompt or terminal.
+- Activate the venv `source venv/bin/activate` then run the main script directly `python3 main.py`.
 
 ## Known Issues:
 - On linux it only detects hotkey presses when the application is in foucs, this is a major issue as the whole point of the project is to have it run in the background, if you want to help out this would be a great place to start poking around! -- this may only be an issue with systems using wayland
+- Using AlwaysReddy in the terminal on ubuntu does not work for me, when I press the hotkey it just prints the key in the terminal, running it in my IDE works. 
 
 ## Troubleshooting:
 If you have issues try deleting the venv folder and starting again.
