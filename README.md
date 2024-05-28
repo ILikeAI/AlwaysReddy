@@ -107,10 +107,16 @@ If you encounter any issues during the setup process, please refer to the [Troub
 
 ## How to Run
 ### Running on Windows:
-- Double-click on the `run_AlwaysReddy.bat` file created during the setup process, or run `python main.py` from the command prompt or terminal.
+- Double-click on the `run_AlwaysReddy.bat` file created during the setup process.
+
+OR run `python main.py` from the command prompt or terminal.
+- Activate the venv `venv\Scripts\activate` then run the main script directly `python main.py`.
 
 ### Running on macOS and Linux:
-- Open a terminal, navigate to the AlwaysReddy directory, and run `./run_AlwaysReddy.sh` or `python main.py`.
+- Open a terminal, navigate to the AlwaysReddy directory, and run `./run_AlwaysReddy.sh`.
+
+OR run `python main.py` from the command prompt or terminal.
+- Activate the venv `venv\Scripts\activate` then run the main script directly `python main.py`.
 
 ## Known Issues:
 - On linux it only detects hotkey presses when the application is in foucs, this is a major issue as the whole point of the project is to have it run in the background, if you want to help out this would be a great place to start poking around! -- this may only be an issue with systems using wayland

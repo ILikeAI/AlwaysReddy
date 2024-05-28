@@ -78,7 +78,7 @@ def copy_file(src, dest):
     """
     if os.path.exists(dest):
         if dest == "config.py":
-            should_overwrite = input(f"[?] {dest} already exists. Do you want to overwrite it? This may be required after an update as new contents are added to the config file often. (y/n): ")
+            should_overwrite = input(f"[?] {dest} already exists. Do you want to overwrite it? (y/n): ")
         else:
             should_overwrite = input(f"[?] {dest} already exists. Do you want to overwrite it? (y/n): ")
         if should_overwrite.lower() != 'y':
