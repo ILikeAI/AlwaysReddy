@@ -31,9 +31,13 @@ Join the discord: https://discord.gg/su44drSBzb
 ### Features:
 You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - Voice chat with you via TTS and STT
-- Read from your clipboard (with `Ctrl + Alt + R + R` rapidly double tapping R). NOTE: Linux has a different hotkey!
+- Read from your clipboard (with `Ctrl + Alt + R + R` rapidly double tapping R).
 - Write text to your clipboard on request.
 - Can be run 100% locally!!!
+- Supports Windows, Mac (experimental), linux (super duper experimental, see [Known Issues](#known-issues))
+
+### Are you a linux wizard?
+If you are and you're willing to help please consider look at the [Known Issues](#known-issues), I'm pretty stuck here!
 
 ### Use cases:
 I often use AlwaysReddy for the following things:
@@ -49,10 +53,12 @@ I often use AlwaysReddy for the following things:
 - TogetherAI
 - LM Studio (local) - [Setup Guide](https://youtu.be/b6MPdboJEfk)
 - Ollama (local) - [Setup Guide](https://youtu.be/BMYwT58rtxw?si=LHTTm85XFEJ5bMUD)
+- Perplexity
 
 ## Supported TTS systems:
 - Piper TTS (local and fast) [See how to change voice model](#how-to-add-new-voices-for-piper-tts)
 - OpenAI TTS API
+- Default mac TTS
 
 ## Setup:
 
@@ -100,7 +106,7 @@ To use GPU acceleration with the faster-whisper API, follow these steps:
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
 2. Navigate into the directory: `cd AlwaysReddy`
-3. Run the setup script with `python setup.py`.
+3. Run the setup script with `python setup.py` on windows or `python3 setup.py` on mac and linux.
 4. Open the `config.py` and `.env` files and update them with your settings and API keys.
 
 If you encounter any issues during the setup process, please refer to the [Troubleshooting](#troubleshooting) section below.
@@ -115,11 +121,12 @@ OR run `python main.py` from the command prompt or terminal.
 ### Running on macOS and Linux:
 - Open a terminal, navigate to the AlwaysReddy directory, and run `./run_AlwaysReddy.sh`.
 
-OR run `python main.py` from the command prompt or terminal.
-- Activate the venv `venv\Scripts\activate` then run the main script directly `python main.py`.
+OR run `python3 main.py` from the command prompt or terminal.
+- Activate the venv `source venv/bin/activate` then run the main script directly `python3 main.py`.
 
 ## Known Issues:
 - On linux it only detects hotkey presses when the application is in foucs, this is a major issue as the whole point of the project is to have it run in the background, if you want to help out this would be a great place to start poking around! -- this may only be an issue with systems using wayland
+- Using AlwaysReddy in the terminal on ubuntu does not work for me, when I press the hotkey it just prints the key in the terminal, running it in my IDE works. 
 
 ## Troubleshooting:
 If you have issues try deleting the venv folder and starting again.
