@@ -1,4 +1,4 @@
-class Config:
+class ConfigLoader:
     """
     Config class to load and merge default and user-specific configuration settings.
 
@@ -52,7 +52,7 @@ class Config:
                     print(f"  - {key}")
 
 # Create a global config object
-config = Config()
+config = ConfigLoader()
 
 # Usage example
 if __name__ == "__main__":

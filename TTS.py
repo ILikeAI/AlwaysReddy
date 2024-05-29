@@ -19,7 +19,7 @@ class TTS:
         self.parent_client = parent_client
         self.queing = False
         self.temp_files = []
-        self.play_audio_thread = threading.Thread(target=self.play_audio)
+        self._play_audio_thread = threading.Thread(target=self._play_audio)
         self.completion_client = None
         self.running_tts = False
         self.last_sentence_spoken = ""
@@ -29,13 +29,13 @@ class TTS:
 
         ## NOTE: For now all TTS services need to return wav files.
         if self.service == "openai":
-            from TTS_apis.openai_api import OpenAITTSClient
+            from TTS_apis.openai_tts_client import OpenAITTSClient
             self.tts_client = OpenAITTSClient(verbose=self.verbose)
         elif self.service == "piper":
-            from TTS_apis.piper_api import PiperTTSClient
+            from TTS_apis.piper_tts_client import PiperTTSClient
             self.tts_client = PiperTTSClient(verbose=self.verbose)
         elif self.service == "mac":
-            from TTS_apis.macTTS import MacTTSClient
+            from TTS_apis.mac_tts_client import MacTTSClient
             self.tts_client = MacTTSClient(verbose=self.verbose)
         else:
             raise ValueError("Unsupported TTS engine configured")
@@ -47,9 +47,9 @@ class TTS:
 
     def wait(self):
         """
-        Wait for the play_audio_thread to join.
+        Wait for the _play_audio_thread to join.
         """
-        self.play_audio_thread.join()
+        self._play_audio_thread.join()
 
     def run_tts(self, sentence, output_dir=config.AUDIO_FILE_DIR):
         """
@@ -63,9 +63,9 @@ class TTS:
         self.queing = True
     
         # If the audio playback thread is not running, start it
-        if not self.play_audio_thread.is_alive():
-            self.play_audio_thread = threading.Thread(target=self.play_audio)
-            self.play_audio_thread.start()
+        if not self._play_audio_thread.is_alive():
+            self._play_audio_thread = threading.Thread(target=self._play_audio)
+            self._play_audio_thread.start()
     
         # If the output directory does not exist, create it
         if not os.path.exists(output_dir):
@@ -110,7 +110,7 @@ class TTS:
         # Set queuing flag to False
         self.queing = False
 
-    def play_audio(self):
+    def _play_audio(self):
         """
         Play the audio from the audio queue.
         """
@@ -199,7 +199,7 @@ class TTS:
         if self.verbose:
             print("Stopping TTS")
 
-        # Set the stop_playback flag to signal the play_audio thread to stop
+        # Set the stop_playback flag to signal the _play_audio thread to stop
         self.stop_playback = True
 
         # Wait for the playback to stop or for a timeout of 1 second
@@ -217,13 +217,13 @@ class TTS:
             self.audio_queue.task_done()
 
         # Start a new thread to handle file deletion
-        file_deletion_thread = threading.Thread(target=self.delete_temp_files)
+        file_deletion_thread = threading.Thread(target=self._delete_temp_files)
         file_deletion_thread.start()
 
         # If the audio playback thread is alive
-        if self.play_audio_thread.is_alive():
+        if self._play_audio_thread.is_alive():
             # Wait for the thread to finish
-            self.play_audio_thread.join()
+            self._play_audio_thread.join()
 
         # Wait for the file deletion thread to finish
         file_deletion_thread.join()
@@ -232,7 +232,7 @@ class TTS:
         self.stop_playback = False
         self.playback_stopped.clear()
 
-    def delete_temp_files(self):
+    def _delete_temp_files(self):
         """
         Delete any temporary files.
         """

@@ -11,32 +11,32 @@ class CompletionManager:
         self.parent_client = parent_client
         self.full_response = ''
         self.verbose = verbose
-        self.setup_client()
+        self._setup_client()
 
-    def setup_client(self):
+    def _setup_client(self):
         """Instantiates the appropriate AI client based on configuration file."""
         if config.COMPLETIONS_API == "openai":
-            from llm_apis.openai_api import OpenAIClient
+            from llm_apis.openai_client import OpenAIClient
             self.client = OpenAIClient(verbose=self.verbose)
             
         elif config.COMPLETIONS_API == "together":
-            from llm_apis.togetherai_api import TogetherAIClient
+            from llm_apis.togetherai_client import TogetherAIClient
             self.client = TogetherAIClient(verbose=self.verbose)
 
         elif config.COMPLETIONS_API == "anthropic":
-            from llm_apis.anthropic_api import AnthropicClient
+            from llm_apis.anthropic_client import AnthropicClient
             self.client = AnthropicClient(verbose=self.verbose)
 
         elif config.COMPLETIONS_API == "perplexity":
-            from llm_apis.perplexity_api import PerplexityClient
+            from llm_apis.perplexity_client import PerplexityClient
             self.client = PerplexityClient(verbose=self.verbose)
 
         elif config.COMPLETIONS_API == "openrouter":
-            from llm_apis.openrouter_api import OpenRouterClient
+            from llm_apis.openrouter_client import OpenRouterClient
             self.client = OpenRouterClient(verbose=self.verbose)
 
         elif config.COMPLETIONS_API == "lm_studio":
-            from llm_apis.lm_studio import LM_StudioClient
+            from llm_apis.lm_studio_client import LM_StudioClient
             if hasattr(config, 'LM_STUDIO_API_BASE_URL'):
                 self.client = LM_StudioClient(base_url=config.LM_STUDIO_API_BASE_URL, verbose=self.verbose)
             else:
@@ -44,7 +44,7 @@ class CompletionManager:
                 self.client = LM_StudioClient(verbose=self.verbose)
 
         elif config.COMPLETIONS_API == "ollama":
-            from llm_apis.ollama_api import OllamaClient
+            from llm_apis.ollama_client import OllamaClient
             if hasattr(config, 'OLLAMA_API_BASE_URL'):
                 self.client = OllamaClient(base_url=config.OLLAMA_API_BASE_URL, verbose=self.verbose)
                 
@@ -70,7 +70,7 @@ class CompletionManager:
             messages = maintain_token_limit(messages, config.MAX_TOKENS)
             
             stream = self.client.stream_completion(messages, model, **kwargs)
-            for type, content in self.stream_sentences_from_chunks(stream, clip_start_marker=config.START_SEQ, clip_end_marker=config.END_SEQ):
+            for type, content in self._stream_sentences_from_chunks(stream, clip_start_marker=config.START_SEQ, clip_end_marker=config.END_SEQ):
 
                 # If stop stream is set to True, break the loop
                 if self.parent_client.stop_response:
@@ -95,7 +95,7 @@ class CompletionManager:
                 print(f"An error occurred while getting completion: {e}")
             return None
         
-    def stream_sentences_from_chunks(self, chunks_stream, clip_start_marker="-CLIPSTART-", clip_end_marker="-CLIPEND-"):
+    def _stream_sentences_from_chunks(self, chunks_stream, clip_start_marker="-CLIPSTART-", clip_end_marker="-CLIPEND-"):
         """Takes in audio chunks and returns sentences or chunks of text for the clipboard, as well as the full unmodified text stream.
 
         Args:
