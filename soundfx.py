@@ -8,7 +8,7 @@ import wave
 import numpy as np
 import platform
 
-def play_sound_file(file_name, volume, verbose=False):
+def __play_sound_file(file_name, volume, verbose=False):
     try:
         # Load the audio file using wave
         with wave.open(file_name, 'rb') as audio_file:
@@ -71,7 +71,7 @@ def play_sound_FX(name, volume=1.0, verbose=False):
         else:
             raise FileNotFoundError(f"No sound file found for {name}")
 
-        sound_thread = threading.Thread(target=play_sound_file, args=(sound_file_name, volume, verbose))
+        sound_thread = threading.Thread(target=__play_sound_file, args=(sound_file_name, volume, verbose))
         sound_thread.start()
 
     except Exception as e:
