@@ -6,7 +6,7 @@ import tempfile
 import pyaudio
 import wave
 
-class TTS:
+class TTSManager:
     """
     Text-to-Speech (TTS) class for generating speech from text.
     """

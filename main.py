@@ -3,7 +3,7 @@ import threading
 from audio_recorder import AudioRecorder
 from transcription_manager import TranscriptionManager
 from input_apis.input_handler import get_input_handler
-import tts as TTS
+import tts_mamager
 from completion_manager import CompletionManager
 from soundfx import play_sound_FX
 from utils import read_clipboard
@@ -18,7 +18,7 @@ class AlwaysReddy:
         self.clipboard_text = None
         self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
         self.last_press_time = 0
-        self.tts = TTS.TTS(parent_client=self, verbose=self.verbose)
+        self.tts = tts_mamager.TTSManager(parent_client=self, verbose=self.verbose)
         self.recording_timeout_timer = None
         self.transcription_manager = TranscriptionManager(verbose=self.verbose)
         self.completion_client = CompletionManager(TTS_client=self.tts, parent_client=self, verbose=self.verbose)
