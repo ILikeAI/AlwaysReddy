@@ -3,7 +3,7 @@ import threading
 from audio_recorder import AudioRecorder
 from transcription_manager import TranscriptionManager
 from input_apis.input_handler import get_input_handler
-import tts_mamager
+import tts_manager
 from completion_manager import CompletionManager
 from soundfx import play_sound_FX
 from utils import read_clipboard
@@ -18,7 +18,7 @@ class AlwaysReddy:
         self.clipboard_text = None
         self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
         self.last_press_time = 0
-        self.tts = tts_mamager.TTSManager(parent_client=self, verbose=self.verbose)
+        self.tts = tts_manager.TTSManager(parent_client=self, verbose=self.verbose)
         self.recording_timeout_timer = None
         self.transcription_manager = TranscriptionManager(verbose=self.verbose)
         self.completion_client = CompletionManager(TTS_client=self.tts, parent_client=self, verbose=self.verbose)
@@ -188,7 +188,7 @@ class AlwaysReddy:
             else:
                 print(f"An error occurred while handling the response: {e}")
 
-    def record_hotkey(self):
+    def toggle_recording(self):
         """Handle the hotkey press for starting or stopping recording."""
         if self.recorder.recording:
             self.stop_response = False
@@ -203,12 +203,12 @@ class AlwaysReddy:
             self.cancel_all(silent=True)  # the silence is just so you dont hear cancel sound immediately followed by the start sound
             self.main_thread.join()
 
-        self.main_thread = threading.Thread(target=self.record_hotkey)
+        self.main_thread = threading.Thread(target=self.toggle_recording)
         self.main_thread.start()
 
-    def toggle_recording(self, is_pressed):
+    def handle_record_hotkey(self, is_pressed):
         """
-        Wrapper for the hotkey handler to handle push-to-talk and double tap detection for clipboard usage.
+        Handle the record hotkey press.
         """
         within_delay = time.time() - self.last_press_time < config.RECORD_HOTKEY_DELAY
         if is_pressed:
@@ -229,7 +229,7 @@ class AlwaysReddy:
 
         print()
         if config.RECORD_HOTKEY:
-            input_handler.add_held_hotkey(config.RECORD_HOTKEY, self.toggle_recording)
+            input_handler.add_held_hotkey(config.RECORD_HOTKEY, self.handle_record_hotkey)
             print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe."
                   f"\n\tAlternatively hold it down to record until you release."
                   f"\n\tDouble tap to give AlwaysReddy the content currently copied in your clipboard.")
