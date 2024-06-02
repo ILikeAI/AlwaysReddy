@@ -79,7 +79,7 @@ class TTSManager:
     
         try:
             # Create a temporary file in the output directory
-            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".mp3")
+            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
             temp_output_file = temp_file.name
             temp_file.close()
     
