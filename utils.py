@@ -1,6 +1,7 @@
 import re
 import clipboard
 import tiktoken
+import re
 
 def read_clipboard():
     """
@@ -19,7 +20,8 @@ def to_clipboard(text):
     Args:
     text (str): The text to be copied to the clipboard.
     """
-    clipboard.copy(text)
+
+    clipboard.copy(extract_code_if_only_code_block(text))
 
 def sanitize_text(text):
     """
@@ -113,3 +115,30 @@ def maintain_token_limit(messages, max_tokens):
     if _count_tokens(messages) > max_tokens:
         messages = _trim_messages(messages, max_tokens)
     return messages
+
+def extract_code_if_only_code_block(markdown_text):
+    """
+    Extracts the code from a markdown text if the text only contains a single code block.
+
+    Args:
+        markdown_text (str): The markdown text to extract the code from.
+
+    Returns:
+        str: The extracted code if the markdown text only contains a single code block, 
+             otherwise the original markdown text.
+    """
+    
+    stripped_text = markdown_text.strip()
+    
+    # Define the regex pattern
+    pattern = r'^```(?:\w+)?\n([\s\S]*?)```$'
+    
+    # Search for the pattern
+    match = re.match(pattern, stripped_text)
+    
+    if match:
+        # Extract and return the code block
+        return match.group(1)
+    else:
+        # Return the original text if it doesn't match the pattern
+        return markdown_text
