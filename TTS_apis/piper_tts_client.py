@@ -1,134 +1,79 @@
 import os
-import platform
-import shutil
-import tarfile
-import zipfile
-import requests
 import subprocess
+from config_loader import config
+import utils
+import platform
 
-def download_file(url, save_path):
-    print(f"Downloading from {url}")
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        total_length = int(r.headers.get('content-length', 0))
-        dl = 0
-        with open(save_path, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                if chunk:
-                    dl += len(chunk)
-                    f.write(chunk)
-                    done = int(50 * dl / total_length)
-                    print(f"\r[{'=' * done}{' ' * (50-done)}] {dl/total_length*100:.2f}%", end='')
-    print("\nDownload complete.")
+class PiperTTSClient:
+    def __init__(self, verbose=False):
+        """Initialize the Piper TTS client."""
+        self.verbose = verbose
 
-def extract_tar_gz(file_path, destination_dir):
-    print(f"Extracting {file_path}")
-    with tarfile.open(file_path, "r:gz") as tar:
-        tar.extractall(path=destination_dir)
-    print("Extraction complete.")
+    def tts(self, text_to_speak, output_file, voice_folder=config.PIPER_VOICE):
+        """
+        This function uses the Piper TTS engine to convert text to speech.
+        
+        Args:
+            text_to_speak (str): The text to be converted to speech.
+            output_file (str): The path where the output audio file will be saved.
+            voice_folder (str): The folder containing the voice files for the TTS engine.
+            
+        Returns:
+            str: "success" if the TTS process was successful, "failed" otherwise.
+        """
+        # Sanitize the text to be spoken
+        text_to_speak = utils.sanitize_text(text_to_speak)
 
-def extract_zip(file_path, destination_dir):
-    print(f"Extracting {file_path}")
-    with zipfile.ZipFile(file_path, "r") as zip_ref:
-        zip_ref.extractall(destination_dir)
-    print("Extraction complete.")
+        # If there's no text left after sanitization, return "failed"
+        if not text_to_speak.strip():
+            if self.verbose:
+                print("No text to speak after sanitization.")
+            return "failed"
 
-def setup_piper_tts():
-    operating_system = platform.system()
-    machine = platform.machine()
-    url_base = "https://github.com/rhasspy/piper/releases/download/2023.11.14-2/"
-    additional_url_base = "https://github.com/rhasspy/piper-phonemize/releases/download/2023.11.14-4/"
-    binary_file, binary_name, extract_func = None, None, None
-    additional_file = None
-
-    if operating_system == "Windows":
-        binary_file = "piper_windows_amd64.zip"
-        extract_func = extract_zip
-    elif operating_system == "Darwin":
-        if machine == "x86_64":
-            binary_file = "piper_macos_x64.tar.gz"
-            additional_file = "piper-phonemize_macos_x64.tar.gz"
-        elif machine == "arm64":
-            binary_file = "piper_macos_aarch64.tar.gz"
-            additional_file = "piper-phonemize_macos_aarch64.tar.gz"
+        # Determine the operating system
+        operating_system = platform.system()
+        if operating_system == "Windows":
+            piper_binary = os.path.join("piper_tts", "piper.exe")
         else:
-            raise ValueError(f"Unsupported macOS architecture: {machine}")
-        extract_func = extract_tar_gz
-    elif operating_system == "Linux":
-        if machine == "x86_64":
-            binary_file = "piper_linux_x86_64.tar.gz"
-        elif machine == "aarch64":
-            binary_file = "piper_linux_aarch64.tar.gz"
-        elif machine == "armv7l":
-            binary_file = "piper_linux_armv7l.tar.gz"
-        else:
-            raise ValueError(f"Unsupported Linux architecture: {machine}")
-        extract_func = extract_tar_gz
-    else:
-        raise ValueError(f"Unsupported operating system: {operating_system}")
+            piper_binary = os.path.join("piper_tts", "piper")
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    parent_dir = os.path.dirname(script_dir)
-    binary_path = os.path.join(script_dir, binary_file)
-    additional_path = os.path.join(script_dir, additional_file) if additional_file else None
-    extraction_dir = os.path.join(script_dir, "piper_tts_extracted")
-    destination_dir = os.path.join(parent_dir, "piper_tts")
+        # Construct the path to the voice files
+        voice_path = os.path.join("piper_tts", "voices", voice_folder)
 
-    # Download the binary
-    download_url = url_base + binary_file
-    download_file(download_url, binary_path)
+        # If the voice folder doesn't exist, return "failed"
+        if not os.path.exists(voice_path):
+            if self.verbose:
+                print(f"Voice folder '{voice_folder}' does not exist.")
+            return "failed"
 
-    # Download the additional file for macOS if needed
-    if additional_file:
-        additional_url = additional_url_base + additional_file
-        download_file(additional_url, additional_path)
+        # Find the model and JSON files in the voice folder
+        files = os.listdir(voice_path)
+        model_path = next((os.path.join(voice_path, f) for f in files if f.endswith('.onnx')), None)
+        json_path = next((os.path.join(voice_path, f) for f in files if f.endswith('.json')), None)
 
-    # Extract and setup binary
-    if not os.path.exists(extraction_dir):
-        os.makedirs(extraction_dir)
+        # If either the model or JSON file is missing, return "failed"
+        if not model_path or not json_path:
+            if self.verbose:
+                print("Required voice files not found.")
+            return "failed"
 
-    extract_func(binary_path, extraction_dir)
-
-    # Extract the additional file if downloaded
-    if additional_file and additional_path:
-        # Extract the lib folder from the additional tar.gz
-        with tarfile.open(additional_path, "r:gz") as tar:
-            members = [m for m in tar.getmembers() if 'lib/' in m.name]
-            tar.extractall(path=destination_dir, members=members)
-        print("Extracted additional files to lib directory.")
-
-    first_dir_path = next((os.path.join(extraction_dir, d) for d in os.listdir(extraction_dir) if os.path.isdir(os.path.join(extraction_dir, d))), None)
-    if not first_dir_path:
-        raise Exception("No directory found within the extracted archive.")
-
-    if not os.path.exists(destination_dir):
-        os.makedirs(destination_dir)
-
-    # Handle existing directories
-    for item in os.listdir(first_dir_path):
-        source_item_path = os.path.join(first_dir_path, item)
-        destination_item_path = os.path.join(destination_dir, item)
-        if os.path.isfile(source_item_path):
-            shutil.copy(source_item_path, destination_item_path)
-        elif os.path.isdir(source_item_path):
-            if os.path.exists(destination_item_path):
-                shutil.rmtree(destination_item_path)
-            shutil.copytree(source_item_path, destination_item_path)
-
-    # Adjust the paths to dylib files using install_name_tool on macOS
-    if operating_system == "Darwin":
-        piper_executable = os.path.join(destination_dir, "piper")  # Assuming "piper" is the executable name
-        lib_dir = os.path.join(destination_dir, "piper-phonemize", "lib")
-        dylib_files = ["libespeak-ng.1.dylib", "libpiper_phonemize.1.dylib", "libonnxruntime.1.14.1.dylib"]
-
-        for dylib in dylib_files:
-            dylib_path = os.path.join(lib_dir, dylib)
-            subprocess.run(["install_name_tool", "-change", f"@rpath/{dylib}", dylib_path, piper_executable], check=True)
-
-    # Clean up the extraction directory and the downloaded binary file
-    shutil.rmtree(extraction_dir)
-    os.remove(binary_path)
-    if additional_file and additional_path:
-        os.remove(additional_path)
-
-    print("Piper TTS setup completed successfully.")
+        try:
+            # Construct and execute the Piper TTS command
+            command = [
+                piper_binary,
+                "-m", model_path,
+                "-c", json_path,
+                "-f", output_file,
+                "-s", str(config.PIPER_VOICE_INDEX)
+            ]
+            process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=(None if self.verbose else subprocess.DEVNULL), stderr=subprocess.STDOUT)
+            process.communicate(text_to_speak.encode("utf-8"))
+            process.wait()
+            if self.verbose:
+                print(f"Piper TTS command executed successfully.")
+            return "success"
+        except subprocess.CalledProcessError as e:
+            # If the command fails, print an error message and return "failed"
+            if self.verbose:
+                print(f"Error running Piper TTS command: {e}")
+            return "failed"

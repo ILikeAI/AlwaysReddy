@@ -4,6 +4,7 @@ import shutil
 import tarfile
 import zipfile
 import requests
+import subprocess
 
 def download_file(url, save_path):
     print(f"Downloading from {url}")
@@ -36,7 +37,9 @@ def setup_piper_tts():
     operating_system = platform.system()
     machine = platform.machine()
     url_base = "https://github.com/rhasspy/piper/releases/download/2023.11.14-2/"
+    additional_url_base = "https://github.com/rhasspy/piper-phonemize/releases/download/2023.11.14-4/"
     binary_file, binary_name, extract_func = None, None, None
+    additional_file = None
 
     if operating_system == "Windows":
         binary_file = "piper_windows_amd64.zip"
@@ -44,8 +47,10 @@ def setup_piper_tts():
     elif operating_system == "Darwin":
         if machine == "x86_64":
             binary_file = "piper_macos_x64.tar.gz"
+            additional_file = "piper-phonemize_macos_x64.tar.gz"
         elif machine == "arm64":
             binary_file = "piper_macos_aarch64.tar.gz"
+            additional_file = "piper-phonemize_macos_aarch64.tar.gz"
         else:
             raise ValueError(f"Unsupported macOS architecture: {machine}")
         extract_func = extract_tar_gz
@@ -65,19 +70,32 @@ def setup_piper_tts():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.dirname(script_dir)
     binary_path = os.path.join(script_dir, binary_file)
+    additional_path = os.path.join(script_dir, additional_file) if additional_file else None
     extraction_dir = os.path.join(script_dir, "piper_tts_extracted")
-    destination_dir = os.path.join(parent_dir, "piper_tts")  # updated this line
-
+    destination_dir = os.path.join(parent_dir, "piper_tts")
 
     # Download the binary
     download_url = url_base + binary_file
     download_file(download_url, binary_path)
+
+    # Download the additional file for macOS if needed
+    if additional_file:
+        additional_url = additional_url_base + additional_file
+        download_file(additional_url, additional_path)
 
     # Extract and setup binary
     if not os.path.exists(extraction_dir):
         os.makedirs(extraction_dir)
 
     extract_func(binary_path, extraction_dir)
+
+    # Extract the additional file if downloaded
+    if additional_file and additional_path:
+        # Extract the lib folder from the additional tar.gz
+        with tarfile.open(additional_path, "r:gz") as tar:
+            members = [m for m in tar.getmembers() if 'lib/' in m.name]
+            tar.extractall(path=destination_dir, members=members)
+        print("Extracted additional files to lib directory.")
 
     first_dir_path = next((os.path.join(extraction_dir, d) for d in os.listdir(extraction_dir) if os.path.isdir(os.path.join(extraction_dir, d))), None)
     if not first_dir_path:
@@ -97,8 +115,20 @@ def setup_piper_tts():
                 shutil.rmtree(destination_item_path)
             shutil.copytree(source_item_path, destination_item_path)
 
+    # Adjust the paths to dylib files using install_name_tool on macOS
+    if operating_system == "Darwin":
+        piper_executable = os.path.join(destination_dir, "piper")  # Assuming "piper" is the executable name
+        lib_dir = os.path.join(destination_dir, "piper-phonemize", "lib")
+        dylib_files = ["libespeak-ng.1.dylib", "libpiper_phonemize.1.dylib", "libonnxruntime.1.14.1.dylib"]
+
+        for dylib in dylib_files:
+            dylib_path = os.path.join(lib_dir, dylib)
+            subprocess.run(["install_name_tool", "-change", f"@rpath/{dylib}", dylib_path, piper_executable], check=True)
+
     # Clean up the extraction directory and the downloaded binary file
     shutil.rmtree(extraction_dir)
     os.remove(binary_path)
+    if additional_file and additional_path:
+        os.remove(additional_path)
 
     print("Piper TTS setup completed successfully.")
