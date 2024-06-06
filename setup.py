@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import sys
 import platform
+import importlib.util
 
 def is_windows():
     return sys.platform == 'win32'
@@ -179,9 +180,19 @@ def main():
 
     # Ask if the user wants to install Piper TTS
     install_piper = input("[?] Do you want to install Piper local TTS? (y/n): ")
-    if install_piper.lower() == 'y':
-        from scripts.installpipertts import setup_piper_tts
-        setup_piper_tts()
+    if install_piper == 'y':
+        # Import the setup function from installpipertts.py
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        installpipertts_path = os.path.join(script_dir, 'scripts', 'installpipertts.py')
+
+        spec = importlib.util.spec_from_file_location("installpipertts", installpipertts_path)
+        installpipertts = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(installpipertts)
+
+        # Call the setup function
+        installpipertts.setup_piper_tts()
+    else:
+        print("Piper TTS installation skipped.")
 
     create_run_files()
 
