@@ -42,6 +42,10 @@ COMPLETION_MODEL = "gpt-4-0125-preview"
 # COMPLETIONS_API = "openrouter"
 # COMPLETION_MODEL = "openai/gpt-3.5-turbo"
 
+## GROQ COMPLETIONS API EXAMPLE ##
+# COMPLETIONS_API = "groq"
+# COMPLETION_MODEL = "llama3-70b-8192"
+
 ### Transcription API Settings ###
 
 ## Faster Whisper local transcription ###

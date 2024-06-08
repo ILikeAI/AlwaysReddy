@@ -1,5 +1,6 @@
 anthropic
 clipboard
+groq
 keyboard
 numpy
 openai

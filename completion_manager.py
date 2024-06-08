@@ -34,6 +34,10 @@ class CompletionManager:
         elif config.COMPLETIONS_API == "openrouter":
             from llm_apis.openrouter_client import OpenRouterClient
             self.client = OpenRouterClient(verbose=self.verbose)
+        
+        elif config.COMPLETIONS_API == "groq":
+            from llm_apis.groq_client import GroqClient
+            self.client = GroqClient(verbose=self.verbose)
 
         elif config.COMPLETIONS_API == "lm_studio":
             from llm_apis.lm_studio_client import LM_StudioClient
