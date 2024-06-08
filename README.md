@@ -109,6 +109,8 @@ To use GPU acceleration with the faster-whisper API, follow these steps:
 3. Run the setup script with `python setup.py` on windows or `python3 setup.py` on mac and linux.
 4. Open the `config.py` and `.env` files and update them with your settings and API keys.
 
+If you get `module 'requests' not found` run `pip install requests` or `pip3 install requests`
+
 If you encounter any issues during the setup process, please refer to the [Troubleshooting](#troubleshooting) section below.
 
 ## How to Run
