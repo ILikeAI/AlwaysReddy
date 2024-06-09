@@ -46,12 +46,16 @@ class AlwaysReddy:
         # This just starts a timer for the recording to stop after a certain amount of time, just to make sure you dont leave it recording forever!
         self.recording_timeout_timer = threading.Timer(config.MAX_RECORDING_DURATION, self.stop_recording)
         self.recording_timeout_timer.start()
-
-    def stop_recording(self):
-        """Stop the audio recording process and handle the recorded audio."""
+    
+    def cancel_recording_timeout_timer(self):
+        """Cancel the recording timeout timer if it is running."""
         if self.recording_timeout_timer and self.recording_timeout_timer.is_alive():
             self.recording_timeout_timer.cancel()
 
+    def stop_recording(self):
+        print("Stopping recording...")
+        """Stop the audio recording process and handle the recorded audio."""
+        self.cancel_recording_timeout_timer()
         if self.recorder.recording:
             if self.verbose:
                 print("Stopping recording...")
@@ -100,6 +104,7 @@ class AlwaysReddy:
     def cancel_all(self, silent=False):
         """Cancel the current recording and TTS."""
         played_cancel_sfx = False
+        self.cancel_recording_timeout_timer()
 
         if self.main_thread is not None and self.main_thread.is_alive():
             if not silent:
