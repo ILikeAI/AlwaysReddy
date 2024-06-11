@@ -13,6 +13,7 @@ USE_GPU = False  # Set to True to use GPU acceleration. Refer to the README for 
 # COMPLETIONS_API = "ollama"
 # COMPLETION_MODEL = "llama3"
 # OLLAMA_API_BASE_URL = "http://localhost:11434" #This should be the defualt
+# OLLAMA_KEEP_ALIVE = "5m" # The duration that models stay loaded in memory (default "5m"). Set to "-1" to keep models loaded indefinitely
 
 ## LM Studio COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "lm_studio" 

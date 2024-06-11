@@ -1,6 +1,8 @@
 import requests
 import json
 import os
+from config_loader import config
+
 
 class OllamaClient:
     """Client for interacting with the Ollama API for streaming text completions."""
@@ -24,6 +26,7 @@ class OllamaClient:
         Args:
             messages (list): List of messages used as context or prompt.
             model (str): Model identifier for text generation.
+            keep_alive (number/str): The duration that models stay loaded in memory (default "5m"). Set to "-1" to keep models loaded indefinitely
             **kwargs: Additional keyword arguments for the API request.
 
         Yields:
@@ -34,6 +37,7 @@ class OllamaClient:
             "model": model,
             "messages": messages,
             "stream": True,
+            "keep_alive": config.OLLAMA_KEEP_ALIVE,
             **kwargs
         }
         json_data = json.dumps(data)
