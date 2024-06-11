@@ -26,7 +26,6 @@ class OllamaClient:
         Args:
             messages (list): List of messages used as context or prompt.
             model (str): Model identifier for text generation.
-            keep_alive (number/str): The duration that models stay loaded in memory (default "5m"). Set to "-1" to keep models loaded indefinitely
             **kwargs: Additional keyword arguments for the API request.
 
         Yields:
