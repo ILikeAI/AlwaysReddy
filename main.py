@@ -235,11 +235,14 @@ class AlwaysReddy:
         print()
         if config.RECORD_HOTKEY:
             input_handler.add_held_hotkey(config.RECORD_HOTKEY, self.handle_record_hotkey)
-            hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)
             print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe."
-                  f"\n\tAlternatively hold it down to record until you release."
-                  f"\n\tHold down '{hotkey_start}' and double tap '{hotkey_end}' to give AlwaysReddy the content currently copied in your clipboard.")
-        
+                  f"\n\tAlternatively hold it down to record until you release.")
+
+            if "+" in config.RECORD_HOTKEY:
+                hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)
+                print(f"\tHold down '{hotkey_start}' and double tap '{hotkey_end}' to give AlwaysReddy the content currently copied in your clipboard.")
+            else:
+                print(f"\tDouble tap '{config.RECORD_HOTKEY}' to give AlwaysReddy the content currently copied in your clipboard.")
 
         if config.CANCEL_HOTKEY:
             input_handler.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
