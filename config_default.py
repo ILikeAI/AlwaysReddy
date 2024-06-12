@@ -69,6 +69,7 @@ TTS_ENGINE="openai" # 'piper' or 'openai' or 'mac'(mac is only for macos)
 
 PIPER_VOICE = "default_female_voice" # You can add more voices to the piper_tts/voices folder
 PIPER_VOICE_INDEX = 0 # For multi-voice models, select the index of the voice you want to use
+PIPER_VOICE_LENGTH = 1.0 # Phoneme length scale: Lower values result in faster speech
 
 OPENAI_VOICE = "nova"
 
