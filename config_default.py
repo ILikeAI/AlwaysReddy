@@ -50,9 +50,9 @@ COMPLETION_MODEL = "gpt-4-0125-preview"
 ### Transcription API Settings ###
 
 ## Faster Whisper local transcription ###
-# TRANSCRIPTION_API = "FasterWhisper" # this will use the local whisper model
-# WHISPER_MODEL = "tiny.en" # If you prefer not to use english set it to "tiny", if the transcription quality is too low then set it to "base" but this will be a little slower
-# BEAM_SIZE = 5
+TRANSCRIPTION_API = "FasterWhisper" # this will use the local whisper model
+WHISPER_MODEL = "tiny.en" # If you prefer not to use english set it to "tiny", if the transcription quality is too low then set it to "base" but this will be a little slower
+BEAM_SIZE = 5
 
 
 ## Transformers Whisper local transcription ###
@@ -60,18 +60,18 @@ COMPLETION_MODEL = "gpt-4-0125-preview"
 # WHISPER_MODEL = "openai/whisper-tiny.en"
 
 ## OPENAI Hosted Transcription ###
-TRANSCRIPTION_API = "openai" # this will use the hosted openai api
+# TRANSCRIPTION_API = "openai" # this will use the hosted openai api
 
 
-
-### TTS SETTINGS ###
-TTS_ENGINE="openai" # 'piper' or 'openai' or 'mac'(mac is only for macos)
-
+### Piper TTS SETTINGS ###
+TTS_ENGINE="piper" 
 PIPER_VOICE = "default_female_voice" # You can add more voices to the piper_tts/voices folder
 PIPER_VOICE_INDEX = 0 # For multi-voice models, select the index of the voice you want to use
 PIPER_VOICE_LENGTH = 1.0 # Phoneme length scale: Lower values result in faster speech
 
-OPENAI_VOICE = "nova"
+### OPENAI TTS SETTINGS ###
+# TTS_ENGINE="openai" 
+# OPENAI_VOICE = "nova"
 
 ### PROMPTS ###
 ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt

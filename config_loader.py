@@ -46,7 +46,7 @@ class ConfigLoader:
 
         # Print missing keys
         if missing_keys:
-            print("The following configuration items are missing from 'config.py' and are using default values:")
+            print("The following configuration items are missing from 'config.py' and are using default values, run the rebuild_config.py file in the `scripts` folder to rebuild your config file:")
             for key in missing_keys:
                 if not key.startswith("__"):
                     print(f"  - {key}")
