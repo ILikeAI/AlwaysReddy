@@ -65,7 +65,7 @@ class PiperTTSClient:
                 "-c", json_path,
                 "-f", output_file,
                 "-s", str(config.PIPER_VOICE_INDEX),
-                "--length_scale", str(config.PIPER_VOICE_LENGTH)
+                "--length_scale", str(1/config.PIPER_VOICE_SPEED)
             ]
             process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=(None if self.verbose else subprocess.DEVNULL), stderr=subprocess.STDOUT)
             process.communicate(text_to_speak.encode("utf-8"))

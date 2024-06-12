@@ -67,7 +67,7 @@ BEAM_SIZE = 5
 TTS_ENGINE="piper" 
 PIPER_VOICE = "default_female_voice" # You can add more voices to the piper_tts/voices folder
 PIPER_VOICE_INDEX = 0 # For multi-voice models, select the index of the voice you want to use
-PIPER_VOICE_LENGTH = 1.0 # Phoneme length scale: Lower values result in faster speech
+PIPER_VOICE_SPEED = 1.0 # Speed of the TTS, 1.0 is normal speed, 2.0 is double speed, 0.5 is half speed
 
 ### OPENAI TTS SETTINGS ###
 # TTS_ENGINE="openai" 
