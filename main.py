@@ -142,7 +142,7 @@ class AlwaysReddy:
 
             # If the user wants to use the clipboard text, append it to the message
             if self.clipboard_text:
-                self.messages.append({"role": "user", "content": transcript + f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
+                self.messages.append({"role": "user", "content": transcript + f"\n\nCLIPBOARD CONTENT (ignore if user doesn't mention it):\n```{self.clipboard_text}```"})
                 self.clipboard_text = None
                 print("\nUsing the text in your clipboard...")
             else:
