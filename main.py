@@ -16,7 +16,7 @@ class AlwaysReddy:
         self.verbose = config.VERBOSE
         self.recorder = AudioRecorder(verbose=self.verbose)
         self.clipboard_text = None
-        self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
+        self.messages = prompts.copy()
         self.last_press_time = 0
         self.tts = tts_manager.TTSManager(parent_client=self, verbose=self.verbose)
         self.recording_timeout_timer = None
@@ -32,7 +32,7 @@ class AlwaysReddy:
         """Clear the message history."""
         # TODO Eventually i would like to keep track of conversations and be able to switch between them
         print("Clearing messages...")
-        self.messages = prompts[config.ACTIVE_PROMPT]["messages"].copy()
+        self.messages = prompts.copy()
         self.last_message_was_cut_off = False
 
     def start_recording(self):

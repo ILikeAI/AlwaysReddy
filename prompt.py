@@ -1,6 +1,6 @@
 from config_loader import config 
 
-prompts = {"default_prompt":{"description":"PLACEHOLDER", "messages":[
+prompts = [
     {"role": "system", "content": f'''This message contains instructions on how you should behave.
 
 ## About you:
@@ -27,6 +27,6 @@ Only write to the clipboard when specifically asked to do so or when you have be
 For example:
 USER: """Can you give me the command to install openai in python, put it in my clipboard for me?"""
 YOU: """{config.START_SEQ} pip install openai{config.END_SEQ}
- I have saved the command to install OpenAI in Python to your clipboard."""'''}]},}
+ I have saved the command to install OpenAI in Python to your clipboard."""'''}]
 
 
