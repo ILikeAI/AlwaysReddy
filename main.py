@@ -218,11 +218,15 @@ class AlwaysReddy:
         within_delay = time.time() - self.last_press_time < config.RECORD_HOTKEY_DELAY
         if is_pressed:
             self.last_press_time = time.time()
-            if self.recorder.recording and within_delay:
+
+            if config.ALWAYS_INCLUDE_CLIPBOARD:
+                self.clipboard_text = read_clipboard()
+            elif self.recorder.recording and within_delay:
                 self.clipboard_text = read_clipboard()
                 if self.verbose:
                     print("Using clipboard...")
                 return
+
             self.start_main_thread() # start recording
         else:
             if self.recorder.recording and not within_delay:
