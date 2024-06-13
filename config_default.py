@@ -74,7 +74,11 @@ PIPER_VOICE_SPEED = 1.0 # Speed of the TTS, 1.0 is normal speed, 2.0 is double s
 # OPENAI_VOICE = "nova"
 
 ### PROMPTS ###
-ACTIVE_PROMPT = "default_prompt" #Right now there is only 1 prompt
+# Options: "default_prompt", "chat_prompt"
+# - "default_prompt": Straight to the point assistant that can write to your clipboard when requested.
+# - None: No system prompt, for the raw out-of-the-box model behavior.
+# Or create your own prompt in the "system_prompts" folder, then put the name of the file here.
+ACTIVE_PROMPT = "default_prompt"
 
 ### HOTKEYS ###
 # Hotkeys can be set to None to disable them
