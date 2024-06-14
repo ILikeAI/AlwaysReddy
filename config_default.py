@@ -33,7 +33,7 @@ USE_GPU = False  # Set to True to use GPU acceleration. Refer to the README for 
 
 ## OPENAI COMPLETIONS API EXAMPLE ##
 COMPLETIONS_API = "openai"
-COMPLETION_MODEL = "gpt-4-0125-preview"
+COMPLETION_MODEL = "gpt-4o"
 
 ## PERPLEXITY COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "perplexity"
