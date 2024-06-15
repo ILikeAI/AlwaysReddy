@@ -100,48 +100,58 @@ class CompletionManager:
             return None
         
     def _stream_sentences_from_chunks(self, chunks_stream, clip_start_marker="-CLIPSTART-", clip_end_marker="-CLIPEND-"):
-        """Takes in audio chunks and returns sentences or chunks of text for the clipboard, as well as the full unmodified text stream.
+        """
+        Takes in audio chunks and returns sentences or chunks of text for the clipboard, as well as the full unmodified text stream.
+        Supports both clip markers and triple backticks for marking clipboard text.
 
         Args:
             chunks_stream: Stream of chunks.
-            clip_start_marker (str): Start marker for clipboard text.
-            clip_end_marker (str): End marker for clipboard text.
+            clip_start_marker (str): Start marker for clipboard text using clip markers.
+            clip_end_marker (str): End marker for clipboard text using clip markers.
 
         Yields:
-            tuple: Type of content and the content itself.
+            tuple: Type of content ("sentence" or "clipboard_text") and the content itself.
         """
         buffer = ''
         self.full_response = ''
         sentence_endings = re.compile(r'(?<=[.!?])\s+|(?<=\n)')
         in_marker = False
-        
+        in_backticks = False
+
         for chunk in chunks_stream:
-            # If stop stream is set to True, break the loop
             if self.parent_client.stop_response:
                 break
             buffer += chunk
             self.full_response += chunk
 
-            # Check for clip_start_marker without clip_end_marker
-            if clip_start_marker in buffer and not in_marker:
-                pre, match, post = buffer.partition(clip_start_marker)
-                if pre.strip():
-                    # if the marker that indicates the start of a segment for the clipboard is here 
-                    # and there is text before it, that should be returned as a sentence.
-                    yield "sentence", pre.strip()
-                buffer = post
-                in_marker = True
-            
-            # Check for clip_end_marker without clip_start_marker
-            if clip_end_marker in buffer and in_marker:
-                marked_section, _, post_end = buffer.partition(clip_end_marker)
-                
-                yield "clipboard_text", marked_section.strip()
-                buffer = post_end  # Remaining text after the end marker
-                in_marker = False  # Reset the marker flag
-            
-            # Process sentences outside of marked sections
+            if not in_backticks:
+                if clip_start_marker in buffer and not in_marker:
+                    pre, match, post = buffer.partition(clip_start_marker)
+                    if pre.strip():
+                        yield "sentence", pre.strip()
+                    buffer = post
+                    in_marker = True
+
+                if clip_end_marker in buffer and in_marker:
+                    marked_section, _, post_end = buffer.partition(clip_end_marker)
+                    yield "clipboard_text", marked_section.strip()
+                    buffer = post_end
+                    in_marker = False
+
             if not in_marker:
+                if not in_backticks and '```' in buffer:
+                    pre, _, post = buffer.partition('```')
+                    if pre.strip():
+                        yield "sentence", pre.strip()
+                    buffer = post
+                    in_backticks = True
+                elif in_backticks and '```' in buffer:
+                    marked_section, _, post_end = buffer.partition('```')
+                    yield "clipboard_text", '```' + marked_section.strip() + '```'
+                    buffer = post_end
+                    in_backticks = False
+
+            if not in_marker and not in_backticks:
                 while True:
                     match = sentence_endings.search(buffer)
                     if match:
@@ -151,9 +161,11 @@ class CompletionManager:
                             yield "sentence", sentence.strip()
                     else:
                         break
-        
-        # Yield any remaining content in the buffer as a sentence
-        if buffer.strip() and not in_marker:
-            yield "sentence", buffer.strip()
-        elif buffer.strip() and in_marker:  # Handle any remaining marked text
-            yield "clipboard_text", buffer.strip()
+
+        if buffer.strip():
+            if in_backticks:
+                yield "clipboard_text", '```' + buffer.strip()
+            elif not in_marker:
+                yield "sentence", buffer.strip()
+            else:
+                yield "clipboard_text", buffer.strip()
