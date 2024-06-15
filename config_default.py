@@ -89,6 +89,7 @@ RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and 
 
 RECORD_HOTKEY_DELAY = 0.2 # Seconds to wait for RECORD_HOTKEY double tap before starting recording
 SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
+ALWAYS_INCLUDE_CLIPBOARD = False # Always include the clipboard content without having to double tap the record hotkey
 
 
 ### MISC ###

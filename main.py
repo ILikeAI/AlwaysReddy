@@ -142,7 +142,7 @@ class AlwaysReddy:
 
             # If the user wants to use the clipboard text, append it to the message
             if self.clipboard_text:
-                self.messages.append({"role": "user", "content": transcript + f"\n\nTHE USER HAS THIS TEXT COPIED TO THEIR CLIPBOARD:\n```{self.clipboard_text}```"})
+                self.messages.append({"role": "user", "content": transcript + f"\n\nCLIPBOARD CONTENT (ignore if user doesn't mention it):\n```{self.clipboard_text}```"})
                 self.clipboard_text = None
                 print("\nUsing the text in your clipboard...")
             else:
@@ -218,11 +218,15 @@ class AlwaysReddy:
         within_delay = time.time() - self.last_press_time < config.RECORD_HOTKEY_DELAY
         if is_pressed:
             self.last_press_time = time.time()
-            if self.recorder.recording and within_delay:
+
+            if config.ALWAYS_INCLUDE_CLIPBOARD:
+                self.clipboard_text = read_clipboard()
+            elif self.recorder.recording and within_delay:
                 self.clipboard_text = read_clipboard()
                 if self.verbose:
                     print("Using clipboard...")
                 return
+
             self.start_main_thread() # start recording
         else:
             if self.recorder.recording and not within_delay:
