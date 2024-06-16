@@ -215,6 +215,13 @@ COMPLETION_MODEL = "claude-3-sonnet-20240229"
 ### How to use local TTS
 To use local TTS just open the config file and set `TTS_ENGINE="piper"`
 
+### How to make a custom system prompt
+1. Navigate to the *system_prompts* directory.
+2. Make a copy of an existing prompt file.
+3. Open the copy in a text or code editor and edit the prompt inside the two `'''` as you like.
+4. Edit your config.py file by setting the `ACTIVE_PROMPT` option to the name of your new prompt file (without the .py extension) as a string.
+   - For example, if your new prompt file is *custom_prompt.py*, then set in config.py: `ACTIVE_PROMPT = "custom_prompt"`
+
 ## How to add AlwaysReddy to Startup List (Windows)
 To add AlwaysReddy to your startup list so it starts automatically on your computer startup, follow these steps:
 1. run `venv\Scripts\activate`
