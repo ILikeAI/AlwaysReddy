@@ -87,7 +87,7 @@ CANCEL_HOTKEY = 'alt+ctrl+e'
 CLEAR_HISTORY_HOTKEY = 'alt+ctrl+w'
 RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
 
-RECORD_HOTKEY_DELAY = 0.2 # Seconds to wait for RECORD_HOTKEY double tap before starting recording
+RECORD_HOTKEY_DELAY = 0.7 # Seconds to wait it listen for the double tap of the hotkey, outside of this time window the second tap will stop recording
 SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
 ALWAYS_INCLUDE_CLIPBOARD = False # Always include the clipboard content without having to double tap the record hotkey
 
