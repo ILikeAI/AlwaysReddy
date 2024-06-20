@@ -103,6 +103,7 @@ To use GPU acceleration with the faster-whisper API, follow these steps:
 </details>
 
 ### Setup for Windows, macOS, and Linux:
+Note for MacOS: it is expected that you have Brew installed on your system, look [here](https://brew.sh/) for setup
 
 1. Clone this repo with `git clone https://github.com/ILikeAI/AlwaysReddy`
 2. Navigate into the directory: `cd AlwaysReddy`
