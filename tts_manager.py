@@ -130,6 +130,9 @@ class TTSManager:
                 continue
 
             try:
+                
+                if self.verbose:
+                    print(f"Playing audio: {sentence}")
                 # Load the audio file using wave
                 with wave.open(file_path, 'rb') as audio_file:
                     # Create a PyAudio instance
@@ -162,8 +165,6 @@ class TTSManager:
                     print(f"Error playing audio: {e}")
                 continue
 
-            if self.verbose:
-                print(f"Playing audio: {sentence}")
             self.last_sentence_spoken = sentence
             # Mark the task as done in the queue
             self.audio_queue.task_done()
