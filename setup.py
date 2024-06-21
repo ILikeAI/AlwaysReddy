@@ -3,13 +3,33 @@ import shutil
 import subprocess
 import sys
 import platform
-import importlib.util
+from pathlib import Path
+
 
 def is_windows():
     return sys.platform == 'win32'
 
 def is_macos():
     return sys.platform == 'darwin'
+
+def get_venv_python():
+    if sys.platform == 'win32':
+        return os.path.join('venv', 'Scripts', 'python')
+    else:
+        return os.path.join('venv', 'bin', 'python')
+
+def run_in_venv(command):
+    venv_python = get_venv_python()
+    if isinstance(command, list):
+        full_command = [venv_python] + command
+    else:
+        full_command = [venv_python, '-c', command]
+    
+    try:
+        subprocess.run(full_command, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running command in virtual environment: {e}")
+        sys.exit(1)
 
 def create_virtualenv(force_create=False):
     if not os.path.isdir('venv') or force_create:
@@ -180,17 +200,10 @@ def main():
 
     # Ask if the user wants to install Piper TTS
     install_piper = input("[?] Do you want to install Piper local TTS? (y/n): ")
-    if install_piper == 'y':
-        # Import the setup function from installpipertts.py
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        installpipertts_path = os.path.join(script_dir, 'scripts', 'installpipertts.py')
-
-        spec = importlib.util.spec_from_file_location("installpipertts", installpipertts_path)
-        installpipertts = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(installpipertts)
-
-        # Call the setup function
-        installpipertts.setup_piper_tts()
+    if install_piper.lower() == 'y':
+        script_dir = Path(__file__).parent.resolve()
+        command = f"import sys; sys.path.append(r'{script_dir}'); from scripts.installpipertts import setup_piper_tts; setup_piper_tts()"
+        run_in_venv(command)
     else:
         print("Piper TTS installation skipped.")
 
