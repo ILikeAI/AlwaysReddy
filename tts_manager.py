@@ -132,7 +132,7 @@ class TTSManager:
             try:
                 
                 if self.verbose:
-                    print(f"Playing audio: {sentence}")
+                    print(f"\nPlaying audio: {sentence}")
                 # Load the audio file using wave
                 with wave.open(file_path, 'rb') as audio_file:
                     # Create a PyAudio instance
