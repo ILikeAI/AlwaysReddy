@@ -86,7 +86,7 @@ ACTIVE_PROMPT = "default_prompt"
 CANCEL_HOTKEY = 'alt+ctrl+e'
 CLEAR_HISTORY_HOTKEY = 'alt+ctrl+w'
 RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
-TRANSCRIBE_CLIPBOARD_HOTKEY='alt+ctrl+t' # Hotkey to transcribe the clipboard
+TRANSCRIBE_CLIPBOARD_HOTKEY='alt+ctrl+t' # This hotkey will transcribe what you say and write it to the clipboard
 
 RECORD_HOTKEY_DELAY = 0.7 # Seconds to wait it listen for the double tap of the hotkey, outside of this time window the second tap will stop recording
 SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)

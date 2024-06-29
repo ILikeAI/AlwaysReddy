@@ -327,7 +327,8 @@ class AlwaysReddy:
 
         if config.TRANSCRIBE_CLIPBOARD_HOTKEY:
             input_handler.add_held_hotkey(config.TRANSCRIBE_CLIPBOARD_HOTKEY, self.handle_transcribe_hotkey)
-            print(f"Press '{config.TRANSCRIBE_CLIPBOARD_HOTKEY}' to transcribe the content currently copied in your clipboard.")
+            print(f"Press '{config.TRANSCRIBE_CLIPBOARD_HOTKEY}'to transcribe what you say and write it to the clipboard."
+                    f"\n\tAlternatively hold it down to record until you release.")
 
         input_handler.start()
 
