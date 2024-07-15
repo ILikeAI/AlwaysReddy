@@ -3,11 +3,6 @@ Hey, I'm Josh, the creator of AlwaysReddy. I am still a little bit of a noob whe
 
 Contact me: joshlikesai@gmail.com
 
-If you think this project is cool and you want to say thanks, feel free to buy me a coffee if you can afford it. I love coffee...
-
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/ilikeai)
-
-
 **Pull Requests Welcome!**
 
 ## Sections
