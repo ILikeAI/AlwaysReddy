@@ -51,8 +51,8 @@ class AutohotkeyHandler(InputHandler):
 
     def handle_held_callback(self, hotkey, callback, is_pressed):
         if is_pressed != self.held_hotkeys[hotkey]:
-            callback(is_pressed=is_pressed)
             self.held_hotkeys[hotkey] = is_pressed
+            callback(is_pressed=is_pressed)
 
     def start(self):
         self.ahk.start_hotkeys()
