@@ -20,7 +20,6 @@ class TTSManager:
         self.queing = False
         self.temp_files = []
         self._play_audio_thread = threading.Thread(target=self._play_audio)
-        self.completion_client = None
         self.running_tts = False
         self.last_sentence_spoken = ""
         self.verbose = verbose

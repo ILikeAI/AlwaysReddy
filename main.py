@@ -6,7 +6,7 @@ from input_apis.input_handler import get_input_handler
 import tts_manager
 from completion_manager import CompletionManager
 from soundfx import play_sound_FX
-from utils import read_clipboard
+from utils import read_clipboard, to_clipboard
 from config_loader import config
 import prompt
 
@@ -21,8 +21,7 @@ class AlwaysReddy:
         self.tts = tts_manager.TTSManager(parent_client=self, verbose=self.verbose)
         self.recording_timeout_timer = None
         self.transcription_manager = TranscriptionManager(verbose=self.verbose)
-        self.completion_client = CompletionManager(TTS_client=self.tts, parent_client=self, verbose=self.verbose)
-        self.tts.completion_client = self.completion_client
+        self.completion_client = CompletionManager(verbose=self.verbose)
         self.recording_stop_time = None
         self.main_thread = None
         self.stop_response = False
@@ -128,6 +127,31 @@ class AlwaysReddy:
                     played_cancel_sfx = True
             self.cancel_tts()
 
+    def handle_response_stream(self, stream):
+        """
+        This recieves a generator that yields tuples of the type of content and the content itself.
+        The type may be "sentence", "clipboard_text" or "full_response", sentence is spoken by the TTS and clipboard_text is copied to the clipboard.
+
+        Args:
+            stream (generator): A generator that yields tuples of the type of content and the content itself.
+        """
+        response = None
+        for type, content in stream:
+            # If stop stream is set to True, break the loop
+            if self.stop_response:
+                break
+
+            if type == "sentence":
+                self.tts.run_tts(content)
+
+            elif type == "clipboard_text":
+                to_clipboard(content)
+
+            elif type == "full_response":
+                response = content
+
+        return response
+    
     def handle_response(self, transcript):
         """
         Handle the response from the transcription and generate a completion.
@@ -158,9 +182,11 @@ class AlwaysReddy:
             if self.stop_response:
                 return
 
-            # Get the response from the AI
-            response = self.completion_client.get_completion(self.messages, model=config.COMPLETION_MODEL)
-
+            #Get the completion stream
+            stream = self.completion_client.get_completion(self.messages, model=config.COMPLETION_MODEL)
+            
+            response = self.handle_response_stream(stream)
+                
             while self.tts.running_tts:
                 # Waiting for the TTS to finish before processing it this way we can tell if the user has cut off the TTS before saving it to the messages
                 # Doing it this way feels like its probably not optimal though
