@@ -1,7 +1,7 @@
 import importlib
 
 
-def get_initial_prompt(prompt_name):
+def build_initial_messages(prompt_name):
     """
     Get the initial prompt for the given prompt file name.
     @param prompt_name: The name of the prompt file to use.
@@ -10,11 +10,22 @@ def get_initial_prompt(prompt_name):
     if prompt_name is None or prompt_name is False:
         return []
     else:
+        return [{"role": "system", "content": get_system_prompt_message(prompt_name)}]
+
+
+def get_system_prompt_message(prompt_name):
+    """
+    Get the system prompt message for the given prompt file name.
+    @param prompt_name: The name of the prompt file to use.
+    @return: The system prompt message as a string.
+    """
+    if prompt_name is None or prompt_name is False:
+        return ""
+    else:
         try:
-            active_prompt = importlib.import_module(f"system_prompts.{prompt_name}")
+            system_prompt = importlib.import_module(f"system_prompts.{prompt_name}")
         except ModuleNotFoundError:
             print(f"Error: System prompt '{prompt_name}' not found. Using default prompt.")
-            active_prompt = importlib.import_module("system_prompts.default_prompt")
+            system_prompt = importlib.import_module("system_prompts.default_prompt")
 
-        return [{"role": "system", "content": active_prompt.get_prompt()}]
-
+        return system_prompt.get_prompt()

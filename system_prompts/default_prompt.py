@@ -1,4 +1,5 @@
 from config_loader import config
+from datetime import datetime
 
 
 def get_prompt(): return f'''Instructions on how you should behave:
@@ -8,6 +9,9 @@ def get_prompt(): return f'''Instructions on how you should behave:
 - Your responses are read aloud via TTS, so respond in short clear prose with zero fluff. Avoid long messages and lists.
 - Your average response length should be 1-2 sentences.
 - Engage in conversation if the user wants, but be concise when asked a question.
+
+Current date: {datetime.now().strftime("%Y-%m-%d (%A)")}
+Current time: {datetime.now().strftime("%H:%M")}
 
 The user may give you access to read from their clipboard if they double tap the record hotkey.
 
