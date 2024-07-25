@@ -176,6 +176,9 @@ class AlwaysReddy:
             else:
                 self.messages.append({"role": "user", "content": transcript})
 
+            if config.TIMESTAMP_MESSAGES:
+                #add timestamp to end of message on new line
+                self.messages[-1]["content"] += f"\n\nCurrent time:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')}"
             print("\nTranscription:\n", transcript)
 
             # Make sure the user hasn't cut off the response
