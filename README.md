@@ -143,6 +143,9 @@ Voice chat with context of your clipboard:
 - Clear the assistants memory with `Ctrl + Alt + W`.
 - Cancel recording or TTS with `Ctrl + Alt + E`
 
+Get AlwaysReddy to output to your clipboard:
+- Just ask it to! It is prompted to know how to save text to the clipboard instead of speaking it aloud.
+
 **Please let me know if you think of better hotkey defaults!**
 
 All hotkeys can be edited in config.py
