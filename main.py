@@ -171,7 +171,6 @@ class AlwaysReddy:
             if self.clipboard_text:
                 self.messages.append({"role": "user", "content": transcript + f"\n\nCLIPBOARD CONTENT (ignore if user doesn't mention it):\n```{self.clipboard_text}```"})
                 self.clipboard_text = None
-                print("\nUsing the text in your clipboard...")
             else:
                 self.messages.append({"role": "user", "content": transcript})
 
@@ -243,7 +242,12 @@ class AlwaysReddy:
         self.main_thread = threading.Thread(target=self.toggle_recording)
         self.main_thread.start()
 
+        # If the user has set the config to always include the clipboard text, save it now
+        if config.ALWAYS_INCLUDE_CLIPBOARD:
+            self.save_clipboard_text()
+
     def save_clipboard_text(self):
+        print("Saving clipboard text...")
         self.clipboard_text = read_clipboard()
 
     def run(self):
