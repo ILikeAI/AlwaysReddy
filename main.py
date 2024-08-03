@@ -17,7 +17,6 @@ class AlwaysReddy:
         self.recorder = AudioRecorder(verbose=self.verbose)
         self.clipboard_text = None
         self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
-        self.last_press_time = 0
         self.tts = tts_manager.TTSManager(parent_client=self, verbose=self.verbose)
         self.recording_timeout_timer = None
         self.transcription_manager = TranscriptionManager(verbose=self.verbose)
@@ -246,28 +245,6 @@ class AlwaysReddy:
 
     def save_clipboard_text(self):
         self.clipboard_text = read_clipboard()
-
-    def handle_record_hotkey(self, is_pressed):
-        """
-        Handle the record hotkey press.
-        """
-        within_delay = time.time() - self.last_press_time < config.RECORD_HOTKEY_DELAY
-        if is_pressed:
-            self.last_press_time = time.time()
-
-            if config.ALWAYS_INCLUDE_CLIPBOARD:
-                self.clipboard_text = read_clipboard()
-            elif self.recorder.recording and within_delay:
-                self.clipboard_text = read_clipboard()
-                if self.verbose:
-                    print("Using clipboard...")
-                return
-
-            self.start_main_thread() # start recording
-        else:
-            if self.recorder.recording and not within_delay:
-                self.start_main_thread() # stop recording
-
 
     def run(self):
         """Run the recorder, setting up hotkeys and entering the main loop."""
