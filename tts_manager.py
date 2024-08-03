@@ -247,6 +247,4 @@ class TTSManager:
                     if temp_file in self.temp_files:
                         self.temp_files.remove(temp_file)
                 except PermissionError as e:
-                    # If a permission error occurs, print a message
-                    if self.verbose:
-                        print(f"Permission denied error when trying to delete {temp_file}: {e}")
+                    pass

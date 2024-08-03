@@ -129,7 +129,9 @@ class AudioRecorder:
                 self.stream.stop_stream()
                 self.stream.close()
             if not cancel:
-                self.save_recording()
+                filename = self.save_recording()
+                return filename
+            return None
 
     def save_recording(self):
         """Save the recorded audio to a WAV file."""
@@ -140,14 +142,16 @@ class AudioRecorder:
             try:
                 if not os.path.exists(directory):
                     os.makedirs(directory, exist_ok=True)
-                filename = os.path.join(directory, self.filename)
-                with wave.open(filename, 'wb') as wf:
+                filepath = os.path.join(directory, self.filename)
+                with wave.open(filepath, 'wb') as wf:
                     wf.setnchannels(1)
                     wf.setsampwidth(self.audio.get_sample_size(pyaudio.paInt16))
                     wf.setframerate(self.FS)
                     wf.writeframes(recording.tobytes())
                 if self.verbose:
-                    print(f"Recording saved to {filename}")
+                    print(f"Recording saved to {filepath}")
+
+                return self.filename
             except Exception as e:
                 if self.verbose:
                     import traceback

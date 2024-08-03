@@ -59,7 +59,7 @@ class AlwaysReddy:
             if self.verbose:
                 print("Stopping recording...")
             play_sound_FX("end", volume=config.END_SOUND_VOLUME, verbose=self.verbose)
-            self.recorder.stop_recording()
+            recording_filename = self.recorder.stop_recording()
             self.recording_stop_time = time.time()
 
             # If the recording is too short, ignore it
@@ -69,7 +69,7 @@ class AlwaysReddy:
                 return
 
             try:
-                transcript = self.transcription_manager.transcribe_audio(self.recorder.filename)
+                transcript = self.transcription_manager.transcribe_audio(recording_filename)
 
                 # If the user has tried to cut off the response, we need to make sure we dont process it
                 if not self.stop_response and transcript:
@@ -127,7 +127,7 @@ class AlwaysReddy:
                     played_cancel_sfx = True
             self.cancel_tts()
 
-    def handle_response_stream(self, stream):
+    def handle_response_stream(self, stream, run_tts=True):
         """
         This recieves a generator that yields tuples of the type of content and the content itself.
         The type may be "sentence", "clipboard_text" or "full_response", sentence is spoken by the TTS and clipboard_text is copied to the clipboard.
@@ -141,7 +141,7 @@ class AlwaysReddy:
             if self.stop_response:
                 break
 
-            if type == "sentence":
+            if type == "sentence" and run_tts:
                 self.tts.run_tts(content)
 
             elif type == "clipboard_text":
@@ -178,7 +178,7 @@ class AlwaysReddy:
 
             if config.TIMESTAMP_MESSAGES:
                 #add timestamp to end of message on new line
-                self.messages[-1]["content"] += f"\n\nCurrent time:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')}"
+                self.messages[-1]["content"] += f"\n\nMESSAGE TIMESTAMP:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')} "
             print("\nTranscription:\n", transcript)
 
             # Make sure the user hasn't cut off the response
@@ -188,7 +188,7 @@ class AlwaysReddy:
             #Get the completion stream
             stream = self.completion_client.get_completion(self.messages, model=config.COMPLETION_MODEL)
             
-            response = self.handle_response_stream(stream)
+            response = self.handle_response_stream(stream, run_tts=True)
                 
             while self.tts.running_tts:
                 # Waiting for the TTS to finish before processing it this way we can tell if the user has cut off the TTS before saving it to the messages
@@ -244,6 +244,9 @@ class AlwaysReddy:
         self.main_thread = threading.Thread(target=self.toggle_recording)
         self.main_thread.start()
 
+    def save_clipboard_text(self):
+        self.clipboard_text = read_clipboard()
+
     def handle_record_hotkey(self, is_pressed):
         """
         Handle the record hotkey press.
@@ -265,13 +268,15 @@ class AlwaysReddy:
             if self.recorder.recording and not within_delay:
                 self.start_main_thread() # stop recording
 
+
     def run(self):
         """Run the recorder, setting up hotkeys and entering the main loop."""
         input_handler = get_input_handler(verbose=self.verbose)
+        input_handler.double_tap_threshold = config.DOUBLE_TAP_THRESHOLD
 
         print()
         if config.RECORD_HOTKEY:
-            input_handler.add_held_hotkey(config.RECORD_HOTKEY, self.handle_record_hotkey)
+            input_handler.add_hotkey(config.RECORD_HOTKEY, pressed=self.start_main_thread,held_release=self.start_main_thread, double_tap=self.save_clipboard_text)
             print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe."
                   f"\n\tAlternatively hold it down to record until you release.")
 
@@ -282,14 +287,14 @@ class AlwaysReddy:
                 print(f"\tDouble tap '{config.RECORD_HOTKEY}' to give AlwaysReddy the content currently copied in your clipboard.")
 
         if config.CANCEL_HOTKEY:
-            input_handler.add_hotkey(config.CANCEL_HOTKEY, self.cancel_all)
+            input_handler.add_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all)
             print(f"Press '{config.CANCEL_HOTKEY}' to cancel recording.")
 
         if config.CLEAR_HISTORY_HOTKEY:
-            input_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY, self.clear_messages)
+            input_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY,pressed=self.clear_messages)
             print(f"Press '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
 
-        input_handler.start()
+        input_handler.start(blocking=True)
 
 if __name__ == "__main__":
     try:
