@@ -131,7 +131,7 @@ class CompletionManager:
                 elif in_backticks and '```' in buffer:
                     marked_section, _, post_end = buffer.partition('```')
                     yield "clipboard_text", '```' + marked_section.strip() + '```'
-                    yield "sentence", "Code saved to the clipboard."
+                    yield "sentence", "Content saved to the clipboard."
                     buffer = post_end
                     in_backticks = False
 

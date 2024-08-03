@@ -70,8 +70,6 @@ class PiperTTSClient:
             process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             process.communicate(text_to_speak.encode("utf-8"))
             process.wait()
-            if self.verbose:
-                print(f"Piper TTS command executed successfully.")
             return "success"
 
         except subprocess.CalledProcessError as e:

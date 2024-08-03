@@ -16,6 +16,7 @@ class AlwaysReddy:
         self.verbose = config.VERBOSE
         self.recorder = AudioRecorder(verbose=self.verbose)
         self.clipboard_text = None
+        self.last_clipboard_text = None # This is used to check if the clipboard text has changed
         self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
         self.tts = tts_manager.TTSManager(parent_client=self, verbose=self.verbose)
         self.recording_timeout_timer = None
@@ -32,6 +33,7 @@ class AlwaysReddy:
         print("Clearing messages...")
         self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
         self.last_message_was_cut_off = False
+        self.last_clipboard_text = None
 
     def start_recording(self):
         """Start the audio recording process and set a timeout for automatic stopping."""
@@ -51,7 +53,6 @@ class AlwaysReddy:
             self.recording_timeout_timer.cancel()
 
     def stop_recording(self):
-        print("Stopping recording...")
         """Stop the audio recording process and handle the recorded audio."""
         self.cancel_recording_timeout_timer()
         if self.recorder.recording:
@@ -168,8 +169,9 @@ class AlwaysReddy:
                 transcript = "--> USER CUT THE ASSISTANTS LAST MESSAGE SHORT <--\n" + transcript
 
             # If the user wants to use the clipboard text, append it to the message
-            if self.clipboard_text:
-                self.messages.append({"role": "user", "content": transcript + f"\n\nCLIPBOARD CONTENT (ignore if user doesn't mention it):\n```{self.clipboard_text}```"})
+            if self.clipboard_text and self.clipboard_text != self.last_clipboard_text:
+                self.messages.append({"role": "user", "content": transcript + f"\n\nTHIS IS THE USERS CLIPBOARD CONTENT (ignore if user doesn't mention it):\n```{self.clipboard_text}```"})
+                self.last_clipboard_text = self.clipboard_text
                 self.clipboard_text = None
             else:
                 self.messages.append({"role": "user", "content": transcript})
@@ -230,6 +232,9 @@ class AlwaysReddy:
             self.stop_response = False
             self.stop_recording()
         else:
+            # If the user has set the config to always include the clipboard text, save it now
+            if config.ALWAYS_INCLUDE_CLIPBOARD:# TODO: This should not live in the toggle_recording method
+                self.save_clipboard_text()
             self.start_recording()
 
     def start_main_thread(self):
@@ -241,10 +246,6 @@ class AlwaysReddy:
 
         self.main_thread = threading.Thread(target=self.toggle_recording)
         self.main_thread.start()
-
-        # If the user has set the config to always include the clipboard text, save it now
-        if config.ALWAYS_INCLUDE_CLIPBOARD:
-            self.save_clipboard_text()
 
     def save_clipboard_text(self):
         print("Saving clipboard text...")
