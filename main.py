@@ -22,7 +22,6 @@ class AlwaysReddy:
         self.recording_timeout_timer = None
         self.transcription_manager = TranscriptionManager(verbose=self.verbose)
         self.completion_client = CompletionManager(verbose=self.verbose)
-        self.recording_stop_time = None
         self.main_thread = None
         self.stop_response = False
         self.last_message_was_cut_off = False
@@ -60,7 +59,6 @@ class AlwaysReddy:
                 print("Stopping recording...")
             play_sound_FX("end", volume=config.END_SOUND_VOLUME, verbose=self.verbose)
             recording_filename = self.recorder.stop_recording()
-            self.recording_stop_time = time.time()
 
             # If the recording is too short, ignore it
             if self.recorder.duration < config.MIN_RECORDING_DURATION:
