@@ -62,8 +62,6 @@ def play_sound_FX(name, volume=1.0, verbose=False):
     try:
         volume *= config.BASE_VOLUME
         sound_file_name = f"sounds/recording-{name}"
-        if verbose:
-            print(f"Playing sound FX: {sound_file_name}")
         if os.path.exists(sound_file_name + ".wav"):
             sound_file_name += ".wav"
         elif os.path.exists(sound_file_name + ".mp3"):

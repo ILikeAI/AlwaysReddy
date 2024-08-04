@@ -87,7 +87,7 @@ CANCEL_HOTKEY = 'alt+ctrl+e'
 CLEAR_HISTORY_HOTKEY = 'alt+ctrl+w'
 RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
 
-DOUBLE_TAP_THRESHOLD = 0.7 # The time window in which a second press must occur to be considered a double tap
+DOUBLE_TAP_THRESHOLD = 0.4 # The time window in which a second press must occur to be considered a double tap
 SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
 ALWAYS_INCLUDE_CLIPBOARD = False # Always include the clipboard content without having to double tap the record hotkey
 

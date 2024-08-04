@@ -27,7 +27,7 @@ class AlwaysReddy:
         self.stop_response = False
         self.last_message_was_cut_off = False
 
-    def clear_messages(self):
+    def new_chat(self):
         """Clear the message history."""
         # TODO Eventually i would like to keep track of conversations and be able to switch between them
         print("Clearing messages...")
@@ -104,7 +104,7 @@ class AlwaysReddy:
         """Cancel the current recording and TTS."""
         played_cancel_sfx = False
         self.cancel_recording_timeout_timer()
-
+        print("Cancelling all...")
         if self.main_thread is not None and self.main_thread.is_alive():
             if not silent:
                 # Track if the cancel sound has been played so it doesn't play twice
@@ -273,8 +273,8 @@ class AlwaysReddy:
             print(f"Press '{config.CANCEL_HOTKEY}' to cancel recording.")
 
         if config.CLEAR_HISTORY_HOTKEY:
-            input_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY,pressed=self.clear_messages)
-            print(f"Press '{config.CLEAR_HISTORY_HOTKEY}' to clear the chat history.")
+            input_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY,pressed=self.new_chat)
+            print(f"Press '{config.CLEAR_HISTORY_HOTKEY}' to start a new")
 
         input_handler.start(blocking=True)
 

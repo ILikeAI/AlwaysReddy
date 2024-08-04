@@ -60,11 +60,11 @@ class InputHandler:
         current_time = time.time()
 
         if is_pressed:
-            if not state.is_pressed:  # Only process the initial press
+            if not state.is_pressed or (current_time - state.last_press_time >= self.double_tap_threshold):
                 state.is_pressed = True
                 is_double_tap = (current_time - state.last_press_time < self.double_tap_threshold)
                 
-                if is_double_tap:
+                if is_double_tap and self.hotkeys[hotkey]['double_tap']:
                     self.handle_event(hotkey, 'double_tap')
                 else:
                     self.handle_event(hotkey, 'pressed')
@@ -72,6 +72,8 @@ class InputHandler:
                 state.last_press_time = current_time
 
                 # Set up a timer for the 'held' event
+                if state.hold_timer:
+                    state.hold_timer.cancel()
                 state.hold_timer = threading.Timer(self.hold_threshold, self.trigger_held_event, args=[hotkey])
                 state.hold_timer.start()
         else:
