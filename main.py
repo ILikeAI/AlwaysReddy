@@ -102,7 +102,6 @@ class AlwaysReddy:
         """Cancel the current recording and TTS."""
         played_cancel_sfx = False
         self.cancel_recording_timeout_timer()
-        print("Cancelling all...")
         if self.main_thread is not None and self.main_thread.is_alive():
             if not silent:
                 # Track if the cancel sound has been played so it doesn't play twice

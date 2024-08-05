@@ -7,7 +7,9 @@ class HotkeyState:
     """
     def __init__(self):
         self.last_press_time = 0
+        self.press_start_time = 0
         self.is_pressed = False
+        self.is_held = False
         self.hold_timer = None
 
 class InputHandler:
@@ -60,8 +62,9 @@ class InputHandler:
         current_time = time.time()
 
         if is_pressed:
-            if not state.is_pressed or (current_time - state.last_press_time >= self.double_tap_threshold):
+            if not state.is_pressed:
                 state.is_pressed = True
+                state.press_start_time = current_time
                 is_double_tap = (current_time - state.last_press_time < self.double_tap_threshold)
                 
                 if is_double_tap and self.hotkeys[hotkey]['double_tap']:
@@ -82,10 +85,12 @@ class InputHandler:
                 if state.hold_timer:
                     state.hold_timer.cancel()
                 
-                if current_time - state.last_press_time >= self.hold_threshold:
+                if current_time - state.press_start_time >= self.hold_threshold:
                     self.handle_event(hotkey, 'held_release')
                 else:
                     self.handle_event(hotkey, 'released')
+                
+                state.is_held = False
 
     def trigger_held_event(self, hotkey):
         """
@@ -93,6 +98,7 @@ class InputHandler:
         """
         state = self.hotkey_states[hotkey]
         if state.is_pressed:
+            state.is_held = True
             self.handle_event(hotkey, 'held')
 
     def start(self, blocking=False):
