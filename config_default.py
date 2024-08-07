@@ -84,8 +84,10 @@ ACTIVE_PROMPT = "default_prompt"
 ### HOTKEYS ###
 # Hotkeys can be set to None to disable them
 CANCEL_HOTKEY = 'alt+ctrl+e'
-CLEAR_HISTORY_HOTKEY = 'alt+ctrl+w'
+NEW_CHAT_HOTKEY = 'alt+ctrl+w'
 RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
+READ_FROM_CLIPBOARD = "ctrl+alt+c"
+TRANSCRIBE_RECORDING = "ctrl+alt+t"
 
 DOUBLE_TAP_THRESHOLD = 0.4 # The time window in which a second press must occur to be considered a double tap
 SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
