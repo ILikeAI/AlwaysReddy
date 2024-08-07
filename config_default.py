@@ -104,6 +104,5 @@ BASE_VOLUME = 1
 START_SOUND_VOLUME = 0.05
 END_SOUND_VOLUME = 0.05
 CANCEL_SOUND_VOLUME = 0.09
-MIN_RECORDING_DURATION = 0.3
 MAX_RECORDING_DURATION= 600 # If you record for more than 10 minutes, the recording will stop automatically
 

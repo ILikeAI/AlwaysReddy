@@ -10,78 +10,76 @@ from utils import read_clipboard, to_clipboard
 from config_loader import config
 import prompt
 
+# Import actions
+from actions.read_clipboard import ReadClipboard
+from actions.transcribe_to_clipboard import TranscribeToClipboard
+from actions.always_reddy_voice_assistant import AlwaysReddyVoiceAssistant
+
+
 class AlwaysReddy:
+
     def __init__(self):
-        """Initialize the Recorder with default settings and objects."""
+        """Initialize the AlwaysReddy instance with default settings and objects."""
         self.verbose = config.VERBOSE
         self.recorder = AudioRecorder(verbose=self.verbose)
         self.clipboard_text = None
-        self.last_clipboard_text = None # This is used to check if the clipboard text has changed
+        self.last_clipboard_text = None
         self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
         self.tts = tts_manager.TTSManager(parent_client=self, verbose=self.verbose)
         self.recording_timeout_timer = None
         self.transcription_manager = TranscriptionManager(verbose=self.verbose)
         self.completion_client = CompletionManager(verbose=self.verbose)
         self.main_thread = None
-        self.stop_response = False
+        self.stop_action = False
         self.last_message_was_cut_off = False
+        self.input_handler = get_input_handler(verbose=self.verbose)
+        self.input_handler.double_tap_threshold = config.DOUBLE_TAP_THRESHOLD
+        self.last_action_time = 0
+        self.current_recording_action = None
 
-    def new_chat(self):
-        """Clear the message history."""
-        # TODO Eventually i would like to keep track of conversations and be able to switch between them
-        print("Clearing messages...")
-        self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
-        self.last_message_was_cut_off = False
-        self.last_clipboard_text = None
-
-    def start_recording(self):
-        """Start the audio recording process and set a timeout for automatic stopping."""
+    def _start_recording(self, action=None):
+        """
+        Start the audio recording process and set a timeout for automatic stopping.
+        
+        Args:
+            action (callable, optional): The action to be called when the recording times out.
+        """
         if self.verbose:
-            print("Starting recording...")
+            print(f"Starting recording... Action: {action.__name__ if action else 'None'}")
         self.recorder.start_recording()
-
         play_sound_FX("start", volume=config.START_SOUND_VOLUME, verbose=self.verbose)
-
-        # This just starts a timer for the recording to stop after a certain amount of time, just to make sure you dont leave it recording forever!
-        self.recording_timeout_timer = threading.Timer(config.MAX_RECORDING_DURATION, self.stop_recording)
+        self.current_recording_action = action
+        self.recording_timeout_timer = threading.Timer(config.MAX_RECORDING_DURATION, self._handle_recording_timeout)
         self.recording_timeout_timer.start()
-    
-    def cancel_recording_timeout_timer(self):
+
+    def _stop_recording(self):
+        """Stop the current recording and return the filename."""
+        self._cancel_recording_timeout_timer()
+        if self.verbose:
+            print("Stopping recording...")
+        play_sound_FX("end", volume=config.END_SOUND_VOLUME, verbose=self.verbose)
+        return self.recorder.stop_recording()
+
+    def _handle_recording_timeout(self):
+        """Handle the recording timeout by stopping the recording and calling the current recording action."""
+        if self.verbose:
+            print("Recording timeout reached.")
+
+        if self.current_recording_action:
+            if self.verbose:
+                print(f"Attempting to run {self.current_recording_action.__name__}")
+            self.execute_action_in_thread(self.current_recording_action)
+        else:
+            if self.verbose:
+                print("No action set for recording timeout.")
+        self.current_recording_action = None  # Clear the action after execution
+
+    def _cancel_recording_timeout_timer(self):
         """Cancel the recording timeout timer if it is running."""
         if self.recording_timeout_timer and self.recording_timeout_timer.is_alive():
             self.recording_timeout_timer.cancel()
 
-    def stop_recording(self):
-        """Stop the audio recording process and handle the recorded audio."""
-        self.cancel_recording_timeout_timer()
-        if self.recorder.recording:
-            if self.verbose:
-                print("Stopping recording...")
-            play_sound_FX("end", volume=config.END_SOUND_VOLUME, verbose=self.verbose)
-            recording_filename = self.recorder.stop_recording()
-
-            # If the recording is too short, ignore it
-            if self.recorder.duration < config.MIN_RECORDING_DURATION:
-                if self.verbose:
-                    print("Recording is too short or file does not exist, ignoring...")
-                return
-
-            try:
-                transcript = self.transcription_manager.transcribe_audio(recording_filename)
-
-                # If the user has tried to cut off the response, we need to make sure we dont process it
-                if not self.stop_response and transcript:
-                    # Handle response is where the magic happens
-                    self.handle_response(transcript)
-
-            except Exception as e:
-                if self.verbose:
-                    import traceback
-                    traceback.print_exc()
-                else:
-                    print(f"An error occurred during transcription: {e}")
-
-    def cancel_recording(self):
+    def _cancel_recording(self):
         """Cancel the current recording."""
         if self.recorder.recording:
             if self.verbose:
@@ -90,7 +88,7 @@ class AlwaysReddy:
             if self.verbose:
                 print("Recording cancelled.")
 
-    def cancel_tts(self):
+    def _cancel_tts(self):
         """Cancel the current TTS."""
         if self.verbose:
             print("Stopping text-to-speech...")
@@ -99,181 +97,178 @@ class AlwaysReddy:
             print("Text-to-speech cancelled.")
 
     def cancel_all(self, silent=False):
-        """Cancel the current recording and TTS."""
-        played_cancel_sfx = False
-        self.cancel_recording_timeout_timer()
+        """
+        Cancel the current recording and TTS.
+        This method runs outside the main action thread and can be called at any time to stop ongoing processes.
+        
+        Args:
+            silent (bool): If True, don't play the cancel sound.
+        """
+        cancelled_something = False
+        self._cancel_recording_timeout_timer()
+        
         if self.main_thread is not None and self.main_thread.is_alive():
-            if not silent:
-                # Track if the cancel sound has been played so it doesn't play twice
-                play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME, verbose=self.verbose)
-                played_cancel_sfx = True
-            self.stop_response = True
+            self.stop_action = True
+            cancelled_something = True
 
-        elif self.recorder.recording:
-            if not silent:
-                # Track if the cancel sound has been played so it doesn't play twice
-                play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME, verbose=self.verbose)
-                played_cancel_sfx = True
-            self.cancel_recording()
+        if self.recorder.recording:
+            self._cancel_recording()
+            cancelled_something = True
 
         if self.tts.running_tts:
-            # Seems like the wrong way to do this but I want to ensure I only play the sound once
-            if not played_cancel_sfx:
-                if not silent:
-                    play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME, verbose=self.verbose)
-                    played_cancel_sfx = True
-            self.cancel_tts()
+            self._cancel_tts()
+            cancelled_something = True
+
+        if cancelled_something and not silent:
+            play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME, verbose=self.verbose)
 
     def handle_response_stream(self, stream, run_tts=True):
         """
-        This recieves a generator that yields tuples of the type of content and the content itself.
-        The type may be "sentence", "clipboard_text" or "full_response", sentence is spoken by the TTS and clipboard_text is copied to the clipboard.
-
+        Handle the response stream from the completion client.
+        
         Args:
-            stream (generator): A generator that yields tuples of the type of content and the content itself.
+            stream (generator): A generator that yields tuples of content type and content.
+            run_tts (bool): If True, run text-to-speech for sentences.
+        
+        Returns:
+            str: The full response.
         """
         response = None
         for type, content in stream:
-            # If stop stream is set to True, break the loop
-            if self.stop_response:
+            if self.stop_action:
                 break
 
             if type == "sentence" and run_tts:
                 self.tts.run_tts(content)
-
             elif type == "clipboard_text":
                 to_clipboard(content)
-
             elif type == "full_response":
                 response = content
 
         return response
-    
-    def handle_response(self, transcript):
-        """
-        Handle the response from the transcription and generate a completion.
 
+    def add_action_hotkey(self, hotkey, *, pressed=None, released=None, held=None, held_release=None, double_tap=None, run_in_main_thread=True):
+        """
+        Add a hotkey for an action with specified callbacks for different events.
+        
         Args:
-            transcript (str): The transcribed text from the audio recording.
+            hotkey (str): The hotkey combination.
+            pressed (callable, optional): Callback for when the hotkey is pressed.
+            released (callable, optional): Callback for when the hotkey is released.
+            held (callable, optional): Callback for when the hotkey is held.
+            held_release (callable, optional): Callback for when the hotkey is released after being held.
+            double_tap (callable, optional): Callback for when the hotkey is double-tapped.
+            run_in_main_thread (bool): If True, the action will run in the main thread. Default is True.
         """
-        try:
-            # Refresh system prompt. For system prompts that contain variables like date and time
-            if len(self.messages) > 0 and self.messages[0]["role"] == "system":
-                self.messages[0]["content"] = prompt.get_system_prompt_message(config.ACTIVE_PROMPT)
+        def wrap_for_main_thread(method):
+            if method is None:
+                return None
+            def run_in_main_thread():
+                self.execute_action_in_thread(method)
+            return run_in_main_thread
 
-            # If the user has cut off the assistant's last message, add a message to indicate this
-            if self.last_message_was_cut_off:
-                transcript = "--> USER CUT THE ASSISTANTS LAST MESSAGE SHORT <--\n" + transcript
+        wrapped_kwargs = {}
+        for event, method in [('pressed', pressed), ('released', released), ('held', held), 
+                            ('held_release', held_release), ('double_tap', double_tap)]:
+            if method is not None:
+                wrapped_kwargs[event] = wrap_for_main_thread(method) if run_in_main_thread else method
 
-            # If the user wants to use the clipboard text, append it to the message
-            if self.clipboard_text and self.clipboard_text != self.last_clipboard_text:
-                self.messages.append({"role": "user", "content": transcript + f"\n\nTHIS IS THE USERS CLIPBOARD CONTENT (ignore if user doesn't mention it):\n```{self.clipboard_text}```"})
-                self.last_clipboard_text = self.clipboard_text
-                self.clipboard_text = None
-            else:
-                self.messages.append({"role": "user", "content": transcript})
+        self.input_handler.add_hotkey(hotkey, **wrapped_kwargs)
 
-            if config.TIMESTAMP_MESSAGES:
-                #add timestamp to end of message on new line
-                self.messages[-1]["content"] += f"\n\nMESSAGE TIMESTAMP:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')} "
-            print("\nTranscription:\n", transcript)
-
-            # Make sure the user hasn't cut off the response
-            if self.stop_response:
-                return
-
-            #Get the completion stream
-            stream = self.completion_client.get_completion(self.messages, model=config.COMPLETION_MODEL)
-            
-            response = self.handle_response_stream(stream, run_tts=True)
-                
-            while self.tts.running_tts:
-                # Waiting for the TTS to finish before processing it this way we can tell if the user has cut off the TTS before saving it to the messages
-                # Doing it this way feels like its probably not optimal though
-                time.sleep(0.001)
-
-            if not response:
-                if self.verbose:
-                    print("No response generated.")
-                # If the response is empty, remove the last message
-                self.messages = self.messages[:-1]
-                return
-
-            # Reset the flag indicating the last message was cut off
-            self.last_message_was_cut_off = False
-
-            if self.stop_response:
-                # If the assistant was cut off while speaking, find the last sentence spoken and cut off the response there
-                index = response.rfind(self.tts.last_sentence_spoken)
-
-                # If the last sentence spoken was found, cut off the response there
-                if index != -1:
-                    # Add a message to indicate the user cut off the response
-                    response = response[:index + len(self.tts.last_sentence_spoken)]
-                    self.last_message_was_cut_off = True
-
-            self.messages.append({"role": "assistant", "content": response})
-
-            print("\nResponse:\n", response)
-
-        except Exception as e:
-            if self.verbose:
-                import traceback
-                traceback.print_exc()
-            else:
-                print(f"An error occurred while handling the response: {e}")
-
-    def toggle_recording(self):
-        """Handle the hotkey press for starting or stopping recording."""
+    def toggle_recording(self, action=None):
+        """
+        Handle the hotkey press for starting or stopping recording.
+        
+        Args:
+            action (callable, optional): The action to be called when the recording is stopped.
+        
+        Returns:
+            str or None: The recording filename if stopped, None if started.
+        """
         if self.recorder.recording:
-            self.stop_response = False
-            self.stop_recording()
+            self.stop_action = False
+            filename = self._stop_recording()
+            if self.current_recording_action:
+                self.execute_action_in_thread(self.current_recording_action, filename)
+            self.current_recording_action = None
+            return filename
         else:
-            # If the user has set the config to always include the clipboard text, save it now
-            if config.ALWAYS_INCLUDE_CLIPBOARD:# TODO: This should not live in the toggle_recording method
-                self.save_clipboard_text()
-            self.start_recording()
+            if config.ALWAYS_INCLUDE_CLIPBOARD:
+                self._save_clipboard_text()
+            self._start_recording(action)
+            return None
 
-    def start_main_thread(self):
-        """This starts the main thread and keeps a reference to it."""
+    def execute_action_in_thread(self, action_to_run, *args, **kwargs):
+        """
+        Execute an action in a separate thread.
+        
+        Args:
+            action_to_run (callable): The action to be executed.
+            *args: Positional arguments for the action.
+            **kwargs: Keyword arguments for the action.
+        """
+        current_time = time.time()
+        if current_time - self.last_action_time < 0.1:
+            print("Action triggered too quickly. Please wait.")
+            return
+
+        self.last_action_time = current_time
+
         if self.main_thread is not None and self.main_thread.is_alive():
-            # If the thread is already running, cancel (without playing cancel sound) and start a new one
-            self.cancel_all(silent=True)  # the silence is just so you dont hear cancel sound immediately followed by the start sound
-            self.main_thread.join()
+            self.cancel_all(silent=True)
+            self.main_thread.join(timeout=2)  # Wait for up to 2 seconds
+            if self.main_thread.is_alive():
+                print("Warning: Previous action did not end properly.")
 
-        self.main_thread = threading.Thread(target=self.toggle_recording)
+        if self.verbose:
+            print(f"Running {action_to_run.__name__}...")
+        self.stop_action = False
+        self.main_thread = threading.Thread(target=action_to_run, args=args, kwargs=kwargs)
         self.main_thread.start()
 
-    def save_clipboard_text(self):
-        print("Saving clipboard text...")
-        self.clipboard_text = read_clipboard()
+    def _save_clipboard_text(self):
+        """Save the current clipboard text."""
+        try:
+            print("Saving clipboard text...")
+            self.clipboard_text = read_clipboard()
+        except Exception as e:
+            if self.verbose:
+                print(f"Error saving clipboard text: {e}")
 
     def run(self):
-        """Run the recorder, setting up hotkeys and entering the main loop."""
-        input_handler = get_input_handler(verbose=self.verbose)
-        input_handler.double_tap_threshold = config.DOUBLE_TAP_THRESHOLD
+        """Run the AlwaysReddy instance, setting up hotkeys and entering the main loop."""
+        print("Setting up AlwaysReddy...")
 
-        print()
-        if config.RECORD_HOTKEY:
-            input_handler.add_hotkey(config.RECORD_HOTKEY, pressed=self.start_main_thread,held_release=self.start_main_thread, double_tap=self.save_clipboard_text)
-            print(f"Press '{config.RECORD_HOTKEY}' to start recording, press again to stop and transcribe."
-                  f"\n\tAlternatively hold it down to record until you release.")
+        read_clipboard_action = ReadClipboard(self)
+        self.add_action_hotkey("ctrl+alt+c", pressed=read_clipboard_action.read_aloud_clipboard)
+        print("Press 'ctrl+alt+c' to read clipboard content aloud.")
 
-            if "+" in config.RECORD_HOTKEY:
-                hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)
-                print(f"\tHold down '{hotkey_start}' and double tap '{hotkey_end}' to give AlwaysReddy the content currently copied in your clipboard.")
-            else:
-                print(f"\tDouble tap '{config.RECORD_HOTKEY}' to give AlwaysReddy the content currently copied in your clipboard.")
+        alwaysreddy_voice_assistant = AlwaysReddyVoiceAssistant(self)
+        self.add_action_hotkey(config.RECORD_HOTKEY, 
+                               pressed=alwaysreddy_voice_assistant.handle_default_assistant_response,
+                               held_release=alwaysreddy_voice_assistant.handle_default_assistant_response)
+        print(f"Press '{config.RECORD_HOTKEY}' to start/stop voice assistant.")
+        
+        transcribe_to_clipboard = TranscribeToClipboard(self)
+        self.add_action_hotkey("ctrl+alt+t", 
+                               pressed=transcribe_to_clipboard.transcription_action,
+                               held_release=transcribe_to_clipboard.transcription_action)
+        print("Press 'ctrl+alt+t' to transcribe audio to clipboard.")
 
-        if config.CANCEL_HOTKEY:
-            input_handler.add_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all)
-            print(f"Press '{config.CANCEL_HOTKEY}' to cancel recording.")
+        self.add_action_hotkey(config.CLEAR_HISTORY_HOTKEY, pressed=alwaysreddy_voice_assistant.new_chat)
+        print(f"Press '{config.CLEAR_HISTORY_HOTKEY}' to start a new chat.")
 
-        if config.CLEAR_HISTORY_HOTKEY:
-            input_handler.add_hotkey(config.CLEAR_HISTORY_HOTKEY,pressed=self.new_chat)
-            print(f"Press '{config.CLEAR_HISTORY_HOTKEY}' to start a new")
+        # Add cancel_all as an action that doesn't run in the main thread
+        self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_main_thread=False)
+        print(f"Press '{config.CANCEL_HOTKEY}' to cancel current action. (This can be used at any time)")
 
-        input_handler.start(blocking=True)
+        print("AlwaysReddy is ready. Press the configured hotkeys to interact.")
+        try:
+            self.input_handler.start(blocking=True)
+        except KeyboardInterrupt:
+            print("\nShutting down AlwaysReddy...")
+        finally:
+            self.cancel_all(silent=True)
 
 if __name__ == "__main__":
     try:
@@ -283,4 +278,4 @@ if __name__ == "__main__":
             import traceback
             traceback.print_exc()
         else:
-            print(f"Failed to start the recorder: {e}")
+            print(f"Failed to start AlwaysReddy: {e}")

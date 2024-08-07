@@ -91,7 +91,7 @@ class TTSManager:
                     print(f"Running TTS: {sentence}")
                 
                 # If the stop flag is set, return early
-                if self.parent_client.stop_response:
+                if self.parent_client.stop_action:
                     return
                 
                 self.temp_files.append(temp_output_file)
@@ -116,7 +116,7 @@ class TTSManager:
         # While there are items in the queue or the queuing flag is set
         while self.queing or not self.audio_queue.empty():
             # If the stop response flag or stop_playback flag is set, break the loop
-            if self.parent_client.stop_response or self.stop_playback:
+            if self.parent_client.stop_action or self.stop_playback:
                 break
 
             # Set the running TTS flag to True
