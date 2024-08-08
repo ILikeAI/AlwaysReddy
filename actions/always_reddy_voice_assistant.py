@@ -2,7 +2,7 @@ import time
 from config_loader import config
 import prompt
 from actions.base_action import BaseAction
-
+from utils import to_clipboard
 class AlwaysReddyVoiceAssistant(BaseAction):
     """Action for handling voice assistant functionality."""
 
@@ -37,7 +37,9 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                     return
 
                 stream = self.AR.completion_client.get_completion(self.AR.messages, model=config.COMPLETION_MODEL)
-                response = self.AR.handle_response_stream(stream, run_tts=True)
+                response = self.AR.completion_client.process_text_stream(stream,
+                                                                         marker_tuples=[(config.CLIPBOARD_TEXT_START_SEQ, config.CLIPBOARD_TEXT_END_SEQ, to_clipboard)],
+                                                                          sentence_callback=self.AR.tts.run_tts)
                     
                 while self.AR.tts.running_tts:
                     time.sleep(0.001)

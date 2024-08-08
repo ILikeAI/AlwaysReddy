@@ -193,7 +193,7 @@ class AlwaysReddy:
             return filename
         else:
             if config.ALWAYS_INCLUDE_CLIPBOARD:
-                self._save_clipboard_text()
+                self.save_clipboard_text()
             self._start_recording(action)
             return None
 
@@ -225,7 +225,7 @@ class AlwaysReddy:
         self.main_thread = threading.Thread(target=action_to_run, args=args, kwargs=kwargs)
         self.main_thread.start()
 
-    def _save_clipboard_text(self):
+    def save_clipboard_text(self):
         """Save the current clipboard text."""
         try:
             print("Saving clipboard text...")
@@ -243,7 +243,7 @@ class AlwaysReddy:
         self.add_action_hotkey(config.RECORD_HOTKEY, 
                                pressed=alwaysreddy_voice_assistant.handle_default_assistant_response,
                                held_release=alwaysreddy_voice_assistant.handle_default_assistant_response,
-                               double_tap=self._save_clipboard_text)
+                               double_tap=self.save_clipboard_text)
         print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press twice or hold-release)")
         if "+" in config.RECORD_HOTKEY:
             hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)

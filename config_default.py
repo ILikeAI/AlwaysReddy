@@ -97,8 +97,8 @@ ALWAYS_INCLUDE_CLIPBOARD = False # Always include the clipboard content without 
 ### MISC ###
 AUDIO_FILE_DIR = "audio_files"
 MAX_TOKENS = 8000 #Max tokens allowed in memory at once
-START_SEQ = "[CLIPSTART]" #the model is instructed to place any text for the clipboard between the start and end seq
-END_SEQ = "[CLIPEND]" #the model is instructed to place any text for the clipboard between the start and end seq
+CLIPBOARD_TEXT_START_SEQ = "[CLIPSTART]" #the model is instructed to place any text for the clipboard between the start and end seq
+CLIPBOARD_TEXT_END_SEQ = "[CLIPEND]" #the model is instructed to place any text for the clipboard between the start and end seq
 TIMESTAMP_MESSAGES = True # If this is true a timestamp will be added to the end of each of your messages
 
 ### AUDIO SETTINGS ###
