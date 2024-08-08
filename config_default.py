@@ -25,7 +25,7 @@ USE_GPU = False  # Set to True to use GPU acceleration. Refer to the README for 
 
 ## ANTHROPIC COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "anthropic" 
-# COMPLETION_MODEL = "claude-3-sonnet-20240229" 
+# COMPLETION_MODEL = "claude-3-5-sonnet-20240620" 
 
 ## TOGETHER COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "together"
