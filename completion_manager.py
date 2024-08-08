@@ -55,7 +55,7 @@ class CompletionManager:
         else:
             raise ValueError("Unsupported completion API service configured")
         
-    def get_completion(self, messages, model, **kwargs):
+    def get_completion_stream(self, messages, model, **kwargs):
         """Get completion from the selected AI client and stream sentences into the TTS client.
 
         Args:

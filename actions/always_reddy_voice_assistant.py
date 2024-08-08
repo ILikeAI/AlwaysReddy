@@ -36,7 +36,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 if self.AR.stop_action:
                     return
 
-                stream = self.AR.completion_client.get_completion(self.AR.messages, model=config.COMPLETION_MODEL)
+                stream = self.AR.completion_client.get_completion_stream(self.AR.messages, model=config.COMPLETION_MODEL)
                 response = self.AR.completion_client.process_text_stream(stream,
                                                                          marker_tuples=[(config.CLIPBOARD_TEXT_START_SEQ, config.CLIPBOARD_TEXT_END_SEQ, to_clipboard)],
                                                                           sentence_callback=self.AR.tts.run_tts)
