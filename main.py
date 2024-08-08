@@ -17,7 +17,6 @@ from actions.always_reddy_voice_assistant import AlwaysReddyVoiceAssistant
 
 
 class AlwaysReddy:
-
     def __init__(self):
         """Initialize the AlwaysReddy instance with default settings and objects."""
         self.verbose = config.VERBOSE
@@ -237,16 +236,14 @@ class AlwaysReddy:
 
     def run(self):
         """Run the AlwaysReddy instance, setting up hotkeys and entering the main loop."""
-        print()
-        print()
-        print("Setting up AlwaysReddy...")
-        print()
+        print("\n\nSetting up AlwaysReddy...\n")
 
         print("Voice assistant hotkeys:")        
         alwaysreddy_voice_assistant = AlwaysReddyVoiceAssistant(self)
         self.add_action_hotkey(config.RECORD_HOTKEY, 
                                pressed=alwaysreddy_voice_assistant.handle_default_assistant_response,
-                               held_release=alwaysreddy_voice_assistant.handle_default_assistant_response)
+                               held_release=alwaysreddy_voice_assistant.handle_default_assistant_response,
+                               double_tap=self._save_clipboard_text)
         print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press twice or hold-release)")
         if "+" in config.RECORD_HOTKEY:
             hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)
@@ -257,8 +254,7 @@ class AlwaysReddy:
         self.add_action_hotkey(config.NEW_CHAT_HOTKEY, pressed=alwaysreddy_voice_assistant.new_chat)
         print(f"'{config.NEW_CHAT_HOTKEY}': New chat for voice assistant")
 
-        print()
-        print("Other actions:")
+        print("\nOther actions:")
         #Read clipboard
         read_clipboard_action = ReadClipboard(self)
         self.add_action_hotkey(config.READ_FROM_CLIPBOARD, pressed=read_clipboard_action.read_aloud_clipboard)
@@ -270,13 +266,11 @@ class AlwaysReddy:
                                held_release=transcribe_to_clipboard.transcription_action)
         print(f"'{config.TRANSCRIBE_RECORDING}': Transcribe to clipboard (press twice or hold-release)")
 
-        print()
-        print("System actions:")
+        print("\nSystem actions:")
         # Add cancel_all as an action that doesn't run in the main thread
         self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_main_thread=False)
         print(f"'{config.CANCEL_HOTKEY}': Cancel currently running action, recording, TTS or other")
-        print()
-        print("AlwaysReddy is reddy. Use any of the hotkeys above to get started.")
+        print("\nAlwaysReddy is reddy. Use any of the hotkeys above to get started.")
         try:
             self.input_handler.start(blocking=True)
         except KeyboardInterrupt:

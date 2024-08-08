@@ -1,6 +1,7 @@
 from utils import read_clipboard
+from actions.base_action import BaseAction
 
-class ReadClipboard:
+class ReadClipboard(BaseAction):
     """Action for reading clipboard content aloud."""
 
     def __init__(self, AR):

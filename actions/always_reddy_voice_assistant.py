@@ -1,18 +1,10 @@
 import time
 from config_loader import config
 import prompt
+from actions.base_action import BaseAction
 
-class AlwaysReddyVoiceAssistant:
+class AlwaysReddyVoiceAssistant(BaseAction):
     """Action for handling voice assistant functionality."""
-
-    def __init__(self, AR):
-        """
-        Initialize the AlwaysReddyVoiceAssistant action.
-        
-        Args:
-            AR (AlwaysReddy): The AlwaysReddy instance.
-        """
-        self.AR = AR
 
     def handle_default_assistant_response(self):
         """Handle the response from the transcription and generate a completion."""

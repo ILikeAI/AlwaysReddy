@@ -1,6 +1,7 @@
 from utils import to_clipboard
+from actions.base_action import BaseAction
 
-class TranscribeToClipboard:
+class TranscribeToClipboard(BaseAction):
     """Action for transcribing audio to clipboard."""
 
     def __init__(self, AR):
