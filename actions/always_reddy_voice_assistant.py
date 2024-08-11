@@ -3,10 +3,10 @@ from config_loader import config
 import prompt
 from actions.base_action import BaseAction
 from utils import to_clipboard
+
 class AlwaysReddyVoiceAssistant(BaseAction):
     """Action for handling voice assistant functionality."""
-    def __init__(self, always_reddy):
-        super().__init__(always_reddy)
+    def setup(self):
         self.last_message_was_cut_off = False
 
     def handle_default_assistant_response(self):
