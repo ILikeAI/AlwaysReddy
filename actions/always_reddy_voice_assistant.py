@@ -5,6 +5,9 @@ from actions.base_action import BaseAction
 from utils import to_clipboard
 class AlwaysReddyVoiceAssistant(BaseAction):
     """Action for handling voice assistant functionality."""
+    def __init__(self, always_reddy):
+        super().__init__(always_reddy)
+        self.last_message_was_cut_off = False
 
     def handle_default_assistant_response(self):
         """Handle the response from the transcription and generate a completion."""
@@ -20,7 +23,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 if len(self.AR.messages) > 0 and self.AR.messages[0]["role"] == "system":
                     self.AR.messages[0]["content"] = prompt.get_system_prompt_message(config.ACTIVE_PROMPT)
 
-                if self.AR.last_message_was_cut_off:
+                if self.last_message_was_cut_off:
                     message = "--> USER CUT THE ASSISTANTS LAST MESSAGE SHORT <--\n" + message
 
                 if self.AR.clipboard_text and self.AR.clipboard_text != self.AR.last_clipboard_text:
@@ -39,7 +42,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 stream = self.AR.completion_client.get_completion_stream(self.AR.messages, model=config.COMPLETION_MODEL)
                 response = self.AR.completion_client.process_text_stream(stream,
                                                                          marker_tuples=[(config.CLIPBOARD_TEXT_START_SEQ, config.CLIPBOARD_TEXT_END_SEQ, to_clipboard)],
-                                                                          sentence_callback=self.AR.tts.run_tts)
+                                                                          sentence_callback=self.AR.tts.run_tts)#We pass in pairs of start and end sequences to the marker_tuples argument to indicate that the text between these sequences should be copied to the clipboard, then we pass the to_clipboard function as the callback to handle this action.
                     
                 while self.AR.tts.running_tts:
                     time.sleep(0.001)
@@ -50,13 +53,13 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                     self.AR.messages = self.AR.messages[:-1]
                     return
 
-                self.AR.last_message_was_cut_off = False
+                self.last_message_was_cut_off = False
 
                 if self.AR.stop_action:
                     index = response.rfind(self.AR.tts.last_sentence_spoken)
                     if index != -1:
                         response = response[:index + len(self.AR.tts.last_sentence_spoken)]
-                        self.AR.last_message_was_cut_off = True
+                        self.last_message_was_cut_off = True
 
                 self.AR.messages.append({"role": "assistant", "content": response})
                 print("\nResponse:\n", response)
@@ -73,6 +76,6 @@ class AlwaysReddyVoiceAssistant(BaseAction):
         """Clear the message history and start a new chat session."""
         print("Clearing messages and starting a new chat...")
         self.AR.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
-        self.AR.last_message_was_cut_off = False
+        self.last_message_was_cut_off = False
         self.AR.last_clipboard_text = None
         print("New chat session started.")

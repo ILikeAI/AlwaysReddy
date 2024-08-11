@@ -30,7 +30,6 @@ class AlwaysReddy:
         self.completion_client = CompletionManager(verbose=self.verbose)
         self.action_thread = None
         self.stop_action = False
-        self.last_message_was_cut_off = False
         self.input_handler = get_input_handler(verbose=self.verbose)
         self.input_handler.double_tap_threshold = config.DOUBLE_TAP_THRESHOLD
         self.last_action_time = 0
