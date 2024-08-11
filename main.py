@@ -244,7 +244,7 @@ class AlwaysReddy:
                                pressed=alwaysreddy_voice_assistant.handle_default_assistant_response,
                                held_release=alwaysreddy_voice_assistant.handle_default_assistant_response,
                                double_tap=self.save_clipboard_text)
-        print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press twice or hold-release)")
+        print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press to toggle on and off or hold-release)")
         if "+" in config.RECORD_HOTKEY:
             hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)
             print(f"\tHold down '{hotkey_start}' and double tap '{hotkey_end}' to send clipboard content to AlwaysReddy")
@@ -264,7 +264,7 @@ class AlwaysReddy:
         self.add_action_hotkey(config.TRANSCRIBE_RECORDING, 
                                pressed=transcribe_to_clipboard.transcription_action,
                                held_release=transcribe_to_clipboard.transcription_action)
-        print(f"'{config.TRANSCRIBE_RECORDING}': Transcribe to clipboard (press twice or hold-release)")
+        print(f"'{config.TRANSCRIBE_RECORDING}': Transcribe to clipboard (press to toggle on and off hold-release)")
 
         print("\nSystem actions:")
         # Add cancel_all as an action that doesn't run in the main thread
