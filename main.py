@@ -9,7 +9,9 @@ from soundfx import play_sound_FX
 from utils import read_clipboard
 from config_loader import config
 import prompt
-
+import os
+import importlib
+from actions.base_action import BaseAction
 # Import actions
 from actions.read_clipboard import ReadClipboard
 from actions.transcribe_to_clipboard import TranscribeToClipboard
@@ -138,7 +140,6 @@ class AlwaysReddy:
             if method is None:
                 return None
             def run_in_action_thread():
-                print(f"THISIS RUNNING VIA HOTKEY IN MAIN THREAD: {method.__name__}")
                 self.execute_action_in_thread(method)
             return run_in_action_thread
 
@@ -179,7 +180,6 @@ class AlwaysReddy:
             *args: Positional arguments for the action.
             **kwargs: Keyword arguments for the action.
         """
-        print(f"RUNNING {action_to_run.__name__} IN THREAD")
         current_time = time.time()
         if current_time - self.last_action_time < 0.1: # Delay between actions
             print("Action triggered too quickly. Please wait.")
@@ -208,39 +208,24 @@ class AlwaysReddy:
             if self.verbose:
                 print(f"Error saving clipboard text: {e}")
 
+    def discover_and_initialize_actions(self):
+        actions_dir = 'actions'
+        for filename in os.listdir(actions_dir):
+            if filename.endswith('.py') and filename not in ['base_action.py', 'example_action.py']:
+                module_name = f'actions.{filename[:-3]}'
+                module = importlib.import_module(module_name)
+                for name, obj in module.__dict__.items():
+                    if isinstance(obj, type) and issubclass(obj, BaseAction) and obj is not BaseAction:
+                        print(f"\nInitalizing action: {obj.__name__}")
+                        action_instance = obj(self)
+                        
+
     def run(self):
         """Run the AlwaysReddy instance, setting up hotkeys and entering the main loop."""
         print("\n\nSetting up AlwaysReddy...\n")
-
-        print("Voice assistant hotkeys:")        
-        alwaysreddy_voice_assistant = AlwaysReddyVoiceAssistant(self)
-        self.add_action_hotkey(config.RECORD_HOTKEY, 
-                               pressed=alwaysreddy_voice_assistant.handle_default_assistant_response,
-                               held_release=alwaysreddy_voice_assistant.handle_default_assistant_response,
-                               double_tap=self.save_clipboard_text)
-        print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press to toggle on and off or hold-release)")
-        if "+" in config.RECORD_HOTKEY:
-            hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)
-            print(f"\tHold down '{hotkey_start}' and double tap '{hotkey_end}' to send clipboard content to AlwaysReddy")
-        else:
-            print(f"\tDouble tap '{config.RECORD_HOTKEY}' to send clipboard content to AlwaysReddy")
-
-        self.add_action_hotkey(config.NEW_CHAT_HOTKEY, pressed=alwaysreddy_voice_assistant.new_chat)
-        print(f"'{config.NEW_CHAT_HOTKEY}': New chat for voice assistant")
-
-        print("\nOther actions:")
-        #Read clipboard
-        read_clipboard_action = ReadClipboard(self)
-        self.add_action_hotkey(config.READ_FROM_CLIPBOARD, pressed=read_clipboard_action.read_aloud_clipboard)
-        print(f"'{config.READ_FROM_CLIPBOARD}': To read the text in your clipboard aloud")
-        #Transcribe voice
-        transcribe_to_clipboard = TranscribeToClipboard(self)
-        self.add_action_hotkey(config.TRANSCRIBE_RECORDING, 
-                               pressed=transcribe_to_clipboard.transcription_action,
-                               held_release=transcribe_to_clipboard.transcription_action)
-        print(f"'{config.TRANSCRIBE_RECORDING}': Transcribe to clipboard (press to toggle on and off hold-release)")
-
+        self.discover_and_initialize_actions()
         print("\nSystem actions:")
+        
         # Add cancel_all as an action that doesn't run in the main thread
         self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_action_thread=False)
         print(f"'{config.CANCEL_HOTKEY}': Cancel currently running action, recording, TTS or other")

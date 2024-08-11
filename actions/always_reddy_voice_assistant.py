@@ -8,6 +8,23 @@ class AlwaysReddyVoiceAssistant(BaseAction):
     """Action for handling voice assistant functionality."""
     def setup(self):
         self.last_message_was_cut_off = False
+        
+        # HOTKEY CONFIGURATION
+        print("Voice assistant hotkeys:")  
+        self.AR.add_action_hotkey(config.RECORD_HOTKEY, 
+                               pressed=self.handle_default_assistant_response,
+                               held_release=self.handle_default_assistant_response,
+                               double_tap=self.AR.save_clipboard_text)
+        
+        print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press to toggle on and off or hold-release)")
+        if "+" in config.RECORD_HOTKEY:
+            hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)
+            print(f"\tHold down '{hotkey_start}' and double tap '{hotkey_end}' to send clipboard content to AlwaysReddy")
+        else:
+            print(f"\tDouble tap '{config.RECORD_HOTKEY}' to send clipboard content to AlwaysReddy")
+        # new chat hotkey
+        self.AR.add_action_hotkey(config.NEW_CHAT_HOTKEY, pressed=self.new_chat)
+        print(f"'{config.NEW_CHAT_HOTKEY}': New chat for voice assistant")
 
     def handle_default_assistant_response(self):
         """Handle the response from the transcription and generate a completion."""
@@ -74,7 +91,6 @@ class AlwaysReddyVoiceAssistant(BaseAction):
 
     def new_chat(self):
         """Clear the message history and start a new chat session."""
-        print("Clearing messages and starting a new chat...")
         self.AR.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
         self.last_message_was_cut_off = False
         self.AR.last_clipboard_text = None

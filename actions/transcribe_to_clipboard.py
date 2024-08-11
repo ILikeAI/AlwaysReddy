@@ -1,17 +1,15 @@
 from utils import to_clipboard
 from actions.base_action import BaseAction
+from config_loader import config
 
 class TranscribeToClipboard(BaseAction):
     """Action for transcribing audio to clipboard."""
+    def setup(self):
 
-    def __init__(self, AR):
-        """
-        Initialize the TranscribeToClipboard action.
-        
-        Args:
-            AR (AlwaysReddy): The AlwaysReddy instance.
-        """
-        self.AR = AR
+        self.AR.add_action_hotkey(config.TRANSCRIBE_RECORDING, 
+                               pressed=self.transcription_action,
+                               held_release=self.transcription_action)
+        print(f"'{config.TRANSCRIBE_RECORDING}': Transcribe to clipboard (press to toggle on and off hold-release)")
 
     def transcription_action(self):
         """Handle the transcription process."""
