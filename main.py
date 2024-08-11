@@ -6,7 +6,7 @@ from input_apis.input_handler import get_input_handler
 import tts_manager
 from completion_manager import CompletionManager
 from soundfx import play_sound_FX
-from utils import read_clipboard, to_clipboard
+from utils import read_clipboard
 from config_loader import config
 import prompt
 

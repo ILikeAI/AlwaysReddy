@@ -3,6 +3,13 @@
 VERBOSE = True
 USE_GPU = False  # Set to True to use GPU acceleration. Refer to the README for instructions on installing PyTorch with CUDA support.
 
+### HOTKEY BINDINGS ###
+# Hotkeys can be set to None to disable them
+CANCEL_HOTKEY = 'alt+ctrl+e'
+NEW_CHAT_HOTKEY = 'alt+ctrl+w'
+RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
+READ_FROM_CLIPBOARD = "ctrl+alt+c"
+TRANSCRIBE_RECORDING = "ctrl+alt+t"
 
 ### COMPLETIONS API SETTINGS  ###
 # Just uncomment the ONE api you want to use
@@ -81,25 +88,18 @@ PIPER_VOICE_SPEED = 1.0 # Speed of the TTS, 1.0 is normal speed, 2.0 is double s
 # Or create your own prompt in the "system_prompts" folder, then put the name of the file here.
 ACTIVE_PROMPT = "default_prompt"
 
-### HOTKEYS ###
-# Hotkeys can be set to None to disable them
-CANCEL_HOTKEY = 'alt+ctrl+e'
-NEW_CHAT_HOTKEY = 'alt+ctrl+w'
-RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
-READ_FROM_CLIPBOARD = "ctrl+alt+c"
-TRANSCRIBE_RECORDING = "ctrl+alt+t"
-
-DOUBLE_TAP_THRESHOLD = 0.4 # The time window in which a second press must occur to be considered a double tap
-SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
-ALWAYS_INCLUDE_CLIPBOARD = False # Always include the clipboard content without having to double tap the record hotkey
-
-
 ### MISC ###
 AUDIO_FILE_DIR = "audio_files"
 MAX_TOKENS = 8000 #Max tokens allowed in memory at once
 CLIPBOARD_TEXT_START_SEQ = "[CLIPSTART]" #the model is instructed to place any text for the clipboard between the start and end seq
 CLIPBOARD_TEXT_END_SEQ = "[CLIPEND]" #the model is instructed to place any text for the clipboard between the start and end seq
 TIMESTAMP_MESSAGES = True # If this is true a timestamp will be added to the end of each of your messages
+
+
+DOUBLE_TAP_THRESHOLD = 0.4 # The time window in which a second press must occur to be considered a double tap
+SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
+ALWAYS_INCLUDE_CLIPBOARD = False # Always include the clipboard content without having to double tap the record hotkey
+
 
 ### AUDIO SETTINGS ###
 BASE_VOLUME = 1 
