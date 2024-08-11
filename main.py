@@ -45,8 +45,9 @@ class AlwaysReddy:
         """
         if self.verbose:
             print(f"Starting recording... Action: {action.__name__ if action else 'None'}")
-        self.recorder.start_recording()
+            
         play_sound_FX("start", volume=config.START_SOUND_VOLUME, verbose=self.verbose)
+        self.recorder.start_recording()
         self.current_recording_action = action
         self.recording_timeout_timer = threading.Timer(config.MAX_RECORDING_DURATION, self._handle_recording_timeout)
         self.recording_timeout_timer.start()
@@ -181,7 +182,7 @@ class AlwaysReddy:
         """
         print(f"RUNNING {action_to_run.__name__} IN THREAD")
         current_time = time.time()
-        if current_time - self.last_action_time < 0.1:
+        if current_time - self.last_action_time < 0.1: # Delay between actions
             print("Action triggered too quickly. Please wait.")
             return
 
