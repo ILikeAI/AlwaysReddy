@@ -121,31 +121,6 @@ class AlwaysReddy:
         if cancelled_something and not silent:
             play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME, verbose=self.verbose)
 
-    def handle_response_stream(self, stream, run_tts=True):
-        """
-        Handle the response stream from the completion client.
-        
-        Args:
-            stream (generator): A generator that yields tuples of content type and content.
-            run_tts (bool): If True, run text-to-speech for sentences.
-        
-        Returns:
-            str: The full response.
-        """
-        response = None
-        for type, content in stream:
-            if self.stop_action:
-                break
-
-            if type == "sentence" and run_tts:
-                self.tts.run_tts(content)
-            elif type == "clipboard_text":
-                to_clipboard(content)
-            elif type == "full_response":
-                response = content
-
-        return response
-
     def add_action_hotkey(self, hotkey, *, pressed=None, released=None, held=None, held_release=None, double_tap=None, run_in_main_thread=True):
         """
         Add a hotkey for an action with specified callbacks for different events.
@@ -163,6 +138,7 @@ class AlwaysReddy:
             if method is None:
                 return None
             def run_in_main_thread():
+                print(f"THISIS RUNNING VIA HOTKEY IN MAIN THREAD: {method.__name__}")
                 self.execute_action_in_thread(method)
             return run_in_main_thread
 
@@ -187,9 +163,6 @@ class AlwaysReddy:
         if self.recorder.recording:
             self.stop_action = False
             filename = self._stop_recording()
-            if self.current_recording_action:#This should only be hit when the recording is stopped by the timeout, it will re run the action that started the recording
-                self.execute_action_in_thread(self.current_recording_action, filename)
-            self.current_recording_action = None
             return filename
         else:
             if config.ALWAYS_INCLUDE_CLIPBOARD:
@@ -206,6 +179,7 @@ class AlwaysReddy:
             *args: Positional arguments for the action.
             **kwargs: Keyword arguments for the action.
         """
+        print(f"RUNNING {action_to_run.__name__} IN THREAD")
         current_time = time.time()
         if current_time - self.last_action_time < 0.1:
             print("Action triggered too quickly. Please wait.")
