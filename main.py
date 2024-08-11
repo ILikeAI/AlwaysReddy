@@ -28,7 +28,7 @@ class AlwaysReddy:
         self.recording_timeout_timer = None
         self.transcription_manager = TranscriptionManager(verbose=self.verbose)
         self.completion_client = CompletionManager(verbose=self.verbose)
-        self.main_thread = None
+        self.action_thread = None
         self.stop_action = False
         self.last_message_was_cut_off = False
         self.input_handler = get_input_handler(verbose=self.verbose)
@@ -107,7 +107,7 @@ class AlwaysReddy:
         cancelled_something = False
         self._cancel_recording_timeout_timer()
         
-        if self.main_thread is not None and self.main_thread.is_alive():
+        if self.action_thread is not None and self.action_thread.is_alive():
             self.stop_action = True
             cancelled_something = True
 
@@ -122,7 +122,7 @@ class AlwaysReddy:
         if cancelled_something and not silent:
             play_sound_FX("cancel", volume=config.CANCEL_SOUND_VOLUME, verbose=self.verbose)
 
-    def add_action_hotkey(self, hotkey, *, pressed=None, released=None, held=None, held_release=None, double_tap=None, run_in_main_thread=True):
+    def add_action_hotkey(self, hotkey, *, pressed=None, released=None, held=None, held_release=None, double_tap=None, run_in_action_thread=True):
         """
         Add a hotkey for an action with specified callbacks for different events.
         
@@ -133,21 +133,21 @@ class AlwaysReddy:
             held (callable, optional): Callback for when the hotkey is held.
             held_release (callable, optional): Callback for when the hotkey is released after being held.
             double_tap (callable, optional): Callback for when the hotkey is double-tapped.
-            run_in_main_thread (bool): If True, the action will run in the main thread. Default is True.
+            run_in_action_thread (bool): If True, the action will run in the main thread. Default is True.
         """
-        def wrap_for_main_thread(method):
+        def wrap_for_action_thread(method):
             if method is None:
                 return None
-            def run_in_main_thread():
+            def run_in_action_thread():
                 print(f"THISIS RUNNING VIA HOTKEY IN MAIN THREAD: {method.__name__}")
                 self.execute_action_in_thread(method)
-            return run_in_main_thread
+            return run_in_action_thread
 
         wrapped_kwargs = {}
         for event, method in [('pressed', pressed), ('released', released), ('held', held), 
                             ('held_release', held_release), ('double_tap', double_tap)]:
             if method is not None:
-                wrapped_kwargs[event] = wrap_for_main_thread(method) if run_in_main_thread else method
+                wrapped_kwargs[event] = wrap_for_action_thread(method) if run_in_action_thread else method
 
         self.input_handler.add_hotkey(hotkey, **wrapped_kwargs)
 
@@ -188,17 +188,17 @@ class AlwaysReddy:
 
         self.last_action_time = current_time
 
-        if self.main_thread is not None and self.main_thread.is_alive():
+        if self.action_thread is not None and self.action_thread.is_alive():
             self.cancel_all(silent=True)
-            self.main_thread.join(timeout=2)  # Wait for up to 2 seconds
-            if self.main_thread.is_alive():
+            self.action_thread.join(timeout=2)  # Wait for up to 2 seconds
+            if self.action_thread.is_alive():
                 print("Warning: Previous action did not end properly.")
 
         if self.verbose:
             print(f"Running {action_to_run.__name__}...")
         self.stop_action = False
-        self.main_thread = threading.Thread(target=action_to_run, args=args, kwargs=kwargs)
-        self.main_thread.start()
+        self.action_thread = threading.Thread(target=action_to_run, args=args, kwargs=kwargs)
+        self.action_thread.start()
 
     def save_clipboard_text(self):
         """Save the current clipboard text."""
@@ -243,7 +243,7 @@ class AlwaysReddy:
 
         print("\nSystem actions:")
         # Add cancel_all as an action that doesn't run in the main thread
-        self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_main_thread=False)
+        self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_action_thread=False)
         print(f"'{config.CANCEL_HOTKEY}': Cancel currently running action, recording, TTS or other")
         print("\nAlwaysReddy is reddy. Use any of the hotkeys above to get started.")
         try:
