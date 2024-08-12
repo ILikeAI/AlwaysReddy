@@ -2,7 +2,7 @@ import time
 from config_loader import config
 import prompt
 from actions.base_action import BaseAction
-from utils import to_clipboard, read_clipboard
+from utils import to_clipboard
 
 class AlwaysReddyVoiceAssistant(BaseAction):
     """Action for handling voice assistant functionality."""
@@ -14,7 +14,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
         self.AR.add_action_hotkey(config.RECORD_HOTKEY, 
                                pressed=self.handle_default_assistant_response,
                                held_release=self.handle_default_assistant_response,
-                               double_tap=self.save_clipboard_text)
+                               double_tap=self.AR.save_clipboard_text)
         
         print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press to toggle on and off or hold-release)")
         if "+" in config.RECORD_HOTKEY:
@@ -43,10 +43,10 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 if self.last_message_was_cut_off:
                     message = "--> USER CUT THE ASSISTANTS LAST MESSAGE SHORT <--\n" + message
 
-                if self.clipboard_text and self.clipboard_text != self.AR.last_clipboard_text:
-                    message += f"\n\nTHE USER HAS GANTED YOU ACCESS TO THEIR CLIPABORD, THIS IS ITS CONTENT (ignore if user doesn't mention it):\n```{self.clipboard_text}```"
-                    self.AR.last_clipboard_text = self.clipboard_text
-                    self.clipboard_text = None
+                if self.AR.clipboard_text and self.AR.clipboard_text != self.AR.last_clipboard_text:
+                    message += f"\n\nTHIS IS THE USERS CLIPBOARD CONTENT (ignore if user doesn't mention it):\n```{self.AR.clipboard_text}```"
+                    self.AR.last_clipboard_text = self.AR.clipboard_text
+                    self.AR.clipboard_text = None
                 
                 if config.TIMESTAMP_MESSAGES:
                     message += f"\n\nMESSAGE TIMESTAMP:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')} "
@@ -55,6 +55,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
 
                 if self.AR.stop_action:
                     return
+
                 stream = self.AR.completion_client.get_completion_stream(self.AR.messages, model=config.COMPLETION_MODEL)
                 response = self.AR.completion_client.process_text_stream(stream,
                                                                          marker_tuples=[(config.CLIPBOARD_TEXT_START_SEQ, config.CLIPBOARD_TEXT_END_SEQ, to_clipboard)],
@@ -86,11 +87,6 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 traceback.print_exc()
             else:
                 print(f"An error occurred while handling the response: {e}")
-
-    def save_clipboard_text(self):
-        """Save the current clipboard text."""
-        print("Saving clipboard text...")
-        self.clipboard_text = read_clipboard()
 
 
     def new_chat(self):

@@ -6,6 +6,7 @@ from input_apis.input_handler import get_input_handler
 import tts_manager
 from completion_manager import CompletionManager
 from soundfx import play_sound_FX
+from utils import read_clipboard
 from config_loader import config
 import prompt
 import os
@@ -18,6 +19,7 @@ class AlwaysReddy:
         """Initialize the AlwaysReddy instance with default settings and objects."""
         self.verbose = config.VERBOSE
         self.recorder = AudioRecorder(verbose=self.verbose)
+        self.clipboard_text = None
         self.last_clipboard_text = None
         self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
         self.tts = tts_manager.TTSManager(parent_client=self, verbose=self.verbose)
@@ -193,6 +195,15 @@ class AlwaysReddy:
         self.action_thread = threading.Thread(target=action_to_run, args=args, kwargs=kwargs)
         self.action_thread.start()
 
+    def save_clipboard_text(self):
+        """Save the current clipboard text."""
+        try:
+            print("Saving clipboard text...")
+            self.clipboard_text = read_clipboard()
+        except Exception as e:
+            if self.verbose:
+                print(f"Error saving clipboard text: {e}")
+
     def discover_and_initialize_actions(self):
         actions_dir = 'actions'
         for filename in os.listdir(actions_dir):
@@ -202,7 +213,8 @@ class AlwaysReddy:
                 for name, obj in module.__dict__.items():
                     if isinstance(obj, type) and issubclass(obj, BaseAction) and obj is not BaseAction:
                         print(f"\nInitalizing action: {obj.__name__}")
-                        action_instance = obj(self)      
+                        action_instance = obj(self)
+                        
 
     def run(self):
         """Run the AlwaysReddy instance, setting up hotkeys and entering the main loop."""
