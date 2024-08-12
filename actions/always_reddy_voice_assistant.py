@@ -44,7 +44,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                     message = "--> USER CUT THE ASSISTANTS LAST MESSAGE SHORT <--\n" + message
 
                 if self.AR.clipboard_text and self.AR.clipboard_text != self.AR.last_clipboard_text:
-                    message += f"\n\nTHIS IS THE USERS CLIPBOARD CONTENT (ignore if user doesn't mention it):\n```{self.AR.clipboard_text}```"
+                    message += f"\n\nTHE USER HAS GANTED YOU ACCESS TO THEIR CLIPABORD, THIS IS ITS CONTENT (ignore if user doesn't mention it):\n```{self.AR.clipboard_text}```"
                     self.AR.last_clipboard_text = self.AR.clipboard_text
                     self.AR.clipboard_text = None
                 

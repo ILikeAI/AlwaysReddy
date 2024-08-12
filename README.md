@@ -7,12 +7,13 @@ Contact me: joshlikesai@gmail.com
 
 ## Sections
 - [Meet AlwaysReddy](#meet-alwaysreddy)
-- [Supported LLM servers](#supported-llm-servers)
-- [Supported TTS systems](#supported-tts-systems)
 - [Setup](#setup)
 - [Known Issues](#known-issues)
+- [How to add custom actions](#custom-actions)
 - [Troubleshooting](#troubleshooting)
 - [How to](#how-to)
+- [Supported LLM servers](#supported-llm-servers)
+- [Supported TTS systems](#supported-tts-systems)
 
 ## Meet AlwaysReddy 
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
@@ -227,3 +228,31 @@ To add AlwaysReddy to your startup list so it starts automatically on your compu
 2. Run `python setup.py`, follow the prompts, it will ask you if you want to add AlwaysReddy to the startup list, press Y the confrim
 
 If you want to remove AlwaysReddy from the startup list you can follow the same steps again, only say no when asked if you want to add AlwaysReddy to the startup list and it will ask if you would like to remove it, press Y.
+
+## Custom Actions
+PLEASE NOTE: Custom actions is a very experimental feature that I am likley to chnage a lot, any actions you make will in all likleyhood need to be updated in some way as I update and change the actions system
+
+### What is an action?
+The action system allows you to easily define new functionality and bind it to a hotkey event, it allows you to easily use the following functionalitys from the AlwayReddy code base:
+- Record audio
+- Transcribe audio
+- Run and play TTS
+- Generate responses from any of the supported LLM servers
+- Read and save to the clipboard
+
+### How to create a custom action
+
+### How to record audio or transcribe in your custom action
+The `toggle_recording` method starts or stops audio recording. When called the first time, it starts recording. The next call stops recording and returns the audio file path.
+
+By default, if the recording times out, it's stopped and deleted. However, you can provide a callback function that will be executed on timeout instead. In the code example, `transcription_action` is passed as the callback. When the recording times out, `transcription_action` is called, which calls `toggle_recording` again, thereby stopping the recording and returning the audio file for transcription.
+
+```python 
+def transcription_action(self):
+    """Handle the transcription process."""
+    recording_filename = self.AR.toggle_recording(self.transcription_action)
+    if recording_filename:
+        transcript = self.AR.transcription_manager.transcribe_audio(recording_filename)
+        to_clipboard(transcript)
+        print("Transcription copied to clipboard.")
+```
