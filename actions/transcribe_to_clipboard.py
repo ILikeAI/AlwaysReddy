@@ -5,11 +5,11 @@ from config_loader import config
 class TranscribeToClipboard(BaseAction):
     """Action for transcribing audio to clipboard."""
     def setup(self):
-
-        self.AR.add_action_hotkey(config.TRANSCRIBE_RECORDING, 
-                               pressed=self.transcription_action,
-                               held_release=self.transcription_action)
-        print(f"'{config.TRANSCRIBE_RECORDING}': Transcribe to clipboard (press to toggle on and off hold-release)")
+        if config.TRANSCRIBE_RECORDING:
+            self.AR.add_action_hotkey(config.TRANSCRIBE_RECORDING, 
+                                pressed=self.transcription_action,
+                                held_release=self.transcription_action)
+            print(f"'{config.TRANSCRIBE_RECORDING}': Transcribe to clipboard (press to toggle on and off hold-release)")
 
     def transcription_action(self):
         """Handle the transcription process."""
