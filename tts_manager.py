@@ -5,6 +5,7 @@ from config_loader import config
 import tempfile
 import pyaudio
 import wave
+import re
 
 class TTSManager:
     """
@@ -25,6 +26,7 @@ class TTSManager:
         self.verbose = verbose
         self.stop_playback = False
         self.playback_stopped = threading.Event()
+        self.sentence_pattern = re.compile(r'(.*?[.!?](?:\s|$)|\n)', re.DOTALL)
 
         ## NOTE: For now all TTS services need to return wav files.
         if self.service == "openai":
@@ -50,13 +52,14 @@ class TTSManager:
         """
         self._play_audio_thread.join()
 
-    def run_tts(self, sentence, output_dir=config.AUDIO_FILE_DIR):
+    def run_tts(self, text, output_dir=config.AUDIO_FILE_DIR, split_sentences=True):
         """
-        Run the TTS for the given sentence and output the audio to the specified directory.
+        Run the TTS for the given text and output the audio to the specified directory.
         
         Args:
-            sentence (str): The text to be converted to speech.
-            output_dir (str): The directory where the audio file will be saved.
+            text (str): The text to be converted to speech.
+            output_dir (str): The directory where the audio files will be saved.
+            split_sentences (bool): Whether to split the text into sentences. Default is True.
         """
         # Set queuing flag to True
         self.queing = True
@@ -76,35 +79,42 @@ class TTSManager:
                 self.queing = False
                 return
     
-        try:
-            # Create a temporary file in the output directory
-            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
-            temp_output_file = temp_file.name
-            temp_file.close()
+        # Split the text into sentences if split_sentences is True, otherwise use the whole text
+        if split_sentences:
+            texts_to_process = [s.strip() for s in self.sentence_pattern.findall(text) if s.strip()]
+        else:
+            texts_to_process = [text]
     
-            # Run the TTS using the appropriate service
-            result = self.tts_client.tts(sentence, temp_output_file)
-            
-            # If the TTS was successful, add the output file to the queue
-            if result == "success":
-                if self.verbose:
-                    print(f"Running TTS: {sentence}")
-                
-                # If the stop flag is set, return early
-                if self.parent_client.stop_action:
-                    return
-                
-                self.temp_files.append(temp_output_file)
+        for current_text in texts_to_process:
+            try:
+                # Create a temporary file in the output directory
+                temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
+                temp_output_file = temp_file.name
+                temp_file.close()
     
+                # Run the TTS using the appropriate service
+                result = self.tts_client.tts(current_text, temp_output_file)
+                
+                # If the TTS was successful, add the output file to the queue
+                if result == "success":
+                    if self.verbose:
+                        print(f"Running TTS: {current_text}")
+                    
+                    # If the stop flag is set, return early
+                    if self.parent_client.stop_action:
+                        return
+                    
+                    self.temp_files.append(temp_output_file)
+    
+                    if self.verbose:
+                        print("Adding to queue")
+                    self.audio_queue.put((temp_output_file, current_text))
+            except Exception as e:
                 if self.verbose:
-                    print("Adding to queue")
-                self.audio_queue.put((temp_output_file, sentence))
-        except Exception as e:
-            if self.verbose:
-                import traceback
-                traceback.print_exc()
-            else:
-                print(f"Error during TTS processing: {e}")
+                    import traceback
+                    traceback.print_exc()
+                else:
+                    print(f"Error during TTS processing: {e}")
     
         # Set queuing flag to False
         self.queing = False
