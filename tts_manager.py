@@ -26,7 +26,7 @@ class TTSManager:
         self.verbose = verbose
         self.stop_playback = False
         self.playback_stopped = threading.Event()
-        self.sentence_pattern = re.compile(r'(.*?[.!?](?:\s|$)|\n)', re.DOTALL)
+        self.sentence_pattern = re.compile(r'(?:[^.!?\n]+[.!?]?(?:\s+|$)|\n)')
 
         ## NOTE: For now all TTS services need to return wav files.
         if self.service == "openai":
@@ -87,6 +87,10 @@ class TTSManager:
     
         for current_text in texts_to_process:
             try:
+                #if the text does not end with a punctuation mark, add a period
+                if not current_text.endswith((".", "!", "?")):
+                    current_text += "."
+                    
                 # Create a temporary file in the output directory
                 temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
                 temp_output_file = temp_file.name
