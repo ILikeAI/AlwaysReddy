@@ -26,7 +26,7 @@ class TTSManager:
         self.verbose = verbose
         self.stop_playback = False
         self.playback_stopped = threading.Event()
-        self.sentence_pattern = re.compile(r'(?:[^.!?\n]+[.!?]?(?:\s+|$)|\n)')
+        self.sentence_pattern = re.compile(r'(?:[^.!?\n"]+[.!?]?(?:\s+|$)|\n|"[^"]*")')
 
         ## NOTE: For now all TTS services need to return wav files.
         if self.service == "openai":
@@ -110,7 +110,7 @@ class TTSManager:
                     
                     self.temp_files.append(temp_output_file)
                     self.audio_queue.put((temp_output_file, current_text))
-                    
+
             except Exception as e:
                 if self.verbose:
                     import traceback
@@ -121,7 +121,7 @@ class TTSManager:
         # Set queuing flag to False
         self.queing = False
 
-    def _play_audio(self):
+    def _play_audio(self): 
         """
         Play the audio from the audio queue.
         """
