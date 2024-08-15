@@ -26,7 +26,7 @@ class TTSManager:
         self.verbose = verbose
         self.stop_playback = False
         self.playback_stopped = threading.Event()
-        self.sentence_pattern = re.compile(r'(?:[^.!?\n"]+[.!?]?(?:\s+|$)|\n|"[^"]*")')
+        self.sentence_pattern = re.compile(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)(?=\s|$)|\n')
 
         ## NOTE: For now all TTS services need to return wav files.
         if self.service == "openai":
@@ -52,6 +52,29 @@ class TTSManager:
         """
         self._play_audio_thread.join()
 
+    def split_sentences(self, text):
+        """
+        Split the text into sentences, handling edge cases including sentences within quotes.
+        """
+        # Split sentences, including within quoted text
+        sentences = []
+        for part in re.split(r'("(?:[^"\\]|\\.)*")', text):
+            if part.startswith('"') and part.endswith('"'):
+                # For quoted text, split sentences but preserve quotes
+                inner_sentences = self.sentence_pattern.split(part[1:-1])
+                sentences.extend([f'"{s.strip()}"' for s in inner_sentences if s.strip()])
+            else:
+                # For non-quoted text, split normally
+                sentences.extend([s.strip() for s in self.sentence_pattern.split(part) if s.strip()])
+
+        # Handle ellipsis
+        sentences = [s for sentence in sentences for s in re.split(r'(?<=\.)\s*\.{3}\s*(?=[A-Z])', sentence) if s.strip()]
+
+        # Ensure sentences end with punctuation
+        sentences = [s + '.' if not s.strip().endswith(('.', '!', '?')) else s for s in sentences]
+
+        return sentences
+
     def run_tts(self, text, output_dir=config.AUDIO_FILE_DIR, split_sentences=True):
         """
         Run the TTS for the given text and output the audio to the specified directory.
@@ -61,15 +84,12 @@ class TTSManager:
             output_dir (str): The directory where the audio files will be saved.
             split_sentences (bool): Whether to split the text into sentences. Default is True.
         """
-        # Set queuing flag to True
         self.queing = True
     
-        # If the audio playback thread is not running, start it
         if not self._play_audio_thread.is_alive():
             self._play_audio_thread = threading.Thread(target=self._play_audio)
             self._play_audio_thread.start()
     
-        # If the output directory does not exist, create it
         if not os.path.exists(output_dir):
             try:
                 os.makedirs(output_dir)
@@ -79,11 +99,8 @@ class TTSManager:
                 self.queing = False
                 return
     
-        # Split the text into sentences if split_sentences is True, otherwise use the whole text
-        if split_sentences:
-            texts_to_process = [s.strip() for s in self.sentence_pattern.findall(text) if s.strip()]
-        else:
-            texts_to_process = [text]
+        texts_to_process = self.split_sentences(text) if split_sentences else [text]
+    
     
         for current_text in texts_to_process:
             try:
