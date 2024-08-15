@@ -109,10 +109,8 @@ class TTSManager:
                         return
                     
                     self.temp_files.append(temp_output_file)
-    
-                    if self.verbose:
-                        print("Adding to queue")
                     self.audio_queue.put((temp_output_file, current_text))
+                    
             except Exception as e:
                 if self.verbose:
                     import traceback
