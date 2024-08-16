@@ -3,6 +3,13 @@
 VERBOSE = True
 USE_GPU = False  # Set to True to use GPU acceleration. Refer to the README for instructions on installing PyTorch with CUDA support.
 
+### HOTKEY BINDINGS ###
+# Hotkeys can be set to None to disable them
+CANCEL_HOTKEY = 'alt+ctrl+e'
+NEW_CHAT_HOTKEY = 'alt+ctrl+w'
+RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
+READ_FROM_CLIPBOARD = "ctrl+alt+c"
+TRANSCRIBE_RECORDING = "ctrl+alt+t"
 
 ### COMPLETIONS API SETTINGS  ###
 # Just uncomment the ONE api you want to use
@@ -25,7 +32,7 @@ USE_GPU = False  # Set to True to use GPU acceleration. Refer to the README for 
 
 ## ANTHROPIC COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "anthropic" 
-# COMPLETION_MODEL = "claude-3-sonnet-20240229" 
+# COMPLETION_MODEL = "claude-3-5-sonnet-20240620" 
 
 ## TOGETHER COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "together"
@@ -81,29 +88,23 @@ PIPER_VOICE_SPEED = 1.0 # Speed of the TTS, 1.0 is normal speed, 2.0 is double s
 # Or create your own prompt in the "system_prompts" folder, then put the name of the file here.
 ACTIVE_PROMPT = "default_prompt"
 
-### HOTKEYS ###
-# Hotkeys can be set to None to disable them
-CANCEL_HOTKEY = 'alt+ctrl+e'
-CLEAR_HISTORY_HOTKEY = 'alt+ctrl+w'
-RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
-
-RECORD_HOTKEY_DELAY = 0.7 # Seconds to wait it listen for the double tap of the hotkey, outside of this time window the second tap will stop recording
-SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
-ALWAYS_INCLUDE_CLIPBOARD = False # Always include the clipboard content without having to double tap the record hotkey
-
-
 ### MISC ###
 AUDIO_FILE_DIR = "audio_files"
 MAX_TOKENS = 8000 #Max tokens allowed in memory at once
-START_SEQ = "[CLIPSTART]" #the model is instructed to place any text for the clipboard between the start and end seq
-END_SEQ = "[CLIPEND]" #the model is instructed to place any text for the clipboard between the start and end seq
+CLIPBOARD_TEXT_START_SEQ = "[CLIPSTART]" #the model is instructed to place any text for the clipboard between the start and end seq
+CLIPBOARD_TEXT_END_SEQ = "[CLIPEND]" #the model is instructed to place any text for the clipboard between the start and end seq
 TIMESTAMP_MESSAGES = True # If this is true a timestamp will be added to the end of each of your messages
+
+
+DOUBLE_TAP_THRESHOLD = 0.4 # The time window in which a second press must occur to be considered a double tap
+SUPPRESS_NATIVE_HOTKEYS = True # Suppress the native system functionality of the defined hotkeys above (Windows only)
+ALWAYS_INCLUDE_CLIPBOARD = False # Always include the clipboard content without having to double tap the record hotkey
+
 
 ### AUDIO SETTINGS ###
 BASE_VOLUME = 1 
 START_SOUND_VOLUME = 0.05
 END_SOUND_VOLUME = 0.05
 CANCEL_SOUND_VOLUME = 0.09
-MIN_RECORDING_DURATION = 0.3
 MAX_RECORDING_DURATION= 600 # If you record for more than 10 minutes, the recording will stop automatically
 

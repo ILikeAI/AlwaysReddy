@@ -5,21 +5,23 @@ Hey, I'm Josh, the creator of AlwaysReddy. I am still a little bit of a noob whe
 
 Contact me: joshlikesai@gmail.com
 
-**Pull Requests Welcome!**
-
+**I'm looking for work, if you know of anyone needing a skillset like mine, please let me know! :)** 
 ## Sections
 - [Meet AlwaysReddy](#meet-alwaysreddy)
-- [Supported LLM servers](#supported-llm-servers)
-- [Supported TTS systems](#supported-tts-systems)
 - [Setup](#setup)
 - [Known Issues](#known-issues)
+- [How to add custom actions](#custom-actions)
 - [Troubleshooting](#troubleshooting)
 - [How to](#how-to)
+- [Supported LLM servers](#supported-llm-servers)
+- [Supported TTS systems](#supported-tts-systems)
 
 ## Meet AlwaysReddy 
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
 It's like having voice ChatGPT running on your computer at all times, you just press a hotkey and it will listen to any questions you have, no need to swap windows or tabs, and if you want to give it context of some extra text, just copy the text and double tap the hotkey! 
+
+**Pull Requests Welcome!**
 
 Join the discord: https://discord.gg/su44drSBzb
 
@@ -41,7 +43,7 @@ I often use AlwaysReddy for the following things:
 - When I have just learned a new concept I will often explain the concept aloud to AlwaysReddy and have it save the concept (in roughly my words) into a note.
 - "What is X called?" Often I know how to roughly describe something but cant remember what it is called, AlwaysReddy is handy for quickly giving me the answer without me having to open the browser.
 - "Can you proof read the text in my clipboard before I send it?"
-- "From the comments in my clipboard what do the r/LocalLLaMA users think of X?"
+- "What do the r/LocalLLaMA users think of X, based on the comments in my clipboard?"
 - Quick journal entries, I speedily list what I have done today and get it to write a journal entry to my clipboard before I shutdown the computer for the day.
 
 ## Supported LLM servers:
@@ -229,3 +231,48 @@ To add AlwaysReddy to your startup list so it starts automatically on your compu
 2. Run `python setup.py`, follow the prompts, it will ask you if you want to add AlwaysReddy to the startup list, press Y the confrim
 
 If you want to remove AlwaysReddy from the startup list you can follow the same steps again, only say no when asked if you want to add AlwaysReddy to the startup list and it will ask if you would like to remove it, press Y.
+
+## Custom Actions
+PLEASE NOTE: Custom actions is a very experimental feature that I am likely to chnage a lot, any actions you make will in all likelyhood need to be updated in some way as I update and change the actions system
+
+### What is an action?
+The action system allows you to easily define new functionality and bind it to a hotkey event, it allows you to easily use the following functionalitys from the AlwayReddy code base:
+- Record audio
+- Transcribe audio
+- Run and play TTS
+- Generate responses from any of the supported LLM servers
+- Read and save to the clipboard
+
+### How to record audio or transcribe in your custom action
+The `toggle_recording` method starts or stops audio recording. When called the first time, it starts recording. The next call stops recording and returns the audio file path.
+
+By default, if the recording times out, it's stopped and deleted. However, you can provide a callback function that will be executed on timeout instead. In the code example, `transcription_action` is passed as the callback. When the recording times out, `transcription_action` is called, which calls `toggle_recording` again, thereby stopping the recording and returning the audio file for transcription.
+
+```python 
+def transcription_action(self):
+    """Handle the transcription process."""
+    recording_filename = self.AR.toggle_recording(self.transcription_action)
+    if recording_filename:
+        transcript = self.AR.transcription_manager.transcribe_audio(recording_filename)
+        to_clipboard(transcript)
+        print("Transcription copied to clipboard.")
+```
+### How to bind your action to a hotkey
+The setup method of your action will run when AlwaysReddy starts, this is where you use the `add_action_hotkey` method to bind your code to a hotkey press, below is an example of binding hotkeys to the `transcription_action` method.
+
+```python
+self.AR.add_action_hotkey("ctrl+alt+t", 
+                  pressed=self.transcription_action,
+                  held_release=self.transcription_action)
+```
+Here we are binding the `pressed` and `held_release` hotkey events to our function.
+
+Below are the arguments for `add_action_hotkey`:
+```python
+hotkey (str): The hotkey combination.
+pressed (callable, optional): Callback for when the hotkey is pressed.
+released (callable, optional): Callback for when the hotkey is released.
+held (callable, optional): Callback for when the hotkey is held.
+held_release (callable, optional): Callback for when the hotkey is released after being held.
+double_tap (callable, optional): Callback for when the hotkey is double-tapped.
+```

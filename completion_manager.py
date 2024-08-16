@@ -1,6 +1,6 @@
 from config_loader import config
 import re
-from utils import to_clipboard, maintain_token_limit
+from utils import maintain_token_limit
 
 class CompletionManager:
     def __init__(self, verbose=False):
@@ -55,7 +55,7 @@ class CompletionManager:
         else:
             raise ValueError("Unsupported completion API service configured")
         
-    def get_completion(self, messages, model, **kwargs):
+    def get_completion_stream(self, messages, model, **kwargs):
         """Get completion from the selected AI client and stream sentences into the TTS client.
 
         Args:
@@ -71,10 +71,8 @@ class CompletionManager:
             # Make sure the token count is within the limit
             messages = maintain_token_limit(messages, config.MAX_TOKENS)
             
-            direct_stream = self.client.stream_completion(messages, model, **kwargs)
-            stream = self._stream_sentences_from_chunks(direct_stream, clip_start_marker=config.START_SEQ, clip_end_marker=config.END_SEQ)
-
-            return stream
+            completion_stream = self.client.stream_completion(messages, model, **kwargs)
+            return completion_stream
 
         except Exception as e:
             if self.verbose:
@@ -84,76 +82,73 @@ class CompletionManager:
                 print(f"An error occurred while getting completion: {e}")
             return None
         
-    def _stream_sentences_from_chunks(self, chunks_stream, clip_start_marker="-CLIPSTART-", clip_end_marker="-CLIPEND-"):
+    def process_text_stream(self, text_stream, sentence_callback=None, marker_tuples=None):
         """
-        Takes in audio chunks and returns sentences or chunks of text for the clipboard, as well as the full unmodified text stream.
-        Supports both clip markers and triple backticks for marking clipboard text.
+        This takes in a stream of text, it will search for text between the markers and pass it to the designated callback functions.
 
         Args:
-            chunks_stream: Stream of chunks.
-            clip_start_marker (str): Start marker for clipboard text using clip markers.
-            clip_end_marker (str): End marker for clipboard text using clip markers.
+            text_stream: An iterable providing chunks of text.
+            sentence_callback: Optional callback function for sentences.
+            marker_tuples: Optional list of tuples (start_marker, end_marker, callback_function).
 
-        Yields:
-            tuple: Type of content ("sentence" or "clipboard_text") and the content itself.
+        Returns:
+            str: The full, unmodified input text.
         """
-        buffer = ''
-        full_response = ''
-        sentence_endings = re.compile(r'(?<=[.!?])\s+|(?<=\n)')
-        in_marker = False
-        in_backticks = False
+        full_text = ""
+        buffer = ""
+        active_markers = []
+        sentence_pattern = re.compile(r'(.*?[.!?](?:\s|$)|\n)', re.DOTALL)
 
-        for chunk in chunks_stream:
+        def process_active_markers():
+            nonlocal buffer
+            for i, (start, end, callback) in enumerate(active_markers):
+                if end in buffer:
+                    marked_text, _, rest = buffer.partition(end)
+                    if marked_text.strip():
+                        callback(marked_text)
+                        buffer = rest
+                        return i
+            return -1
+
+        def process_new_markers_or_sentences():
+            nonlocal buffer
+            if marker_tuples:
+                for start, end, callback in marker_tuples:
+                    if start in buffer:
+                        _, _, buffer = buffer.partition(start)
+                        active_markers.append((start, end, callback))
+                        return True
+            match = sentence_pattern.match(buffer)
+            if match:
+                sentence = match.group(1)
+                if sentence_callback and sentence.strip():
+                    sentence_callback(sentence.strip())
+                buffer = buffer[len(sentence):]
+                return True
+            return False
+
+        for chunk in text_stream:
+            full_text += chunk
             buffer += chunk
-            full_response += chunk
-
-            if not in_backticks:
-                if clip_start_marker in buffer and not in_marker:
-                    pre, match, post = buffer.partition(clip_start_marker)
-                    if pre.strip():
-                        yield "sentence", pre.strip()
-                    buffer = post
-                    in_marker = True
-
-                if clip_end_marker in buffer and in_marker:
-                    marked_section, _, post_end = buffer.partition(clip_end_marker)
-                    yield "clipboard_text", marked_section.strip()
-                    buffer = post_end
-                    in_marker = False
-
-            if not in_marker:
-                if not in_backticks and '```' in buffer:
-                    pre, _, post = buffer.partition('```')
-                    if pre.strip():
-                        yield "sentence", pre.strip()
-                    buffer = post
-                    in_backticks = True
-                elif in_backticks and '```' in buffer:
-                    marked_section, _, post_end = buffer.partition('```')
-                    yield "clipboard_text", '```' + marked_section.strip() + '```'
-                    yield "sentence", "Code saved to the clipboard."
-                    buffer = post_end
-                    in_backticks = False
-
-            if not in_marker and not in_backticks:
-                while True:
-                    match = sentence_endings.search(buffer)
-                    if match:
-                        sentence = buffer[:match.end()]
-                        buffer = buffer[match.end():]
-                        if sentence.strip():
-                            yield "sentence", sentence.strip()
+            
+            while buffer:
+                if active_markers:
+                    marker_index = process_active_markers()
+                    if marker_index >= 0:
+                        active_markers.pop(marker_index)
                     else:
                         break
+                else:
+                    if not process_new_markers_or_sentences():
+                        break
 
-        if buffer.strip():
-            if in_backticks:
-                yield "clipboard_text", '```' + buffer.strip()
-            elif not in_marker:
-                yield "sentence", buffer.strip()
+        # Process any remaining buffer
+        while buffer:
+            if active_markers:
+                active_markers.pop(0)
             else:
-                yield "clipboard_text", buffer.strip()
+                if sentence_callback and buffer.strip():
+                    sentence_callback(buffer.strip())
+                break
 
-        if full_response.strip():
-            yield "full_response", full_response.strip()
-            
+        return full_text

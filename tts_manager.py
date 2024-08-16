@@ -5,6 +5,7 @@ from config_loader import config
 import tempfile
 import pyaudio
 import wave
+import re
 
 class TTSManager:
     """
@@ -25,6 +26,7 @@ class TTSManager:
         self.verbose = verbose
         self.stop_playback = False
         self.playback_stopped = threading.Event()
+        self.sentence_pattern = re.compile(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)(?=\s|$)|\n')
 
         ## NOTE: For now all TTS services need to return wav files.
         if self.service == "openai":
@@ -50,23 +52,44 @@ class TTSManager:
         """
         self._play_audio_thread.join()
 
-    def run_tts(self, sentence, output_dir=config.AUDIO_FILE_DIR):
+    def split_sentences(self, text):
         """
-        Run the TTS for the given sentence and output the audio to the specified directory.
+        Split the text into sentences, handling edge cases including sentences within quotes.
+        """
+        # Split sentences, including within quoted text
+        sentences = []
+        for part in re.split(r'("(?:[^"\\]|\\.)*")', text):
+            if part.startswith('"') and part.endswith('"'):
+                # For quoted text, split sentences but preserve quotes
+                inner_sentences = self.sentence_pattern.split(part[1:-1])
+                sentences.extend([f'"{s.strip()}"' for s in inner_sentences if s.strip()])
+            else:
+                # For non-quoted text, split normally
+                sentences.extend([s.strip() for s in self.sentence_pattern.split(part) if s.strip()])
+
+        # Handle ellipsis
+        sentences = [s for sentence in sentences for s in re.split(r'(?<=\.)\s*\.{3}\s*(?=[A-Z])', sentence) if s.strip()]
+
+        # Ensure sentences end with punctuation
+        sentences = [s + '.' if not s.strip().endswith(('.', '!', '?')) else s for s in sentences]
+
+        return sentences
+
+    def run_tts(self, text, output_dir=config.AUDIO_FILE_DIR, split_sentences=True):
+        """
+        Run the TTS for the given text and output the audio to the specified directory.
         
         Args:
-            sentence (str): The text to be converted to speech.
-            output_dir (str): The directory where the audio file will be saved.
+            text (str): The text to be converted to speech.
+            output_dir (str): The directory where the audio files will be saved.
+            split_sentences (bool): Whether to split the text into sentences. Default is True.
         """
-        # Set queuing flag to True
         self.queing = True
     
-        # If the audio playback thread is not running, start it
         if not self._play_audio_thread.is_alive():
             self._play_audio_thread = threading.Thread(target=self._play_audio)
             self._play_audio_thread.start()
     
-        # If the output directory does not exist, create it
         if not os.path.exists(output_dir):
             try:
                 os.makedirs(output_dir)
@@ -76,47 +99,53 @@ class TTSManager:
                 self.queing = False
                 return
     
-        try:
-            # Create a temporary file in the output directory
-            temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
-            temp_output_file = temp_file.name
-            temp_file.close()
+        texts_to_process = self.split_sentences(text) if split_sentences else [text]
     
-            # Run the TTS using the appropriate service
-            result = self.tts_client.tts(sentence, temp_output_file)
-            
-            # If the TTS was successful, add the output file to the queue
-            if result == "success":
-                if self.verbose:
-                    print(f"Running TTS: {sentence}")
-                
-                # If the stop flag is set, return early
-                if self.parent_client.stop_response:
-                    return
-                
-                self.temp_files.append(temp_output_file)
     
+        for current_text in texts_to_process:
+            try:
+                #if the text does not end with a punctuation mark, add a period
+                if not current_text.endswith((".", "!", "?")):
+                    current_text += "."
+                    
+                # Create a temporary file in the output directory
+                temp_file = tempfile.NamedTemporaryFile(delete=False, dir=output_dir, suffix=".wav")
+                temp_output_file = temp_file.name
+                temp_file.close()
+    
+                # Run the TTS using the appropriate service
+                result = self.tts_client.tts(current_text, temp_output_file)
+                
+                # If the TTS was successful, add the output file to the queue
+                if result == "success":
+                    if self.verbose:
+                        print(f"Running TTS: {current_text}")
+                    
+                    # If the stop flag is set, return early
+                    if self.parent_client.stop_action:
+                        return
+                    
+                    self.temp_files.append(temp_output_file)
+                    self.audio_queue.put((temp_output_file, current_text))
+
+            except Exception as e:
                 if self.verbose:
-                    print("Adding to queue")
-                self.audio_queue.put((temp_output_file, sentence))
-        except Exception as e:
-            if self.verbose:
-                import traceback
-                traceback.print_exc()
-            else:
-                print(f"Error during TTS processing: {e}")
+                    import traceback
+                    traceback.print_exc()
+                else:
+                    print(f"Error during TTS processing: {e}")
     
         # Set queuing flag to False
         self.queing = False
 
-    def _play_audio(self):
+    def _play_audio(self): 
         """
         Play the audio from the audio queue.
         """
         # While there are items in the queue or the queuing flag is set
         while self.queing or not self.audio_queue.empty():
             # If the stop response flag or stop_playback flag is set, break the loop
-            if self.parent_client.stop_response or self.stop_playback:
+            if self.parent_client.stop_action or self.stop_playback:
                 break
 
             # Set the running TTS flag to True
@@ -247,6 +276,4 @@ class TTSManager:
                     if temp_file in self.temp_files:
                         self.temp_files.remove(temp_file)
                 except PermissionError as e:
-                    # If a permission error occurs, print a message
-                    if self.verbose:
-                        print(f"Permission denied error when trying to delete {temp_file}: {e}")
+                    pass

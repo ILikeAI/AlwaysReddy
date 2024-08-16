@@ -14,3 +14,10 @@ test.py
 !/piper_tts/voices/
 run_AlwaysReddy.sh
 run_AlwaysReddy.bat
+
+/actions/*
+!/actions/always_reddy_voice_assistant
+!/actions/base_action
+!/actions/read_clipboard
+!/actions/transcribe_to_clipboard
+!/actions/example_action
