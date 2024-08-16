@@ -207,6 +207,10 @@ class AlwaysReddy:
     def discover_and_initialize_actions(self):
         actions_dir = 'actions'
         for action_folder in os.listdir(actions_dir):
+            # Skip the example_action folder
+            if action_folder == 'example_action':
+                continue
+            
             folder_path = os.path.join(actions_dir, action_folder)
             if os.path.isdir(folder_path):
                 main_file = os.path.join(folder_path, 'main.py')
@@ -216,7 +220,7 @@ class AlwaysReddy:
                     for name, obj in module.__dict__.items():
                         if isinstance(obj, type) and issubclass(obj, BaseAction) and obj is not BaseAction:
                             print(f"\nInitializing action: {obj.__name__}")
-                            action_instance = obj(self)                 
+                            action_instance = obj(self)       
 
     def run(self):
         """Run the AlwaysReddy instance, setting up hotkeys and entering the main loop."""

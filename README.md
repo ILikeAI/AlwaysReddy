@@ -3,8 +3,7 @@ Hey, I'm Josh, the creator of AlwaysReddy. I am still a little bit of a noob whe
 
 Contact me: joshlikesai@gmail.com
 
-**Pull Requests Welcome!**
-
+**I'm looking for work, if you know of anyone needing a skillset like mine, please let me know! :)** 
 ## Sections
 - [Meet AlwaysReddy](#meet-alwaysreddy)
 - [Setup](#setup)
@@ -19,6 +18,8 @@ Contact me: joshlikesai@gmail.com
 AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
 It's like having voice ChatGPT running on your computer at all times, you just press a hotkey and it will listen to any questions you have, no need to swap windows or tabs, and if you want to give it context of some extra text, just copy the text and double tap the hotkey! 
+
+**Pull Requests Welcome!**
 
 Join the discord: https://discord.gg/su44drSBzb
 
