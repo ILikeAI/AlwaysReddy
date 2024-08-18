@@ -241,6 +241,8 @@ The action system allows you to easily define new functionality and bind it to a
 - Generate responses from any of the supported LLM servers
 - Read and save to the clipboard
 
+This video shows the process of making an action from scratch: https://youtu.be/X0Bd20EDxfQ
+
 ### How to record audio or transcribe in your custom action
 The `toggle_recording` method starts or stops audio recording. When called the first time, it starts recording. The next call stops recording and returns the audio file path.
 
