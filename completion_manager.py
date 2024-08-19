@@ -54,6 +54,38 @@ class CompletionManager:
                 self.client = OllamaClient(verbose=self.verbose)
         else:
             raise ValueError("Unsupported completion API service configured")
+    
+    def get_completion(self, messages, model, **kwargs):
+        """Get completion from the selected AI client and return the entire response.
+
+        Args:
+            messages (list): List of messages.
+            model (str): Model for completion.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            str: The complete response from the AI client, or None if an error occurs.
+        """
+        try:
+            # Make sure the token count is within the limit
+            #messages = maintain_token_limit(messages, config.MAX_TOKENS)
+            
+            completion_stream = self.client.stream_completion(messages, model, **kwargs)
+            
+            # Accumulate the entire response
+            full_response = ""
+            for chunk in completion_stream:
+                full_response += chunk
+
+            return full_response
+
+        except Exception as e:
+            if self.verbose:
+                import traceback
+                traceback.print_exc()
+            else:
+                print(f"An error occurred while getting completion: {e}")
+            return None
         
     def get_completion_stream(self, messages, model, **kwargs):
         """Get completion from the selected AI client and stream sentences into the TTS client.
