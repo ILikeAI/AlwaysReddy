@@ -3,6 +3,7 @@ from config_loader import config
 import prompt
 from actions.base_action import BaseAction
 from utils import to_clipboard
+import prompt
 
 class AlwaysReddyVoiceAssistant(BaseAction):
     """Action for handling voice assistant functionality."""
@@ -25,6 +26,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 print(f"\tDouble tap '{config.RECORD_HOTKEY}' to send clipboard content to AlwaysReddy")
             # new chat hotkey
             self.AR.add_action_hotkey(config.NEW_CHAT_HOTKEY, pressed=self.new_chat)
+            self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
             print(f"'{config.NEW_CHAT_HOTKEY}': New chat for voice assistant")
 
     def handle_default_assistant_response(self):
@@ -38,8 +40,8 @@ class AlwaysReddyVoiceAssistant(BaseAction):
             if not self.AR.stop_action and message:
                 print("\nTranscript:\n", message)
                 
-                if len(self.AR.messages) > 0 and self.AR.messages[0]["role"] == "system":
-                    self.AR.messages[0]["content"] = prompt.get_system_prompt_message(config.ACTIVE_PROMPT)
+                if len(self.messages) > 0 and self.messages[0]["role"] == "system":
+                    self.messages[0]["content"] = prompt.get_system_prompt_message(config.ACTIVE_PROMPT)
 
                 if self.last_message_was_cut_off:
                     message = "--> USER CUT THE ASSISTANTS LAST MESSAGE SHORT <--\n" + message
@@ -52,12 +54,12 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 if config.TIMESTAMP_MESSAGES:
                     message += f"\n\nMESSAGE TIMESTAMP:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')} "
 
-                self.AR.messages.append({"role": "user", "content": message})
+                self.messages.append({"role": "user", "content": message})
 
                 if self.AR.stop_action:
                     return
 
-                stream = self.AR.completion_client.get_completion_stream(self.AR.messages, model=config.COMPLETION_MODEL)
+                stream = self.AR.completion_client.get_completion_stream(self.messages, model=config.COMPLETION_MODEL)
                 response = self.AR.completion_client.process_text_stream(stream,
                                                                          marker_tuples=[(config.CLIPBOARD_TEXT_START_SEQ, config.CLIPBOARD_TEXT_END_SEQ, to_clipboard)],
                                                                           sentence_callback=self.AR.tts.run_tts)#We pass in pairs of start and end sequences to the marker_tuples argument to indicate that the text between these sequences should be copied to the clipboard, then we pass the to_clipboard function as the callback to handle this action.
@@ -68,7 +70,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 if not response:
                     if self.AR.verbose:
                         print("No response generated.")
-                    self.AR.messages = self.AR.messages[:-1]
+                    self.messages = self.messages[:-1]
                     return
 
                 self.last_message_was_cut_off = False
@@ -79,7 +81,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                         response = response[:index + len(self.AR.tts.last_sentence_spoken)]
                         self.last_message_was_cut_off = True
 
-                self.AR.messages.append({"role": "assistant", "content": response})
+                self.messages.append({"role": "assistant", "content": response})
                 print("\nResponse:\n", response)
 
         except Exception as e:
@@ -92,7 +94,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
 
     def new_chat(self):
         """Clear the message history and start a new chat session."""
-        self.AR.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
+        self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
         self.last_message_was_cut_off = False
         self.AR.last_clipboard_text = None
         print("New chat session started.")

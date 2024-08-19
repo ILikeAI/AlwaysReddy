@@ -8,7 +8,6 @@ from completion_manager import CompletionManager
 from soundfx import play_sound_FX
 from utils import read_clipboard
 from config_loader import config
-import prompt
 import os
 import importlib
 from actions.base_action import BaseAction
@@ -21,7 +20,6 @@ class AlwaysReddy:
         self.recorder = AudioRecorder(verbose=self.verbose)
         self.clipboard_text = None
         self.last_clipboard_text = None
-        self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
         self.tts = tts_manager.TTSManager(parent_client=self, verbose=self.verbose)
         self.recording_timeout_timer = None
         self.transcription_manager = TranscriptionManager(verbose=self.verbose)
