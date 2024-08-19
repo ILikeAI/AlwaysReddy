@@ -4,6 +4,7 @@ groq
 keyboard
 numpy
 openai
+pyautogui
 pydub
 python-dotenv
 pynput

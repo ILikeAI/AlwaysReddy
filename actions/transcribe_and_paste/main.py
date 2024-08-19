@@ -1,9 +1,11 @@
 from utils import to_clipboard
 from actions.base_action import BaseAction
 from config_loader import config
+import pyautogui
+import time
 
-class TranscribeToClipboard(BaseAction):
-    """Action for transcribing audio to clipboard."""
+class TranscribeAndPaste(BaseAction):
+    """Action for transcribing audio to clipboard and pasting it."""
     def setup(self):
         if config.TRANSCRIBE_RECORDING:
             self.AR.add_action_hotkey(config.TRANSCRIBE_RECORDING, 
@@ -17,4 +19,5 @@ class TranscribeToClipboard(BaseAction):
         if recording_filename:
             transcript = self.AR.transcription_manager.transcribe_audio(recording_filename)
             to_clipboard(transcript)
+            pyautogui.hotkey('ctrl', 'v') 
             print("Transcription copied to clipboard.")
