@@ -54,24 +54,11 @@ class TTSManager:
 
     def split_sentences(self, text):
         """
-        Split the text into sentences, handling edge cases including sentences within quotes.
+        Split the text into sentences and remove empty ones.
         """
-        # Split sentences, including within quoted text
-        sentences = []
-        for part in re.split(r'("(?:[^"\\]|\\.)*")', text):
-            if part.startswith('"') and part.endswith('"'):
-                # For quoted text, split sentences but preserve quotes
-                inner_sentences = self.sentence_pattern.split(part[1:-1])
-                sentences.extend([f'"{s.strip()}"' for s in inner_sentences if s.strip()])
-            else:
-                # For non-quoted text, split normally
-                sentences.extend([s.strip() for s in self.sentence_pattern.split(part) if s.strip()])
-
-        # Handle ellipsis
-        sentences = [s for sentence in sentences for s in re.split(r'(?<=\.)\s*\.{3}\s*(?=[A-Z])', sentence) if s.strip()]
-
-        # Ensure sentences end with punctuation
-        sentences = [s + '.' if not s.strip().endswith(('.', '!', '?')) else s for s in sentences]
+        sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)(?=\s|$)|\n', text)
+        # Ensure sentences end with punctuation and remove empty sentences
+        sentences = [s + '.' if not s.strip().endswith(('.', '!', '?')) else s for s in sentences if s.strip()]
 
         return sentences
 
