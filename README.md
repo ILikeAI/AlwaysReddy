@@ -4,8 +4,13 @@ Hey, I'm Josh, the creator of AlwaysReddy. I am still a little bit of a noob whe
 Contact me: joshlikesai@gmail.com
 
 **I'm looking for work, if you know of anyone needing a skillset like mine, please let me know! :)** 
+
+## Important notice:
+The code base is a mess right now, I am in the middle of transforming AlwaysReddy from just being a voice chat bot into something that will allow users to create their own chatbots and extensions. This transition will be a little messy until I find solutions that I like, then I will start cleaning things up. 
+
 ## Sections
 - [Meet AlwaysReddy](#meet-alwaysreddy)
+- [Philosophy of the project](#philosophy-of-the-project)
 - [Setup](#setup)
 - [Known Issues](#known-issues)
 - [How to add custom actions](#custom-actions)
@@ -19,11 +24,23 @@ AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
 It's like having voice ChatGPT running on your computer at all times, you just press a hotkey and it will listen to any questions you have, no need to swap windows or tabs, and if you want to give it context of some extra text, just copy the text and double tap the hotkey! 
 
+**Future of AlwaysReddy**
+I would like to make AlwaysReddy an extensible interface where you can easily voice chat with a range of AIs, these AIs could be given the ability to access custom tools or applications so that they can do tasks for you on the fly, all of this with as little friction as possible.
+
 **Pull Requests Welcome!**
 
 Join the discord: https://discord.gg/su44drSBzb
 
 **Here is a demo video of me using it with Llama3** https://www.reddit.com/r/LocalLLaMA/comments/1ca510h/voice_chatting_with_llama_3_8b/
+
+## Philosophy of the project
+- Friction is the enemy
+- I am building this for myself first but sharing it in case other people get value from it too
+- Practicality first, I want this system to help me be as effective as possible
+- I will change directions freely, when I think of a more useful direction for the code base I will start working in that direction, even if that makes things messy in the short term
+- Help is always welcome, if you have an idea of how you could improve AlwaysReddy, jump in and get your hands dirty!
+
+
 
 ### Features:
 You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
@@ -32,6 +49,7 @@ You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
 - Write text to your clipboard on request.
 - Can be run 100% locally!!!
 - Supports Windows, Mac (experimental), linux (super duper experimental, see [Known Issues](#known-issues))
+- You can create your own hotkeys to fire custom code using AlwaysReddy's inbuilt systems like TTS and STT
 
 ### Are you a linux wizard?
 If you are and you're willing to help please consider look at the [Known Issues](#known-issues), I'm pretty stuck here!
