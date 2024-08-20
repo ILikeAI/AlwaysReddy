@@ -4,7 +4,6 @@ from audio_recorder import AudioRecorder
 from transcription_manager import TranscriptionManager
 from input_apis.input_handler import get_input_handler
 import tts_manager
-from completion_manager import CompletionManager
 from soundfx import play_sound_FX
 from utils import read_clipboard
 from config_loader import config
@@ -23,7 +22,6 @@ class AlwaysReddy:
         self.tts = tts_manager.TTSManager(parent_client=self, verbose=self.verbose)
         self.recording_timeout_timer = None
         self.transcription_manager = TranscriptionManager(verbose=self.verbose)
-        self.completion_client = CompletionManager(verbose=self.verbose)
         self.action_thread = None
         self.stop_action = False
         self.input_handler = get_input_handler(verbose=self.verbose)

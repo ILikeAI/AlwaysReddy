@@ -3,11 +3,11 @@ import re
 from utils import maintain_token_limit
 
 class CompletionManager:
-    def __init__(self, verbose=False):
+    def __init__(self):
         """Initialize the CompletionManager with the TTS client."""
         self.client = None
         self.model = None
-        self.verbose = verbose
+        self.verbose = config.VERBOSE 
         self._setup_client()
 
     def _setup_client(self):
