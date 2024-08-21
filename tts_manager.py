@@ -104,10 +104,7 @@ class TTSManager:
                 result = self.tts_client.tts(current_text, temp_output_file)
                 
                 # If the TTS was successful, add the output file to the queue
-                if result == "success":
-                    if self.verbose:
-                        print(f"Running TTS: {current_text}")
-                    
+                if result == "success":                   
                     # If the stop flag is set, return early
                     if self.parent_client.stop_action:
                         return
