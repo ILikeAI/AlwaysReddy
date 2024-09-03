@@ -10,7 +10,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
     def setup(self):
         self.last_message_was_cut_off = False
         
-        if config.TRANSCRIBE_RECORDING:
+        if config.RECORD_HOTKEY:
             # HOTKEY CONFIGURATION
             print("Voice assistant hotkeys:")  
             self.AR.add_action_hotkey(config.RECORD_HOTKEY, 
@@ -24,10 +24,12 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 print(f"\tHold down '{hotkey_start}' and double tap '{hotkey_end}' to send clipboard content to AlwaysReddy")
             else:
                 print(f"\tDouble tap '{config.RECORD_HOTKEY}' to send clipboard content to AlwaysReddy")
-            # new chat hotkey
+
+        if config.NEW_CHAT_HOTKEY:
             self.AR.add_action_hotkey(config.NEW_CHAT_HOTKEY, pressed=self.new_chat)
-            self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
             print(f"'{config.NEW_CHAT_HOTKEY}': New chat for voice assistant")
+
+        self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
 
     def handle_default_assistant_response(self):
         """Handle the response from the transcription and generate a completion."""
