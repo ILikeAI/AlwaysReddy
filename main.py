@@ -227,8 +227,10 @@ class AlwaysReddy:
         print("\nSystem actions:")
         
         # Add cancel_all as an action that doesn't run in the main thread
-        self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_action_thread=False)
-        print(f"'{config.CANCEL_HOTKEY}': Cancel currently running action, recording, TTS or other")
+        if config.CANCEL_HOTKEY:
+            self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_action_thread=False)
+            print(f"'{config.CANCEL_HOTKEY}': Cancel currently running action, recording, TTS or other")
+
         print("\nAlwaysReddy is reddy. Use any of the hotkeys above to get started.")
         try:
             self.input_handler.start(blocking=True)
