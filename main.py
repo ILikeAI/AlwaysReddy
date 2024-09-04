@@ -224,12 +224,14 @@ class AlwaysReddy:
         """Run the AlwaysReddy instance, setting up hotkeys and entering the main loop."""
         print("\n\nSetting up AlwaysReddy...\n")
         self.discover_and_initialize_actions()
-        print("\nSystem actions:")
-        
-        # Add cancel_all as an action that doesn't run in the main thread
-        if config.CANCEL_HOTKEY:
-            self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_action_thread=False)
-            print(f"'{config.CANCEL_HOTKEY}': Cancel currently running action, recording, TTS or other")
+
+        if any([config.CANCEL_HOTKEY]): # if not hotkey below is set, skip the "system actions" print
+            print("\nSystem actions:")
+
+            # Add cancel_all as an action that doesn't run in the main thread
+            if config.CANCEL_HOTKEY:
+                self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_action_thread=False)
+                print(f"'{config.CANCEL_HOTKEY}': Cancel currently running action, recording, TTS or other")
 
         print("\nAlwaysReddy is reddy. Use any of the hotkeys above to get started.")
         try:
