@@ -20,7 +20,7 @@ TRANSCRIBE_RECORDING = "ctrl+alt+t"
 # COMPLETIONS_API = "ollama"
 # COMPLETION_MODEL = "llama3"
 # OLLAMA_API_BASE_URL = "http://localhost:11434" #This should be the defualt
-OLLAMA_KEEP_ALIVE = "5m" # The duration that models stay loaded in memory (default "5m"). Set to "-1" to keep models loaded indefinitely
+OLLAMA_KEEP_ALIVE = "5m" # The duration that models stay loaded in memory (default "5m") you can also use "24h" to keep it loaded for 24 hours
 
 ## LM Studio COMPLETIONS API EXAMPLE ##
 # COMPLETIONS_API = "lm_studio" 
