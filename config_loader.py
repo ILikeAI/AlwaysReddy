@@ -50,6 +50,10 @@ class ConfigLoader:
             if not key.startswith('__'):
                 setattr(self, key, getattr(user_config, key, value))
 
+        for key, value in user_config.__dict__.items():
+            if not key.startswith('__') and key not in default_config.__dict__:
+                setattr(self, key, value)
+
     def _import_config(self, config_path):
         spec = importlib.util.spec_from_file_location("config", config_path)
         config = importlib.util.module_from_spec(spec)
