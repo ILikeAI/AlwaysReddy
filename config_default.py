@@ -5,6 +5,7 @@ USE_GPU = False  # Set to True to use GPU acceleration. Refer to the README for 
 
 ### HOTKEY BINDINGS ###
 # Hotkeys can be set to None to disable them
+# On Mac/Linux, a hotkey cannot overlap another (e.g. cmd+e and cmd+shift+e)
 CANCEL_HOTKEY = 'alt+ctrl+e'
 NEW_CHAT_HOTKEY = 'alt+ctrl+w'
 RECORD_HOTKEY = 'alt+ctrl+r' # Press to start, press again to stop, or hold and release. Double tap to include clipboard
