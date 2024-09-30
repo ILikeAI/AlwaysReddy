@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+import re
 from config_loader import config
 
 
@@ -36,7 +37,7 @@ class OllamaClient:
             "model": model,
             "messages": messages,
             "stream": True,
-            "keep_alive": config.OLLAMA_KEEP_ALIVE,
+            "keep_alive": self.__fix_keep_alive(config.OLLAMA_KEEP_ALIVE),
             **kwargs
         }
         json_data = json.dumps(data)
@@ -60,3 +61,14 @@ class OllamaClient:
             else:
                 print(f"An error occurred streaming completion from Ollama API: {e}")
             raise RuntimeError(f"An error occurred streaming completion from Ollama API: {e}")
+
+    def __fix_keep_alive(self, keep_alive):
+        """ Attempts to fix the keep_alive value if it is not a valid string. Returns -1 as a fallback. """
+        try:
+            return int(keep_alive)
+        except ValueError:
+            pattern = r"^-?\d+[smh]$"
+            if re.match(pattern, keep_alive) is not None:
+                return keep_alive
+            print(f"Invalid OLLAMA_KEEP_ALIVE value: {keep_alive}. Must be a number followed by s, m, or h.")
+            return -1
