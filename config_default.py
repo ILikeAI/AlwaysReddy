@@ -27,6 +27,11 @@ OLLAMA_KEEP_ALIVE = "-1s" # The duration that models stay loaded in memory examp
 # COMPLETION_MODEL = "local-model" # You dont need to update this
 # LM_STUDIO_API_BASE_URL = "http://localhost:1234/v1" #This should be the defualt
 
+# TabbyAPI COMPLETIONS API EXAMPLE ##
+# COMPLETIONS_API = "tabby_api"
+# COMPLETION_MODEL = "llama3-7b-instruct-4.0bpw-exl2"
+# TABBY_API_BASE_URL = "http://localhost:5000/v1"
+
 
 ### Hosted APIS ###
 
