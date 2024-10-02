@@ -9,7 +9,7 @@ class TabbyApiClient:
         self.client = OpenAI(api_key=key if key != "" else None, base_url=config.TABBY_API_BASE_URL)
         self.verbose = verbose
 
-    def stream_completion(self, messages, model, temperature=0.3, max_tokens=2048, **kwargs):
+    def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
         """Get completion from TabbyAPI.
 
         Args:
