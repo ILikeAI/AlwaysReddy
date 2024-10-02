@@ -6,7 +6,7 @@ class TabbyApiClient:
     """Client for interacting with TabbyAPI."""
     def __init__(self, verbose=False):
         key = os.getenv('TABBY_API_KEY')
-        self.client = OpenAI(api_key=key if key is not "" else None, base_url=config.TABBY_API_BASE_URL)
+        self.client = OpenAI(api_key=key if key != "" else None, base_url=config.TABBY_API_BASE_URL)
         self.verbose = verbose
 
     def stream_completion(self, messages, model, temperature=0.3, max_tokens=2048, **kwargs):
