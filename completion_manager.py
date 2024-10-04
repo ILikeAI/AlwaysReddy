@@ -36,6 +36,10 @@ class CompletionManager:
             from llm_apis.groq_client import GroqClient
             self.client = GroqClient(verbose=self.verbose)
 
+        elif config.COMPLETIONS_API == "tabbyapi":
+            from llm_apis.tabbyapi_client import TabbyApiClient
+            self.client = TabbyApiClient(verbose=self.verbose)
+
         elif config.COMPLETIONS_API == "lm_studio":
             from llm_apis.lm_studio_client import LM_StudioClient
             if hasattr(config, 'LM_STUDIO_API_BASE_URL'):

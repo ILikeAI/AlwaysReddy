@@ -69,6 +69,7 @@ I often use AlwaysReddy for the following things:
 - LM Studio (local) - [Setup Guide](https://youtu.be/b6MPdboJEfk)
 - Ollama (local) - [Setup Guide](https://youtu.be/BMYwT58rtxw?si=LHTTm85XFEJ5bMUD)
 - Perplexity
+- [TabbyAPI](https://github.com/theroyallab/tabbyAPI) (local)
 
 ## Supported TTS systems:
 - Piper TTS (local and fast) [See how to change voice model](#how-to-add-new-voices-for-piper-tts)
