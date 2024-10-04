@@ -4,7 +4,6 @@ except ModuleNotFoundError:
     print("The faster_whisper module is not found. Please run 'pip install -r faster_whisper_requirements.txt' to install the required packages.")
     raise
 
-import os
 from config_loader import config
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" # This is a workaround for a bug 
@@ -12,18 +11,17 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" # This is a workaround for a bug
 
 class FasterWhisperClient:
     def __init__(self, verbose=False):
-        self.device = "cuda" if config.USE_GPU else "cpu"
-        self.compute_type = "float16" if self.device == "cuda" else "int8"
+        device = "cuda" if config.USE_GPU else "cpu"
         self.model = WhisperModel(
             config.WHISPER_MODEL,
-            device=self.device,
-            compute_type=self.compute_type
+            device=device,
+            compute_type="auto"
         )
         self.beam_size = config.BEAM_SIZE
         self.verbose = verbose
 
         if self.verbose:
-            print(f"Using faster-whisper model: {config.WHISPER_MODEL} and device: {self.device}")
+            print(f"Using faster-whisper model: {config.WHISPER_MODEL} and device: {device}")
 
     def transcribe_audio_file(self, file_path):
         if self.verbose:
