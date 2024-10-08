@@ -1,6 +1,5 @@
 import time
 from config_loader import config
-import prompt
 from actions.base_action import BaseAction
 from utils import to_clipboard
 import prompt
@@ -11,13 +10,12 @@ class AlwaysReddyVoiceAssistant(BaseAction):
         self.last_message_was_cut_off = False
         
         if config.RECORD_HOTKEY:
-            # HOTKEY CONFIGURATION
             self.AR.add_action_hotkey(config.RECORD_HOTKEY, 
                                 pressed=self.handle_default_assistant_response,
                                 held_release=self.handle_default_assistant_response,
                                 double_tap=self.AR.save_clipboard_text)
             
-            print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press to toggle on and off or hold-release)")
+            print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press to toggle on and off, or hold and release)")
             if "+" in config.RECORD_HOTKEY:
                 hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)
                 print(f"\tHold down '{hotkey_start}' and double tap '{hotkey_end}' to send clipboard content to AlwaysReddy")

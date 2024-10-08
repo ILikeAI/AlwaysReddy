@@ -11,7 +11,7 @@ class TranscribeAndPaste(BaseAction):
             self.AR.add_action_hotkey(config.TRANSCRIBE_RECORDING, 
                                 pressed=self.transcription_action,
                                 held_release=self.transcription_action)
-            print(f"'{config.TRANSCRIBE_RECORDING}': Transcribe to clipboard (press to toggle on and off hold-release)")
+            print(f"'{config.TRANSCRIBE_RECORDING}': Transcribe to clipboard (press to toggle on and off, or hold and release)")
 
     def transcription_action(self):
         """Handle the transcription process."""
