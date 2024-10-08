@@ -12,7 +12,6 @@ class AlwaysReddyVoiceAssistant(BaseAction):
         
         if config.RECORD_HOTKEY:
             # HOTKEY CONFIGURATION
-            print("Voice assistant hotkeys:")  
             self.AR.add_action_hotkey(config.RECORD_HOTKEY, 
                                 pressed=self.handle_default_assistant_response,
                                 held_release=self.handle_default_assistant_response,
