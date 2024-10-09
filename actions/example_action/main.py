@@ -13,7 +13,7 @@ class ExampleAction(BaseAction):
     def transcription_action(self):
         """Handle the transcription process."""
         recording_filename = self.AR.toggle_recording(self.transcription_action)
-        if recording_filename:#If the recording has only just been started, recording_filename will be None
+        if recording_filename: # If the recording has only just been started, recording_filename will be None
             transcript = self.AR.transcription_manager.transcribe_audio(recording_filename)
             to_clipboard(transcript)
             print("Transcription copied to clipboard.")

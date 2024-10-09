@@ -1,6 +1,5 @@
 import time
 from config_loader import config
-import prompt
 from actions.base_action import BaseAction
 from utils import to_clipboard
 import prompt
@@ -10,24 +9,24 @@ class AlwaysReddyVoiceAssistant(BaseAction):
     def setup(self):
         self.last_message_was_cut_off = False
         
-        if config.TRANSCRIBE_RECORDING:
-            # HOTKEY CONFIGURATION
-            print("Voice assistant hotkeys:")  
+        if config.RECORD_HOTKEY:
             self.AR.add_action_hotkey(config.RECORD_HOTKEY, 
                                 pressed=self.handle_default_assistant_response,
                                 held_release=self.handle_default_assistant_response,
                                 double_tap=self.AR.save_clipboard_text)
             
-            print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press to toggle on and off or hold-release)")
+            print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press to toggle on and off, or hold and release)")
             if "+" in config.RECORD_HOTKEY:
                 hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)
                 print(f"\tHold down '{hotkey_start}' and double tap '{hotkey_end}' to send clipboard content to AlwaysReddy")
             else:
                 print(f"\tDouble tap '{config.RECORD_HOTKEY}' to send clipboard content to AlwaysReddy")
-            # new chat hotkey
+
+        if config.NEW_CHAT_HOTKEY:
             self.AR.add_action_hotkey(config.NEW_CHAT_HOTKEY, pressed=self.new_chat)
-            self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
             print(f"'{config.NEW_CHAT_HOTKEY}': New chat for voice assistant")
+
+        self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
 
     def handle_default_assistant_response(self):
         """Handle the response from the transcription and generate a completion."""

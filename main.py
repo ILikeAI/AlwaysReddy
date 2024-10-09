@@ -11,7 +11,6 @@ from config_loader import config
 import os
 import importlib
 from actions.base_action import BaseAction
-# Import actions
 
 class AlwaysReddy:
     def __init__(self):
@@ -217,18 +216,23 @@ class AlwaysReddy:
                     module = importlib.import_module(module_name)
                     for name, obj in module.__dict__.items():
                         if isinstance(obj, type) and issubclass(obj, BaseAction) and obj is not BaseAction:
-                            print(f"\nInitializing action: {obj.__name__}")
-                            action_instance = obj(self)       
+                            if self.verbose:
+                                print(f"\nInitializing action: {obj.__name__}")
+                            obj(self)
 
     def run(self):
         """Run the AlwaysReddy instance, setting up hotkeys and entering the main loop."""
         print("\n\nSetting up AlwaysReddy...\n")
         self.discover_and_initialize_actions()
-        print("\nSystem actions:")
-        
+
+        if self.verbose and any([config.CANCEL_HOTKEY]): # if not hotkey below is set, skip the "system actions" print
+            print("\nSystem actions:")
+
         # Add cancel_all as an action that doesn't run in the main thread
-        self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_action_thread=False)
-        print(f"'{config.CANCEL_HOTKEY}': Cancel currently running action, recording, TTS or other")
+        if config.CANCEL_HOTKEY:
+            self.add_action_hotkey(config.CANCEL_HOTKEY, pressed=self.cancel_all, run_in_action_thread=False)
+            print(f"'{config.CANCEL_HOTKEY}': Cancel currently running action, recording, TTS, or other")
+
         print("\nAlwaysReddy is reddy. Use any of the hotkeys above to get started.")
         try:
             self.input_handler.start(blocking=True)
