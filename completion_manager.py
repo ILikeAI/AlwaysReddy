@@ -92,7 +92,7 @@ class CompletionManager:
             return None
         
     def get_completion_stream(self, messages, model, **kwargs):
-        """Get completion from the selected AI client and stream sentences into the TTS client.
+        """Get completion stream from the selected AI client.
 
         Args:
             messages (list): List of messages.
