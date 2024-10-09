@@ -6,14 +6,12 @@ class LM_StudioClient:
         self.client = OpenAI(base_url=base_url, api_key="not-needed")
         self.verbose = verbose
 
-    def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
+    def stream_completion(self, messages, model, **kwargs):
         """Get completion from LM studio API.
 
         Args:
             messages (list): List of messages.
-            model (str): Model for completion, this for now is alway "local-model"
-            temperature (float): Temperature for sampling.
-            max_tokens (int): Maximum number of tokens to generate.
+            model (str): Model for completion, this for now is always "local-model"
             **kwargs: Additional keyword arguments.
 
         Yields:
@@ -23,8 +21,6 @@ class LM_StudioClient:
             stream = self.client.chat.completions.create(
                 model=model,
                 messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
                 stream=True,
                 **kwargs
             )
