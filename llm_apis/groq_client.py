@@ -13,7 +13,7 @@ class GroqClient:
         self.client = Groq(api_key=os.getenv('GROQ_API_KEY'))
         self.verbose = verbose
 
-    def stream_completion(self, messages, model='llama3-8b-8192', **kwargs):
+    def stream_completion(self, messages, model, **kwargs):
         """
         Get chat completions from the Groq API.
 

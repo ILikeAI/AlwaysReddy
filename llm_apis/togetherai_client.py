@@ -11,14 +11,12 @@ class TogetherAIClient:
         )
         self.verbose = verbose
 
-    def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
+    def stream_completion(self, messages, model, **kwargs):
         """Get completion from the TogetherAI API.
 
         Args:
             messages (list): List of messages.
             model (str): Model for completion.
-            temperature (float): Temperature for sampling.
-            max_tokens (int): Maximum number of tokens to generate.
             **kwargs: Additional keyword arguments.
 
         Yields:
@@ -28,9 +26,8 @@ class TogetherAIClient:
             stream = self.client.chat.completions.create(
                 model=model,
                 messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                stream=True
+                stream=True,
+                **kwargs
             )
             for chunk in stream:
                 content = chunk.choices[0].delta.content

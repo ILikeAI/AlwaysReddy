@@ -7,14 +7,12 @@ class AnthropicClient:
         self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
         self.verbose = verbose
 
-    def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
+    def stream_completion(self, messages, model, **kwargs):
         """Stream completion from the Anthropic API.
 
         Args:
             messages (list): List of messages.
             model (str): Model for completion.
-            temperature (float): Temperature for sampling.
-            max_tokens (int): Maximum number of tokens to generate.
             **kwargs: Additional keyword arguments.
 
         Yields:
@@ -32,8 +30,7 @@ class AnthropicClient:
             api_args = {
                 "model": model,
                 "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
+                **kwargs
             }
             
             # Only include the system parameter if a system message is present

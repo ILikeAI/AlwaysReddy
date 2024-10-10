@@ -11,14 +11,12 @@ class PerplexityClient:
         self.base_url = "https://api.perplexity.ai/chat/completions"
         self.verbose = verbose
 
-    def stream_completion(self, messages, model, temperature=0.7, max_tokens=2048, **kwargs):
+    def stream_completion(self, messages, model, **kwargs):
         """Stream completion from the Perplexity AI API.
 
         Args:
             messages (list): List of messages.
             model (str): Model for completion.
-            temperature (float): Temperature for sampling.
-            max_tokens (int): Maximum number of tokens to generate.
             **kwargs: Additional keyword arguments.
 
         Yields:
@@ -27,8 +25,6 @@ class PerplexityClient:
         payload = {
             "model": model,
             "messages": messages,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
             **kwargs
         }
         headers = {

@@ -60,13 +60,17 @@ COMPLETION_MODEL = "gpt-4o"
 # COMPLETIONS_API = "groq"
 # COMPLETION_MODEL = "llama3-70b-8192"
 
-### Transcription API Settings ###
+### COMPLETIONS API PARAMETERS ###
+# Allows you to override the default parameters for the completions API
+# The available parameters depend on which completions API you are using, so should be looked up in the API documentation online
+COMPLETION_PARAMS = {"temperature": 0.7, "max_tokens": 2048}
+
+### TRANSCRIPTION API SETTINGS ###
 
 ## Faster Whisper local transcription ###
 TRANSCRIPTION_API = "FasterWhisper" # this will use the local whisper model
 WHISPER_MODEL = "tiny.en" # If you prefer not to use english set it to "tiny", if the transcription quality is too low then set it to "base" but this will be a little slower
 BEAM_SIZE = 5
-
 
 ## Transformers Whisper local transcription ###
 # TRANSCRIPTION_API = "TransformersWhisper"
