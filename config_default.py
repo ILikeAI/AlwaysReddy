@@ -87,12 +87,18 @@ PIPER_VOICE_SPEED = 1.0 # Speed of the TTS, 1.0 is normal speed, 2.0 is double s
 # OPENAI_VOICE = "nova"
 
 ### PROMPTS ###
-# Options: "default_prompt", "chat_prompt"
+# Options:
 # - "default_prompt": Straight to the point assistant that can write to your clipboard when requested.
 # - "chat_prompt": Simple prompt for a friendly back-and-forth chat. Does NOT support writing to clipboard.
 # - None: No system prompt, for the raw out-of-the-box model behavior.
 # Or create your own prompt in the "system_prompts" folder, then put the name of the file here.
 ACTIVE_PROMPT = "default_prompt"
+
+# Options:
+# - "clipboard": Allow the assistant to write to the clipboard when requested
+# - "time": Add the current time to the system prompt
+# Or create your own module in the "system_prompts\modules" folder, then add the name of the file here.
+ACTIVE_PROMPT_MODULES = ["clipboard", "time"]
 
 ### MISC ###
 AUDIO_FILE_DIR = "audio_files"
