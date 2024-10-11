@@ -70,6 +70,10 @@ def __play_sound_file(file_name, volume, verbose=False):
 def play_sound_FX(name, volume=1.0, verbose=False):
     try:
         volume *= config.BASE_VOLUME
+
+        if volume <= 0.0:
+            return
+
         sound_file_name = f"sounds/recording-{name}"
         if os.path.exists(sound_file_name + ".wav"):
             sound_file_name += ".wav"
