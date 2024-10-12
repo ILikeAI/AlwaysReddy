@@ -97,8 +97,9 @@ ACTIVE_PROMPT = "default_prompt"
 # Options:
 # - "clipboard": Allow the assistant to write to the clipboard when requested
 # - "time": Add the current time to the system prompt
+# - "window_title": Add the current window title to the system prompt
 # Or create your own module in the "system_prompts\modules" folder, then add the name of the file here.
-ACTIVE_PROMPT_MODULES = ["clipboard", "time"]
+ACTIVE_PROMPT_MODULES = ["clipboard", "time", "window_title"]
 
 ### MISC ###
 AUDIO_FILE_DIR = "audio_files"
