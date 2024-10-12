@@ -242,6 +242,17 @@ To use local TTS just open the config file and set `TTS_ENGINE="piper"`
 4. Edit your config.py file by setting the `ACTIVE_PROMPT` option to the name of your new prompt file (without the .py extension) as a string.
    - For example, if your new prompt file is *custom_prompt.py*, then set in config.py: `ACTIVE_PROMPT = "custom_prompt"`
 
+### System prompt modules
+An alternative way to customize the system prompt is to create a new "system prompt module". These modules, found in the *system_prompts\modules* directory, are additional instructions that can be appended to your base system prompt.
+
+For example, the default 'clipboard' module contains the instructions that gives the assistant the ability to copy generated text into your clipboard.
+
+#### How to make a custom system prompt module:
+1. Navigate to the *system_prompts\modules* directory.
+2. Make a copy of an existing module file.
+3. Open the copy in a text or code editor and edit the prompt inside the two `'''` as you like.
+4. Edit your config.py file by adding your module file name (without the .py extension) to the `ACTIVE_PROMPT_MODULES` list option.
+
 ## How to add AlwaysReddy to Startup List (Windows)
 To add AlwaysReddy to your startup list so it starts automatically on your computer startup, follow these steps:
 1. run `venv\Scripts\activate`
