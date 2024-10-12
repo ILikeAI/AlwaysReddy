@@ -58,7 +58,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 if self.AR.stop_action:
                     return
 
-                stream = self.AR.completion_client.get_completion_stream(self.messages, model=config.COMPLETION_MODEL)
+                stream = self.AR.completion_client.get_completion_stream(self.messages, config.COMPLETION_MODEL, **config.COMPLETION_PARAMS)
                 response = self.AR.completion_client.process_text_stream(stream,
                                                                          marker_tuples=[(config.CLIPBOARD_TEXT_START_SEQ, config.CLIPBOARD_TEXT_END_SEQ, to_clipboard)],
                                                                           sentence_callback=self.AR.tts.run_tts)#We pass in pairs of start and end sequences to the marker_tuples argument to indicate that the text between these sequences should be copied to the clipboard, then we pass the to_clipboard function as the callback to handle this action.

@@ -15,9 +15,18 @@ def __play_sound_file(file_name, volume, verbose=False):
             # Create a PyAudio instance
             p = pyaudio.PyAudio()
 
+            try:
+                output_device = p.get_default_output_device_info()
+            except OSError:
+                p.terminate()
+                return # No output devices
+
+            # Used to limit the number of channels to avoid 'invalid number of channels' error
+            output_device_channels = output_device['maxOutputChannels']
+
             # Open a stream for playback
             stream = p.open(format=p.get_format_from_width(audio_file.getsampwidth()),
-                            channels=audio_file.getnchannels(),
+                            channels=min(audio_file.getnchannels(), output_device_channels),
                             rate=audio_file.getframerate(),
                             output=True)
 
@@ -61,6 +70,10 @@ def __play_sound_file(file_name, volume, verbose=False):
 def play_sound_FX(name, volume=1.0, verbose=False):
     try:
         volume *= config.BASE_VOLUME
+
+        if volume <= 0.0:
+            return
+
         sound_file_name = f"sounds/recording-{name}"
         if os.path.exists(sound_file_name + ".wav"):
             sound_file_name += ".wav"

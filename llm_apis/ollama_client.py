@@ -39,6 +39,7 @@ class OllamaClient:
             "stream": True,
             "keep_alive": self.__fix_keep_alive(config.OLLAMA_KEEP_ALIVE),
             **kwargs
+
         }
         json_data = json.dumps(data)
         headers = {'Authorization': f'Bearer {self.api_key}'} if self.api_key else {}
