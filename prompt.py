@@ -1,4 +1,5 @@
 import importlib
+import config
 
 
 def build_initial_messages(prompt_name):
@@ -28,4 +29,9 @@ def get_system_prompt_message(prompt_name):
             print(f"Error: System prompt '{prompt_name}' not found. Using default prompt.")
             system_prompt = importlib.import_module("system_prompts.default_prompt")
 
-        return system_prompt.get_prompt()
+        prompt = system_prompt.get_prompt().strip()
+
+        for module in config.ACTIVE_PROMPT_MODULES:
+            prompt += "\n\n" + importlib.import_module(f"system_prompts.modules.{module}").get_prompt().strip()
+
+        return prompt
