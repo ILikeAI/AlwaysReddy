@@ -44,6 +44,10 @@ class CompletionManager:
         elif config.COMPLETIONS_API == "portkey":
             from llm_apis.portkey_client import PortkeyClient
             self.client = PortkeyClient(verbose=self.verbose)
+        
+        elif config.COMPLETIONS_API == "portkey_prompt":
+            from llm_apis.portkey_prompt_client import PortkeyPromptClient
+            self.client = PortkeyPromptClient(verbose=self.verbose)
 
         elif config.COMPLETIONS_API == "lm_studio":
             from llm_apis.lm_studio_client import LM_StudioClient

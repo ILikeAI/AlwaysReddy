@@ -11,7 +11,7 @@ test.py
 # Ignore everything in the piper_tts directory
 /piper_tts/*
 # But don't ignore the voices folder
-!/piper_tts/voices/
+#!/piper_tts/voices/
 run_AlwaysReddy.sh
 run_AlwaysReddy.bat
 
