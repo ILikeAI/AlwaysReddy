@@ -18,6 +18,14 @@ class TranscribeAndPaste(BaseAction):
         recording_filename = self.AR.toggle_recording(self.transcription_action)
         if recording_filename:
             transcript = self.AR.transcription_manager.transcribe_audio(recording_filename)
-            to_clipboard(transcript)
-            pyautogui.hotkey('ctrl', 'v') 
-            print("Transcription copied to clipboard.")
+            
+            # Send transcript to language model for error correction
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant that corrects transcription errors. Please fix any errors in the following transcription, maintaining the original meaning and style."},
+                {"role": "user", "content": transcript}
+            ]
+            corrected_transcript = self.AR.completion_client.get_completion(messages, config.COMPLETION_MODEL)
+            
+            to_clipboard(corrected_transcript)
+            pyautogui.hotkey('ctrl', 'v')
+            print("Corrected transcription copied to clipboard and pasted.")

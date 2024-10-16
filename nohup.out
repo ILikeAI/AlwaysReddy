@@ -1,0 +1,690 @@
+This process is not trusted! Input event monitoring will not be possible until it is added to accessibility clients.
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/llm_apis/perplexity_client.py", line 38, in stream_completion
+    response.raise_for_status()
+  File "/Volumes/Media/Coding/AlwaysReddy/venv/lib/python3.12/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://api.perplexity.ai/chat/completions
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/llm_apis/perplexity_client.py", line 38, in stream_completion
+    response.raise_for_status()
+  File "/Volumes/Media/Coding/AlwaysReddy/venv/lib/python3.12/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://api.perplexity.ai/chat/completions
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/actions/always_reddy_voice_assistant/main.py", line 62, in handle_default_assistant_response
+    response = self.AR.completion_client.process_text_stream(stream,
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/Media/Coding/AlwaysReddy/completion_manager.py", line 166, in process_text_stream
+    for chunk in text_stream:
+  File "/Volumes/Media/Coding/AlwaysReddy/llm_apis/perplexity_client.py", line 48, in stream_completion
+    raise RuntimeError(f"An error occurred streaming completion from Perplexity AI API: {e}")
+RuntimeError: An error occurred streaming completion from Perplexity AI API: 400 Client Error: Bad Request for url: https://api.perplexity.ai/chat/completions
+Using faster-whisper model: tiny.en and device: cpu
+Using PynputHandler
+
+
+Setting up AlwaysReddy...
+
+
+Initializing action: ReadClipboard
+'ctrl+alt+c': To read the text in your clipboard aloud
+
+Initializing action: TranscribeAndPaste
+'ctrl+alt+t': Transcribe to clipboard (press to toggle on and off, or hold and release)
+
+Initializing action: AlwaysReddyVoiceAssistant
+'alt+ctrl+r': Start/stop talking to voice assistant (press to toggle on and off, or hold and release)
+	Hold down 'alt+ctrl' and double tap 'r' to send clipboard content to AlwaysReddy
+'alt+ctrl+w': New chat for voice assistant
+
+System actions:
+'alt+ctrl+e': Cancel currently running action, recording, TTS, or other
+
+AlwaysReddy is reddy. Use any of the hotkeys above to get started.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Warning: Previous action did not end properly.
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Detected language: en with probability 1.00
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Let's see.
+Playing audio: The Battle of Glasgow was fought on October 15, 1864, in and near Glasgow, Missouri, as part of Price's Missouri Expedition during the American Civil War.
+Stopping text-to-speech...
+Stopping TTS
+Text-to-speech cancelled.
+
+Response:
+ The Battle of Glasgow was fought on October 15, 1864, in and near Glasgow, Missouri, as part of Price's Missouri Expedition during the American Civil War.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Summarize the contents of the clipboard and copy the new version back to the clipboard.
+Playing audio: The contents of the clipboard are related to the Battle of Glasgow, which took place on October 15, 1864, during the American Civil War.
+Playing audio: The battle involved Confederate forces under Major General Sterling Price and Union forces under Colonel Chester Harding.
+Stopping text-to-speech...
+Stopping TTS
+Text-to-speech cancelled.
+
+Response:
+ The contents of the clipboard are related to the Battle of Glasgow, which took place on October 15, 1864, during the American Civil War. The battle involved Confederate forces under Major General Sterling Price and Union forces under Colonel Chester Harding.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Turn into bullet points.
+Playing audio: - **Battle of Glasgow Date:** October 15, 1864.
+Playing audio: - **Location:** Glasgow, Missouri.
+Playing audio: - **Part of:** Price's Missouri Expedition during the American Civil War.
+Playing audio: - **Confederate Forces:** Approximately 1,500-1,800 men, led by Generals John B.
+Playing audio: Clark and Joe Shelby.
+Stopping text-to-speech...
+Stopping TTS
+
+Response:
+ - **Battle of Glasgow Date:** October 15, 1864
+- **Location:** Glasgow, Missouri
+- **Part of:** Price's Missouri Expedition during the American Civil War
+- **Confederate Forces:** Approximately 1,500-1,800 men, led by Generals John B. Clark and Joe Shelby
+- **Union Forces:** 650 men, led by Colonel Chester Harding
+- **Outcome:** Confederate victory
+  - Union forces surrendered around 1:30 pm.
+  - Confederates captured Union weapons and supplies, including rifles and horses.
+  - Several buildings in Glasgow were set on fire, including the City Hall and the steamer West Wind.
+
+**Aftermath:**
+- The town was left without effective governmental authority.
+- Notorious Confederate guerrillas, including William Quantrill and "Bloody Bill" Anderson, attacked the town and its citizens.
+
+**Casualties:**
+- Union forces: 8 killed, 32 wounded.
+- Confederate forces: approximately 50 killed or wounded.
+- Three Glasgow citizens fighting with the Union were killed.
+Text-to-speech cancelled.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Shorten this, text and save it to the clipboard.
+Playing audio: I have copied the text to your clipboard.
+
+Response:
+ [CLIPSTART]
+The Battle of Glasgow, fought on October 15, 1864, was part of Price's Missouri Expedition during the American Civil War. Confederate forces, led by Generals John B. Clark and Joe Shelby, attacked Glasgow with artillery and infantry, forcing the Union forces under Colonel Chester Harding to surrender. The Confederates captured Union weapons and supplies and set fire to the town, including the City Hall and several homes. After the battle, the town was left without protection, leading to further violence by guerrilla groups. The Union forces suffered 30 casualties, while the Confederates lost around 50 men. [CLIPEND]
+I have copied the text to your clipboard.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Turn this into an email for my boss and copy to the clipboard.
+Playing audio: I have copied the email to your clipboard.
+
+Response:
+ [CLIPSTART]
+Subject: Update on Server Procurement and Bug Status
+
+Dear [Boss's Name],
+
+I hope this email finds you well. I wanted to provide a brief update on the server procurement and bug status.
+
+### Server Procurement
+- **No New Updates:** There are no new updates on server procurement at this time.
+
+### Bug Status
+- **Bugs:** The number of bugs has decreased to 16, down from 25.
+- **No Status Meeting Tomorrow:** There will be no status meeting tomorrow.
+
+Please let me know if you have any questions or need further information.
+
+Best regards,
+[Your Name]  
+[Your Position]  
+[Your Contact Information]
+
+[CLIPEND]
+I have copied the email to your clipboard.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ I would like you to take the text on the clipboard and go to paragraph by paragraph  through it and shorten the paragraphs by about 60% and then save the results back to the
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Give me a brief summary of what's on the clipboard.
+Playing audio: The clipboard appears to be empty or not provided in the message.
+Playing audio: If you need to copy something, please specify the text you want copied, and I can help with that.
+
+Response:
+ The clipboard appears to be empty or not provided in the message. If you need to copy something, please specify the text you want copied, and I can help with that.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ please summarize the board
+Playing audio: The content on the clipboard discusses Nas's perfectionism in music production.
+Playing audio: Nas strives for perfection by meticulously working on each line of his songs, often running through a single line 25 times to achieve the best intonation.
+Playing audio: His producer, Harrell, provides detailed feedback to help Nas perfect the lines.
+Playing audio: Despite the detailed process, Nas remains dedicated and focused, showing an unassailable conviction in his abilities.
+Playing audio: The discussion highlights the fine line between attention to detail and perfectionism, where attention to detail is about quality, while perfectionism is an obsession with an unattainable ideal.
+
+Response:
+ The content on the clipboard discusses Nas's perfectionism in music production. Nas strives for perfection by meticulously working on each line of his songs, often running through a single line 25 times to achieve the best intonation. His producer, Harrell, provides detailed feedback to help Nas perfect the lines. Despite the detailed process, Nas remains dedicated and focused, showing an unassailable conviction in his abilities. The discussion highlights the fine line between attention to detail and perfectionism, where attention to detail is about quality, while perfectionism is an obsession with an unattainable ideal.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Please turn the contents of the clipboard into a motivational blog post and copy back  to the clipboard.
+Playing audio: I have copied the motivational blog post to your clipboard.
+
+Response:
+ [CLIPSTART]
+**Embracing Perfection in Music Production: Nas's Journey to Sonic Excellence**
+
+Nas's dedication to perfection in music production is a testament to the power of relentless pursuit. His meticulous attention to detail, evident in every line and every note, is a reminder that true artistry requires unwavering commitment.
+
+### The Path to Perfection
+
+Nas's approach is not about aiming for mere perfection; it's about striving for an unattainable ideal. He runs through a single line 25 times to ensure the perfect intonation, and even then, he's not satisfied until he achieves it. This level of dedication is what sets him apart as a producer.
+
+### The Role of a Producer
+
+A producer like Nas is not just a technician; they are also a coach and a cheerleader. Harrell's feedback, whether immediate and gushing or constructive and detailed, helps Nas refine his craft. This collaborative process ensures that every element of the song is crafted with precision and care.
+
+### The Studio Experience
+
+In the studio, time is taken to perfect each line. The first word of the line might be three measures long, but Nas doesn't rush through it. He warbles, he growls, he tries again and again until it's just right. This process, though time-consuming, is essential for creating a song that meets Nas's high standards.
+
+### The Power of Learning
+
+Nas's journey is also about continuous learning. He studies the post-production mastery of Ye, applying the same breadth of vision to his Southern backyard tracks. He doesn't just mimic; he innovates, ensuring that his music reflects his unique perspective.
+
+### Overcoming Obstacles
+
+Despite the challenges, Nas doesn't give up. He hears a whistle in his headphones and runs vocal trills to prove it's not just in his head. He flubs the line, but he doesn't let frustration get the better of him. Instead, he keeps working, driven by his conviction that he can do anything he sets his mind to.
+
+### The Importance of Backup and Accessibility
+
+A NAS system like the one described in can provide both backup and accessibility. Files are safe, accessible from anywhere, and easily shared with collaborators. This technology ensures that data is never lost, and projects can be worked on seamlessly from multiple devices.
+
+### Conclusion
+
+Nas's journey to perfection is a reminder that true artistry requires dedication, continuous learning, and a willingness to push beyond the limits of what's possible. By embracing the process and staying committed to our goals, we can create music that transcends time and resonates with audiences worldwide.
+
+[CLIPEND]
+I have copied the motivational blog post to your clipboard.
+Running transcription_action...
+Starting recording... Action: transcription_action
+Recording started...
+Running transcription_action...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+Transcription copied to clipboard.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running save_clipboard_text...
+Saving clipboard text...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ What's up?
+Playing audio: Not much is up Just wrapping up a motivational blog post on overcoming perfectionism in music production, inspired by the content on your clipboard.
+Playing audio: It's all about embracing the process, setting realistic goals, and letting go of the need for flawlessness to keep creativity flowing.
+Playing audio: If you have any more questions or need further assistance, feel free to ask.
+
+Response:
+ Not much is up Just wrapping up a motivational blog post on overcoming perfectionism in music production, inspired by the content on your clipboard. It's all about embracing the process, setting realistic goals, and letting go of the need for flawlessness to keep creativity flowing. If you have any more questions or need further assistance, feel free to ask
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+./run_AlwaysReddy.sh: line 3: 47541 Terminated: 15          python3 main.py
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
+This process is not trusted! Input event monitoring will not be possible until it is added to accessibility clients.
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 48, in transcribe_audio
+    os.remove(full_path)
+FileNotFoundError: [Errno 2] No such file or directory: 'audio_files/temp_recording.wav'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/actions/always_reddy_voice_assistant/main.py", line 37, in handle_default_assistant_response
+    message = self.AR.transcription_manager.transcribe_audio(recording_filename)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 55, in transcribe_audio
+    raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
+FileNotFoundError: The audio file temp_recording.wav was not found.
+Exception in thread Thread-88 (transcription_action):
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 48, in transcribe_audio
+    os.remove(full_path)
+FileNotFoundError: [Errno 2] No such file or directory: 'audio_files/temp_recording.wav'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/threading.py", line 1073, in _bootstrap_inner
+    self.run()
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/threading.py", line 1010, in run
+    self._target(*self._args, **self._kwargs)
+  File "/Volumes/Media/Coding/AlwaysReddy/actions/transcribe_and_paste/main.py", line 20, in transcription_action
+    transcript = self.AR.transcription_manager.transcribe_audio(recording_filename)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 55, in transcribe_audio
+    raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
+FileNotFoundError: The audio file temp_recording.wav was not found.
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 48, in transcribe_audio
+    os.remove(full_path)
+FileNotFoundError: [Errno 2] No such file or directory: 'audio_files/temp_recording.wav'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/actions/always_reddy_voice_assistant/main.py", line 37, in handle_default_assistant_response
+    message = self.AR.transcription_manager.transcribe_audio(recording_filename)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 55, in transcribe_audio
+    raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
+FileNotFoundError: The audio file temp_recording.wav was not found.
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 48, in transcribe_audio
+    os.remove(full_path)
+FileNotFoundError: [Errno 2] No such file or directory: 'audio_files/temp_recording.wav'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/actions/always_reddy_voice_assistant/main.py", line 37, in handle_default_assistant_response
+    message = self.AR.transcription_manager.transcribe_audio(recording_filename)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 55, in transcribe_audio
+    raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
+FileNotFoundError: The audio file temp_recording.wav was not found.
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 48, in transcribe_audio
+    os.remove(full_path)
+FileNotFoundError: [Errno 2] No such file or directory: 'audio_files/temp_recording.wav'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/actions/always_reddy_voice_assistant/main.py", line 37, in handle_default_assistant_response
+    message = self.AR.transcription_manager.transcribe_audio(recording_filename)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 55, in transcribe_audio
+    raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
+FileNotFoundError: The audio file temp_recording.wav was not found.
+Using faster-whisper model: tiny.en and device: cpu
+Using PynputHandler
+
+
+Setting up AlwaysReddy...
+
+
+Initializing action: ReadClipboard
+'ctrl+alt+c': To read the text in your clipboard aloud
+
+Initializing action: TranscribeAndPaste
+'ctrl+alt+t': Transcribe to clipboard (press to toggle on and off, or hold and release)
+
+Initializing action: AlwaysReddyVoiceAssistant
+'alt+ctrl+/': Start/stop talking to voice assistant (press to toggle on and off, or hold and release)
+	Hold down 'alt+ctrl' and double tap '/' to send clipboard content to AlwaysReddy
+'alt+ctrl+.': New chat for voice assistant
+
+System actions:
+'alt+ctrl+,': Cancel currently running action, recording, TTS, or other
+
+AlwaysReddy is reddy. Use any of the hotkeys above to get started.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Hello?
+Playing audio: Hello, how can I assist you today?
+
+Response:
+ Hello, how can I assist you today?
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Tell me a joke about cats.
+Playing audio: Why don't cats make good dancers?
+Playing audio: They have two left feet.
+
+Response:
+ Why don't cats make good dancers? They have two left feet.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ What's new today?
+Playing audio: Not much, but how about you?
+Playing audio: Is there anything specific you'd like to know or discuss?
+
+Response:
+ Not much, but how about you? Is there anything specific you'd like to know or discuss?
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Give me some ideas to get fitter.
+Playing audio: Start with regular cardio exercises like running or cycling.
+Stopping text-to-speech...
+Stopping TTS
+Text-to-speech cancelled.
+
+Response:
+ Start with regular cardio exercises like running or cycling.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Cancelling recording...
+Recording cancelled.
+Recording started...
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Action triggered too quickly. Please wait.
+Action triggered too quickly. Please wait.
+Action triggered too quickly. Please wait.
+Recording started...
+Recording timeout reached.
+Attempting to run handle_default_assistant_response
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ .  .  .  . .  . .  . .  . .  . .  . .  .  . .  . .  . .  . .  . .  .  .  .  .  .  . .  . .  . .  . .  . .  . .  . .  . .  . .  . .  . .  . .  . .  . .
+Playing audio: Try incorporating strength training exercises and stretching into your daily routine.
+
+Response:
+ Try incorporating strength training exercises and stretching into your daily routine.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+The audio file temp_recording.wav was not found.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ Hey there.
+Playing audio: Good morning!
+
+Response:
+ Good morning!
+Running transcription_action...
+Starting recording... Action: transcription_action
+Recording started...
+Running transcription_action...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+The audio file temp_recording.wav was not found.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+The audio file temp_recording.wav was not found.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+The audio file temp_recording.wav was not found.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+
+Transcript:
+ I'd like to give you a summary of the news today from New York City, include news  about the weather and anything specific about the election.
+Playing audio: There is a high pressure system bringing clear skies and warm temperatures to New York City today, with highs in the mid-60s.
+Playing audio: In election news, a new poll shows a close race for mayor between the current incumbent and a challenger.
+
+Response:
+ There is a high pressure system bringing clear skies and warm temperatures to New York City today, with highs in the mid-60s. In election news, a new poll shows a close race for mayor between the current incumbent and a challenger.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Detected language: en with probability 1.00
+The audio file temp_recording.wav was not found.
+Running handle_default_assistant_response...
+Starting recording... Action: handle_default_assistant_response
+Recording started...
+Running handle_default_assistant_response...
+Stopping recording...
+Recording saved to audio_files/temp_recording.wav
+Transcribing audio file: audio_files/temp_recording.wav
+Warning: Previous action did not end properly.
+Running handle_default_assistant_response...
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 48, in transcribe_audio
+    os.remove(full_path)
+FileNotFoundError: [Errno 2] No such file or directory: 'audio_files/temp_recording.wav'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/actions/always_reddy_voice_assistant/main.py", line 37, in handle_default_assistant_response
+    message = self.AR.transcription_manager.transcribe_audio(recording_filename)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 55, in transcribe_audio
+    raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
+FileNotFoundError: The audio file temp_recording.wav was not found.
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 48, in transcribe_audio
+    os.remove(full_path)
+FileNotFoundError: [Errno 2] No such file or directory: 'audio_files/temp_recording.wav'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/actions/always_reddy_voice_assistant/main.py", line 37, in handle_default_assistant_response
+    message = self.AR.transcription_manager.transcribe_audio(recording_filename)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 55, in transcribe_audio
+    raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
+FileNotFoundError: The audio file temp_recording.wav was not found.
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 48, in transcribe_audio
+    os.remove(full_path)
+FileNotFoundError: [Errno 2] No such file or directory: 'audio_files/temp_recording.wav'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/actions/always_reddy_voice_assistant/main.py", line 37, in handle_default_assistant_response
+    message = self.AR.transcription_manager.transcribe_audio(recording_filename)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 55, in transcribe_audio
+    raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
+FileNotFoundError: The audio file temp_recording.wav was not found.
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 48, in transcribe_audio
+    os.remove(full_path)
+FileNotFoundError: [Errno 2] No such file or directory: 'audio_files/temp_recording.wav'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Volumes/Media/Coding/AlwaysReddy/actions/always_reddy_voice_assistant/main.py", line 37, in handle_default_assistant_response
+    message = self.AR.transcription_manager.transcribe_audio(recording_filename)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/Media/Coding/AlwaysReddy/transcription_manager.py", line 55, in transcribe_audio
+    raise FileNotFoundError(f"The audio file {file_path} was not found.") from e
+FileNotFoundError: The audio file temp_recording.wav was not found.

@@ -1,3 +1,4 @@
+
 from config_loader import config
 import re
 from utils import maintain_token_limit
@@ -39,6 +40,10 @@ class CompletionManager:
         elif config.COMPLETIONS_API == "tabbyapi":
             from llm_apis.tabbyapi_client import TabbyApiClient
             self.client = TabbyApiClient(verbose=self.verbose)
+
+        elif config.COMPLETIONS_API == "portkey":
+            from llm_apis.portkey_client import PortkeyClient
+            self.client = PortkeyClient(verbose=self.verbose)
 
         elif config.COMPLETIONS_API == "lm_studio":
             from llm_apis.lm_studio_client import LM_StudioClient

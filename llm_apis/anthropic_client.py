@@ -1,4 +1,5 @@
 from anthropic import Anthropic
+import anthropic.types
 import os
 
 class AnthropicClient:
@@ -7,12 +8,13 @@ class AnthropicClient:
         self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
         self.verbose = verbose
 
-    def stream_completion(self, messages, model, **kwargs):
+    def stream_completion(self, messages, model, max_tokens=1000, **kwargs):
         """Stream completion from the Anthropic API.
 
         Args:
             messages (list): List of messages.
             model (str): Model for completion.
+            max_tokens (int): Maximum number of tokens to generate.
             **kwargs: Additional keyword arguments.
 
         Yields:
@@ -30,6 +32,7 @@ class AnthropicClient:
             api_args = {
                 "model": model,
                 "messages": messages,
+                "max_tokens": max_tokens,
                 **kwargs
             }
             
@@ -38,11 +41,14 @@ class AnthropicClient:
                 api_args["system"] = system_message
 
             # Stream the completion
-            stream = self.client.messages.stream(**api_args)
-            
-            with stream as stream:
-                for text in stream.text_stream:
-                    yield text
+            with self.client.messages.stream(**api_args) as stream:
+                for event in stream:
+                    if isinstance(event, anthropic.types.MessageStartEvent):
+                        continue
+                    if isinstance(event, anthropic.types.ContentBlockStartEvent):
+                        continue
+                    if isinstance(event, anthropic.types.ContentBlockDeltaEvent):
+                        yield event.delta.text
         except Exception as e:
             if self.verbose:
                 import traceback
@@ -50,3 +56,24 @@ class AnthropicClient:
             else:
                 print(f"An error occurred streaming completion from Anthropic API: {e}")
             raise RuntimeError(f"An error occurred streaming completion from Anthropic API: {e}")
+        
+        
+# Test the AnthropicClient
+if __name__ == "__main__":
+    client = AnthropicClient(verbose=True)
+    messages = [
+        {
+            "role": "system",
+            "content": "Be precise and concise."
+        },
+        {
+            "role": "user",
+            "content": "What is the capital of France?"
+        }
+    ]
+    model = "claude-3-5-sonnet-20240620"
+
+    print("Response:")
+    for chunk in client.stream_completion(messages, model, max_tokens=100):
+        print(chunk, end='', flush=True)
+    print()  # Add a newline at the end
