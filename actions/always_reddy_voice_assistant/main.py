@@ -39,23 +39,67 @@ class AlwaysReddyVoiceAssistant(BaseAction):
             if not self.AR.stop_action and message:
                 print("\nTranscript:\n", message)
                 
-                if len(self.messages) > 0 and self.messages[0]["role"] == "system":
-                    self.messages[0]["content"] = prompt.get_system_prompt_message(config.ACTIVE_PROMPT)
+                if not self.messages:
+                    self.messages = [{"role": "system", "content": prompt.get_system_prompt_message(config.ACTIVE_PROMPT)}]
 
                 if self.last_message_was_cut_off:
                     message = "--> USER CUT THE ASSISTANTS LAST MESSAGE SHORT <--\n" + message
 
-                if self.AR.clipboard_text and self.AR.clipboard_text != self.AR.last_clipboard_text:
-                    message += f"\n\nTHE USER HAS GANTED YOU ACCESS TO THEIR CLIPABORD, THIS IS ITS CONTENT (ignore if user doesn't mention it):\n```{self.AR.clipboard_text}```"
+                new_message = {"role": "user", "content": message}
+
+                if hasattr(self.AR, 'clipboard_image') and self.AR.clipboard_image:
+                    new_message['content'] = [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/jpeg",  
+                                "data": self.AR.clipboard_image.replace('\n', '')
+                            }
+                        },
+                        {
+                            "type": "text",
+                            "text": message + "\n\nTHE USER HAS GRANTED YOU ACCESS TO AN IMAGE FROM THEIR CLIPBOARD. ANALYZE AND BRIEFLY DESCRIBE THE IMAGE IF RELEVANT TO THE CONVERSATION."
+                        }
+                    ]
+                    self.AR.clipboard_image = None
+                elif self.AR.clipboard_text and self.AR.clipboard_text != self.AR.last_clipboard_text:
+                    new_message['content'] += f"\n\nTHE USER HAS GRANTED YOU ACCESS TO THEIR CLIPBOARD, THIS IS ITS CONTENT (ignore if user doesn't mention it):\n```{self.AR.clipboard_text}```"
                     self.AR.last_clipboard_text = self.AR.clipboard_text
                     self.AR.clipboard_text = None
                 
                 if config.TIMESTAMP_MESSAGES:
-                    message += f"\n\nMESSAGE TIMESTAMP:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')} "
+                    timestamp = f"\n\nMESSAGE TIMESTAMP:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')} "
+                    if isinstance(new_message['content'], list):
+                        new_message['content'][-1]['text'] += timestamp
+                    else:
+                        new_message['content'] += timestamp
 
-                self.messages.append({"role": "user", "content": message})
+                self.messages.append(new_message)
 
                 if self.AR.stop_action:
+                    return
+
+                # if self.AR.verbose:
+                #     print("Messages being sent to API:")
+                #     for idx, msg in enumerate(self.messages):
+                #         print(f"Message {idx + 1}:")
+                #         print(f"  Role: {msg['role']}")
+                #         if isinstance(msg['content'], list):
+                #             print("  Content: [Image + Text]")
+                #             for item in msg['content']:
+                #                 if isinstance(item, dict) and 'type' in item:
+                #                     print(f"    Type: {item['type']}")
+                #                 elif isinstance(item, str):
+                #                     print(f"    Text: {item[:50]}...")
+                #         else:
+                #             print(f"  Content: {msg['content'][:50]}...")
+                #         if 'image' in msg:
+                #             print("  Image: [Present]")
+
+                # Ensure there's at least one message
+                if not self.messages:
+                    print("Error: No messages to send to the API.")
                     return
 
                 stream = self.AR.completion_client.get_completion_stream(self.messages, config.COMPLETION_MODEL, **config.COMPLETION_PARAMS)
@@ -84,11 +128,10 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                 print("\nResponse:\n", response)
 
         except Exception as e:
+            print(f"An error occurred in handle_default_assistant_response: {e}")
             if self.AR.verbose:
                 import traceback
                 traceback.print_exc()
-            else:
-                print(f"An error occurred while handling the response: {e}")
 
 
     def new_chat(self):

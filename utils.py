@@ -2,16 +2,30 @@ import re
 import clipboard
 import tiktoken
 import re
+import io
+from PIL import Image, ImageGrab
+import base64
 
 def read_clipboard():
-    """
-    Read the text from the clipboard.
+    """Read text or image from clipboard."""
+    try:
+        # Try to get text content
+        text = clipboard.paste()
+        if text:
+            return {'type': 'text', 'content': text}
+    except:
+        pass
 
-    Returns:
-    str: The text read from the clipboard.
-    """
-    text = clipboard.paste()
-    return text
+    try:
+        # Try to get image content using PIL
+        image = ImageGrab.grabclipboard()
+        if image:
+            processed_image = process_image(image)
+            return {'type': 'image', 'content': processed_image}
+    except:
+        pass
+
+    return {'type': 'unknown', 'content': None}
 
 def to_clipboard(text):
     """
@@ -96,7 +110,17 @@ def _count_tokens(messages, model="gpt-3.5-turbo"):
     msg_token_count = 0
     for message in messages:
         for key, value in message.items():
-            msg_token_count += len(enc.encode(value))  # Add tokens in set message
+            if isinstance(value, str):
+                msg_token_count += len(enc.encode(value))
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, dict):
+                        if item.get('type') == 'image':
+                            msg_token_count += 85  # Approximate token count for an image
+                        elif item.get('type') == 'text':
+                            msg_token_count += len(enc.encode(item.get('text', '')))
+                    elif isinstance(item, str):
+                        msg_token_count += len(enc.encode(item))
 
     return msg_token_count
 
@@ -142,3 +166,20 @@ def extract_code_if_only_code_block(markdown_text):
     else:
         # Return the original text if it doesn't match the pattern
         return markdown_text
+
+def process_image(image):
+    """Resize and encode image for LLM input."""
+    try:
+        max_size = (1024, 1024)
+        image.thumbnail(max_size, Image.LANCZOS)
+        
+        # Convert image to RGB if it's not already
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        buffered = io.BytesIO()
+        image.save(buffered, format="JPEG", quality=85, subsampling=0, progressive=True)
+        return base64.b64encode(buffered.getvalue()).decode('utf-8')
+    except Exception as e:
+        print(f"Error processing image: {e}")
+        return None

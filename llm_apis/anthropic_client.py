@@ -1,6 +1,8 @@
 from anthropic import Anthropic
 import anthropic.types
 import os
+import base64
+import httpx
 
 class AnthropicClient:
     def __init__(self, verbose=False):
@@ -31,7 +33,6 @@ class AnthropicClient:
             # Prepare the arguments for the Anthropic API call
             api_args = {
                 "model": model,
-                "messages": messages,
                 "max_tokens": max_tokens,
                 **kwargs
             }
@@ -40,27 +41,74 @@ class AnthropicClient:
             if system_message:
                 api_args["system"] = system_message
 
-            # Stream the completion
+            processed_messages = []
+            for message in messages:
+                if 'image' in message:
+                    processed_content = [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/png",
+                                "data": message['image'].replace('\n', '')  # Remove newlines
+                                #"data": message['image']
+                            }
+                        }
+                    ]
+                    
+                    # Add original text content if present
+                    if 'content' in message and message['content']:
+                        processed_content.append({
+                            "type": "text",
+                            "text": message['content']
+                        })
+                
+                    processed_messages.append({
+                        "role": message['role'],
+                        "content": processed_content
+                    })
+                else:
+                    processed_messages.append({
+                        "role": message['role'],
+                        "content": message['content']
+                    })
+
+            if not processed_messages:
+                raise ValueError(f"No messages to send to the API. Original messages: {messages}")
+
+            api_args["messages"] = processed_messages
+
+            # if self.verbose:
+            #     print("API arguments:")
+            #     print(f"Model: {api_args['model']}")
+            #     print(f"Max tokens: {api_args['max_tokens']}")
+            #     print(f"System message: {api_args.get('system', 'None')}")
+            #     print(f"Number of messages: {len(api_args['messages'])}")
+            #     for idx, msg in enumerate(api_args['messages']):
+            #         print(f"Message {idx + 1}:")
+            #         print(f"  Role: {msg['role']}")
+            #         if isinstance(msg['content'], list):
+            #             print("  Content: [Image + Text]")
+            #         else:
+            #             print(f"  Content: {msg['content'][:50]}...")
+
             with self.client.messages.stream(**api_args) as stream:
                 for event in stream:
-                    if isinstance(event, anthropic.types.MessageStartEvent):
-                        continue
-                    if isinstance(event, anthropic.types.ContentBlockStartEvent):
-                        continue
                     if isinstance(event, anthropic.types.ContentBlockDeltaEvent):
                         yield event.delta.text
         except Exception as e:
             if self.verbose:
                 import traceback
                 traceback.print_exc()
-            else:
-                print(f"An error occurred streaming completion from Anthropic API: {e}")
+            print(f"An error occurred streaming completion from Anthropic API: {e}")
             raise RuntimeError(f"An error occurred streaming completion from Anthropic API: {e}")
         
         
 # Test the AnthropicClient
 if __name__ == "__main__":
     client = AnthropicClient(verbose=True)
+    
+#test text only   
     messages = [
         {
             "role": "system",
@@ -77,3 +125,38 @@ if __name__ == "__main__":
     for chunk in client.stream_completion(messages, model, max_tokens=100):
         print(chunk, end='', flush=True)
     print()  # Add a newline at the end
+
+    
+#test multimodal
+    image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Camponotus_flavomarginatus_ant.jpg"
+    image_media_type = "image/jpeg"
+    image_data = base64.b64encode(httpx.get(image_url).content).decode("utf-8")
+ 
+    messages=[
+        {
+            "role": "system",
+            "content": "Respond only in rhyming couplets."
+        },
+        {
+            "role": "user",
+            "content": "Should I eat this?"
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": image_media_type,
+                        "data": image_data,
+                    },
+                }
+            ],
+        }
+    ]
+   
+    print("Response:")
+    for chunk in client.stream_completion(messages, model, max_tokens=100):
+        print(chunk, end='', flush=True)
+    print()  

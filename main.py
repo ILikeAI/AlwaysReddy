@@ -11,6 +11,9 @@ from config_loader import config
 import os
 import importlib
 from actions.base_action import BaseAction
+import io
+from PIL import Image
+import base64
 
 class AlwaysReddy:
     def __init__(self):
@@ -193,13 +196,26 @@ class AlwaysReddy:
         self.action_thread.start()
 
     def save_clipboard_text(self):
-        """Save the current clipboard text."""
+        """Save the current clipboard text or image."""
         try:
-            print("Saving clipboard text...")
-            self.clipboard_text = read_clipboard()
+            print("Saving clipboard content...")
+            clipboard_content = read_clipboard()
+            
+            if clipboard_content['type'] == 'text':
+                self.clipboard_text = clipboard_content['content']
+                print("Text content saved from clipboard.")
+            elif clipboard_content['type'] == 'image':
+                self.clipboard_image = clipboard_content['content']
+                print("Image content saved from clipboard.")
+            else:
+                print(f"Unsupported clipboard content type: {clipboard_content['type']}")
+                if self.verbose:
+                    print(f"Clipboard content: {clipboard_content['content']}")
         except Exception as e:
             if self.verbose:
-                print(f"Error saving clipboard text: {e}")
+                print(f"Error saving clipboard content: {e}")
+                import traceback
+                traceback.print_exc()
 
     def discover_and_initialize_actions(self):
         actions_dir = 'actions'
