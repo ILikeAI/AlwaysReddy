@@ -39,9 +39,8 @@ class AlwaysReddyVoiceAssistant(BaseAction):
             if not self.AR.stop_action and message:
                 print("\nTranscript:\n", message)
                 
-                if not self.messages:
-                    self.messages = [{"role": "system", "content": prompt.get_system_prompt_message(config.ACTIVE_PROMPT)}]
-
+                if len(self.messages) > 0 and self.messages[0]["role"] == "system":
+                    self.messages[0]["content"] = prompt.get_system_prompt_message(config.ACTIVE_PROMPT)
                 if self.last_message_was_cut_off:
                     message = "--> USER CUT THE ASSISTANTS LAST MESSAGE SHORT <--\n" + message
 
