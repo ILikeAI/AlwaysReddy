@@ -1,17 +1,34 @@
 import re
 import clipboard
 import tiktoken
-import re
+import io
+from PIL import Image, ImageGrab
+import base64
+import json
+import os
 
-def read_clipboard():
-    """
-    Read the text from the clipboard.
+def read_clipboard(model_supports_images=True):
+    """Read text or image from clipboard."""
+    # Determine clipboard content type
+    clipboard_content = clipboard.paste()
+    
+    if isinstance(clipboard_content, str):
+        # It's text
+        return {'type': 'text', 'content': clipboard_content}
 
-    Returns:
-    str: The text read from the clipboard.
-    """
-    text = clipboard.paste()
-    return text
+    # It might be an image
+    if model_supports_images:
+        try:
+            image = ImageGrab.grabclipboard()
+            if image:
+                processed_image = process_image(image)
+                if processed_image:
+                    return {'type': 'image', 'content': processed_image}
+        except Exception as e:
+            print(f"Error processing image from clipboard: {e}")
+    
+    print("No valid content found in clipboard.")
+    return None
 
 def to_clipboard(text):
     """
@@ -20,7 +37,6 @@ def to_clipboard(text):
     Args:
     text (str): The text to be copied to the clipboard.
     """
-
     clipboard.copy(extract_code_if_only_code_block(text))
 
 def sanitize_text(text):
@@ -79,7 +95,6 @@ def _trim_messages(messages, max_tokens):
         first_non_system_msg_index = next((i for i, message in enumerate(messages) if message.get('role') != 'system'), None)
 
     return messages
-           
 
 def _count_tokens(messages, model="gpt-3.5-turbo"):
     """
@@ -96,10 +111,19 @@ def _count_tokens(messages, model="gpt-3.5-turbo"):
     msg_token_count = 0
     for message in messages:
         for key, value in message.items():
-            msg_token_count += len(enc.encode(value))  # Add tokens in set message
+            if isinstance(value, str):
+                msg_token_count += len(enc.encode(value))
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, dict):
+                        if item.get('type') == 'image':
+                            msg_token_count += 85  # Approximate token count for an image
+                        elif item.get('type') == 'text':
+                            msg_token_count += len(enc.encode(item.get('text', '')))
+                    elif isinstance(item, str):
+                        msg_token_count += len(enc.encode(item))
 
     return msg_token_count
-
 
 def maintain_token_limit(messages, max_tokens):
     """
@@ -127,7 +151,6 @@ def extract_code_if_only_code_block(markdown_text):
         str: The extracted code if the markdown text only contains a single code block, 
              otherwise the original markdown text.
     """
-    
     stripped_text = markdown_text.strip()
     
     # Define the regex pattern
@@ -142,3 +165,42 @@ def extract_code_if_only_code_block(markdown_text):
     else:
         # Return the original text if it doesn't match the pattern
         return markdown_text
+
+def process_image(image):
+    """Resize and encode image for LLM input."""
+    try:
+        max_size = (1024, 1024)
+        image.thumbnail(max_size, Image.LANCZOS)
+        
+        # Convert image to RGB if it's not already
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        buffered = io.BytesIO()
+        image.save(buffered, format="JPEG", quality=85, subsampling=0, progressive=True)
+        return base64.b64encode(buffered.getvalue()).decode('utf-8')
+    except Exception as e:
+        print(f"Error processing image: {e}")
+        return None
+
+
+
+def does_model_support_images(model_name: str) -> bool:
+    try:
+        # Get the directory of the current file
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Construct the path to the JSON file
+        json_path = os.path.join(current_dir, 'image_supported_models.json')
+        
+        # Read the JSON file
+        with open(json_path, 'r') as file:
+            supported_models = json.load(file)
+        
+        # Check if the model name is in the supported_models list
+        result = model_name in supported_models['supported_models']
+        
+        return result
+    except Exception as e:
+        print(f"Error reading or parsing the supported models file: {e}")
+        return False
