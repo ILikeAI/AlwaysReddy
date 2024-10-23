@@ -6,14 +6,11 @@ from input_apis.input_handler import get_input_handler
 import tts_manager
 from completion_manager import CompletionManager
 from soundfx import play_sound_FX
-from utils import read_clipboard, does_model_support_images
+from utils import read_clipboard
 from config_loader import config
 import os
 import importlib
 from actions.base_action import BaseAction
-import io
-from PIL import Image
-import base64
 
 class AlwaysReddy:
     def __init__(self):
@@ -22,7 +19,6 @@ class AlwaysReddy:
         self.recorder = AudioRecorder(verbose=self.verbose)
         self.clipboard_text = None
         self.last_clipboard_text = None
-        self.clipboard_image = None 
         self.tts = tts_manager.TTSManager(parent_client=self, verbose=self.verbose)
         self.recording_timeout_timer = None
         self.transcription_manager = TranscriptionManager(verbose=self.verbose)
@@ -33,7 +29,6 @@ class AlwaysReddy:
         self.input_handler.double_tap_threshold = config.DOUBLE_TAP_THRESHOLD
         self.last_action_time = 0
         self.current_recording_action = None
-        self.model_supports_images = does_model_support_images(config.COMPLETION_MODEL)
 
     def _start_recording(self, action=None):
         """
@@ -198,30 +193,13 @@ class AlwaysReddy:
         self.action_thread.start()
 
     def save_clipboard_text(self):
-        """Save the current clipboard text or image."""
+        """Save the current clipboard text."""
         try:
-            print("Saving clipboard content...")
-            clipboard_content = read_clipboard(does_model_support_images(config.COMPLETION_MODEL))
-            
-            if clipboard_content is None:
-                print("No content found in clipboard.")
-                return
-
-            if clipboard_content.get('type') == 'text':
-                self.clipboard_text = clipboard_content['content']
-                print("Text content saved from clipboard.")
-            elif clipboard_content.get('type') == 'image':
-                self.clipboard_image = clipboard_content['content']
-                print("Image content saved from clipboard.")
-            else:
-                print(f"Unsupported clipboard content type: {clipboard_content.get('type')}")
-                if self.verbose:
-                    print(f"Clipboard content: {clipboard_content.get('content')}")
+            print("Saving clipboard text...")
+            self.clipboard_text = read_clipboard()
         except Exception as e:
             if self.verbose:
-                print(f"Error saving clipboard content: {e}")
-                import traceback
-                traceback.print_exc()
+                print(f"Error saving clipboard text: {e}")
 
     def discover_and_initialize_actions(self):
         actions_dir = 'actions'
