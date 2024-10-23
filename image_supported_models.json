@@ -16,6 +16,7 @@
     "bunny-llama-3-8b",
     "deepseek-vl",
     "idefics2-8b",
-    "llava-llama-3-8b"
+    "llava-llama-3-8b",
+    "meta-llama/llama-3.2-11b-vision-instruct:free" 
   ]
 }
