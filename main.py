@@ -11,9 +11,6 @@ from config_loader import config
 import os
 import importlib
 from actions.base_action import BaseAction
-import io
-from PIL import Image
-import base64
 
 class AlwaysReddy:
     def __init__(self):
