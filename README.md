@@ -44,12 +44,13 @@ Join the discord: https://discord.gg/su44drSBzb
 
 ### Features:
 You interact with AlwaysReddy entirely with hotkeys, it has the ability to:
-- Voice chat with you via TTS and STT
+- Voice chat with you via TTS and STT.
 - Read from your clipboard (with `Ctrl + Alt + R + R` rapidly double tapping R).
 - Write text to your clipboard on request.
 - Can be run 100% locally!!!
-- Supports Windows, Mac (experimental), linux (super duper experimental, see [Known Issues](#known-issues))
-- You can create your own hotkeys to fire custom code using AlwaysReddy's inbuilt systems like TTS and STT
+- Supports Windows, Mac (experimental), linux (super duper experimental, see [Known Issues](#known-issues)).
+- You can create your own hotkeys to fire custom code using AlwaysReddy's inbuilt systems like TTS and STT.
+- Image capabilities, it can detect images in your clipboard and pass them to supported LLMs.
 
 ### Are you a linux wizard?
 If you are and you're willing to help please consider look at the [Known Issues](#known-issues), I'm pretty stuck here!

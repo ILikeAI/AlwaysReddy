@@ -9,14 +9,7 @@ import os
 
 def read_clipboard(model_supports_images=True):
     """Read text or image from clipboard."""
-    # Determine clipboard content type
-    clipboard_content = clipboard.paste()
-    
-    if isinstance(clipboard_content, str):
-        # It's text
-        return {'type': 'text', 'content': clipboard_content}
-
-    # It might be an image
+    # Try to grab an image from the clipboard
     if model_supports_images:
         try:
             image = ImageGrab.grabclipboard()
@@ -26,6 +19,12 @@ def read_clipboard(model_supports_images=True):
                     return {'type': 'image', 'content': processed_image}
         except Exception as e:
             print(f"Error processing image from clipboard: {e}")
+
+    # If no image is found, try to get text
+    clipboard_content = clipboard.paste()
+    if isinstance(clipboard_content, str) and clipboard_content:
+        # It's text
+        return {'type': 'text', 'content': clipboard_content}
     
     print("No valid content found in clipboard.")
     return None
