@@ -46,7 +46,7 @@ class AudioRecorder:
             return device_info['index']
         except IOError:
             return None
-
+        
     def start_recording(self):
         """
         Start a new recording session.
@@ -54,33 +54,33 @@ class AudioRecorder:
         This method starts the recording thread and the audio stream.
         It uses the system default microphone as the input device.
         """
-        if not self.recording:
+        if self.recording:
+            print("Recording is already in progress.")
+            return
+        self.frames.clear()
+        self.start_time = time.time()
+        try:
+            mic_index = self.get_default_mic_index()
+            if mic_index is None:
+                raise IOError("No default microphone found.")
+            self.stream = self.audio.open(format=pyaudio.paInt16, channels=1,
+                                        rate=self.FS, input=True,
+                                        frames_per_buffer=512, start=False,
+                                        input_device_index=mic_index)
+            self.stream.start_stream()
+            self.record_thread = threading.Thread(target=self.record_audio, daemon=True)
+            self.record_thread.start()
             self.recording = True
-            self.frames.clear()
-            self.start_time = time.time()
-            
-            try:
-                mic_index = self.get_default_mic_index()
-                if mic_index is not None:
-                    self.stream = self.audio.open(format=pyaudio.paInt16, channels=1,
-                                                  rate=self.FS, input=True,
-                                                  frames_per_buffer=512, start=False,
-                                                  input_device_index=mic_index)
-                    self.stream.start_stream()
-                    self.record_thread = threading.Thread(target=self.record_audio, daemon=True)
-                    self.record_thread.start()
-                    if self.verbose:
-                        print("Recording started...")
-                else:
-                    self.recording = False
-                    print("No default microphone found.")
-            except Exception as e:
-                self.recording = False
-                if self.verbose:
-                    import traceback
-                    traceback.print_exc()
-                else:
-                    print(f"Failed to start recording: {e}")
+            if self.verbose:
+                print("Recording started...")
+        except Exception as e:
+            self.recording = False
+            self.record_thread = None  # Ensure the thread is reset
+            if self.verbose:
+                import traceback
+                traceback.print_exc()
+            else:
+                print(f"Failed to start recording: {e}")
 
     @property
     def duration(self):
@@ -124,7 +124,8 @@ class AudioRecorder:
         """
         if self.recording:
             self.recording = False
-            self.record_thread.join()
+            if self.record_thread is not None:
+                self.record_thread.join()
             if self.stream is not None:
                 self.stream.stop_stream()
                 self.stream.close()
