@@ -40,6 +40,18 @@ class CompletionManager:
             from llm_apis.tabbyapi_client import TabbyApiClient
             self.client = TabbyApiClient(verbose=self.verbose)
 
+        elif config.COMPLETIONS_API == "google":
+            from llm_apis.gemini_client import GeminiClient
+            self.client = GeminiClient(verbose=self.verbose)
+
+        elif config.COMPLETIONS_API == "portkey":
+            from llm_apis.portkey_client import PortkeyClient
+            self.client = PortkeyClient(verbose=self.verbose)
+        
+        elif config.COMPLETIONS_API == "portkey_prompt":
+            from llm_apis.portkey_prompt_client import PortkeyPromptClient
+            self.client = PortkeyPromptClient(verbose=self.verbose) 
+        
         elif config.COMPLETIONS_API == "lm_studio":
             from llm_apis.lm_studio_client import LM_StudioClient
             if hasattr(config, 'LM_STUDIO_API_BASE_URL'):

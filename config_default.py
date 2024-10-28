@@ -60,6 +60,11 @@ COMPLETION_MODEL = "gpt-4o"
 # COMPLETIONS_API = "groq"
 # COMPLETION_MODEL = "llama3-70b-8192"
 
+## GOOGLE GEMINI COMPLETIONS EXAMPLE ##
+# COMPLETIONS_API = "google"
+# COMPLETION_MODEL = "gemini-1.5-flash"
+
+
 ### COMPLETIONS API PARAMETERS ###
 # Allows you to override the default parameters for the completions API
 # The available parameters depend on which completions API you are using, so should be looked up in the API documentation online
