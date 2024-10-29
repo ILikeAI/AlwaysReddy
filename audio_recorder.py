@@ -54,33 +54,32 @@ class AudioRecorder:
         This method starts the recording thread and the audio stream.
         It uses the system default microphone as the input device.
         """
-        if self.recording:
-            print("Recording is already in progress.")
-            return
-        self.frames.clear()
-        self.start_time = time.time()
-        try:
-            mic_index = self.get_default_mic_index()
-            if mic_index is None:
-                raise IOError("No default microphone found.")
-            self.stream = self.audio.open(format=pyaudio.paInt16, channels=1,
-                                        rate=self.FS, input=True,
-                                        frames_per_buffer=512, start=False,
-                                        input_device_index=mic_index)
-            self.stream.start_stream()
-            self.record_thread = threading.Thread(target=self.record_audio, daemon=True)
-            self.record_thread.start()
-            self.recording = True
-            if self.verbose:
-                print("Recording started...")
-        except Exception as e:
-            self.recording = False
-            self.record_thread = None  # Ensure the thread is reset
-            if self.verbose:
-                import traceback
-                traceback.print_exc()
-            else:
-                print(f"Failed to start recording: {e}")
+        if not self.recording:
+            self.frames.clear()
+            self.start_time = time.time()
+            try:
+                mic_index = self.get_default_mic_index()
+                if mic_index is not None:
+                    self.stream = self.audio.open(format=pyaudio.paInt16, channels=1,
+                                                rate=self.FS, input=True,
+                                                frames_per_buffer=512, start=False,
+                                                input_device_index=mic_index)
+                    self.recording = True  # Set this before starting the thread
+                    self.record_thread = threading.Thread(target=self.record_audio, daemon=True)
+                    self.stream.start_stream()
+                    self.record_thread.start()
+                    if self.verbose:
+                        print("Recording started...")
+                else:
+                    print("No default microphone found.")
+            except Exception as e:
+                self.recording = False
+                self.record_thread = None  # Ensure the thread is reset
+                if self.verbose:
+                    import traceback
+                    traceback.print_exc()
+                else:
+                    print(f"Failed to start recording: {e}")
 
     @property
     def duration(self):
