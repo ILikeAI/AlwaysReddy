@@ -12,7 +12,7 @@ class ReadClipboard(BaseAction):
     def read_aloud_clipboard(self):
         """Read the content of the clipboard aloud."""
         clipboard_text = read_clipboard()
-        if clipboard_text:
-            self.AR.tts.run_tts(clipboard_text)
+        if clipboard_text and clipboard_text["type"] == "text":
+            self.AR.tts.run_tts(clipboard_text["content"])
         else:
             print("No text found in the clipboard.")
