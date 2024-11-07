@@ -1,35 +1,98 @@
 from input_apis.input_handler import InputHandler
 import keyboard
 import config
+import threading
+import time
 
 class KeyboardLibraryHandler(InputHandler):
+    """
+    Handles keyboard input using the keyboard library.
+    """
+
     def __init__(self, verbose=False):
+        """
+        Initialize the KeyboardLibraryHandler.
+
+        :param verbose: If True, enable detailed logging.
+        """
         super().__init__(verbose)
-        self.held_hotkeys = {}
+        self.running = False
+        self.listener_thread = None
 
-    def add_hotkey(self, hotkey, callback):
-        keyboard.add_hotkey(hotkey, callback, suppress=config.SUPPRESS_NATIVE_HOTKEYS)
+    def add_hotkey(self, hotkey, *, pressed=None, released=None, held=None, held_release=None, double_tap=None):
+        """
+        Adds a hotkey with specified callbacks for different events.
 
-    def add_held_hotkey(self, hotkey, callback):
-        self.held_hotkeys[hotkey] = False
-        keyboard.add_hotkey(hotkey, lambda: self.handle_held_callback(hotkey, callback, is_pressed=True), suppress=config.SUPPRESS_NATIVE_HOTKEYS)
-        keyboard.add_hotkey(hotkey, lambda: self.handle_held_callback(hotkey, callback, is_pressed=False), suppress=config.SUPPRESS_NATIVE_HOTKEYS, trigger_on_release=True)
+        :param hotkey: The hotkey combination (e.g., 'ctrl+alt+f').
+        :param pressed: Callback for when the hotkey is initially pressed.
+        :param released: Callback for when the hotkey is released (short press).
+        :param held: Callback for when the hotkey is held down.
+        :param held_release: Callback for when the hotkey is released after being held.
+        :param double_tap: Callback for when the hotkey is double-tapped.
+        """
+        super().add_hotkey(
+            hotkey,
+            pressed=pressed,
+            released=released,
+            held=held,
+            held_release=held_release,
+            double_tap=double_tap
+        )
 
-    def handle_held_callback(self, hotkey, callback, is_pressed):
-        if is_pressed != self.held_hotkeys[hotkey]:
-            callback(is_pressed=is_pressed)
-            self.held_hotkeys[hotkey] = is_pressed
+        # Register the hotkey press event
+        keyboard.add_hotkey(
+            hotkey,
+            lambda: self.process_key_event(hotkey, True),
+            suppress=config.SUPPRESS_NATIVE_HOTKEYS
+        )
 
-    def start(self):
+        # Register the hotkey release event
+        keys = hotkey.split('+')
+        release_key = keys[-1]
+        keyboard.on_release_key(
+            release_key,
+            lambda e: self.process_key_event(hotkey, False)
+        )
+
+    def start(self, blocking=False):
+        """
+        Starts the keyboard listener.
+
+        :param blocking: If True, block execution until stopped.
+                         If False, run the listener in a background thread.
+        """
+        self.running = True
+        if blocking:
+            try:
+                while self.running:
+                    time.sleep(0.1)
+            except KeyboardInterrupt:
+                print("Keyboard interrupt received. Stopping...")
+            finally:
+                self.stop()
+        else:
+            self.listener_thread = threading.Thread(target=self._run_listener, daemon=True)
+            self.listener_thread.start()
+
+    def _run_listener(self):
+        """
+        Internal method to keep the listener thread active.
+        """
         try:
-            while True:
-                keyboard.wait()
-        except KeyboardInterrupt:
-            if self.verbose:
-                print("Recorder stopped by user.")
+            while self.running:
+                time.sleep(0.1)  # Keeps the thread alive
         except Exception as e:
             if self.verbose:
-                import traceback
-                traceback.print_exc()
-            else:
-                print(f"An error occurred: {e}")
+                print(f"An error occurred in KeyboardLibraryHandler listener thread: {e}")
+            self.stop()
+
+    def stop(self):
+        """
+        Stops the keyboard listener and cleans up.
+        """
+        if not self.running:
+            return
+        self.running = False
+        keyboard.unhook_all_hotkeys()
+        if self.listener_thread and self.listener_thread.is_alive():
+            self.listener_thread.join(timeout=0.5)

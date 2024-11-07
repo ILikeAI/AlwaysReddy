@@ -1,5 +1,6 @@
 import time
 import threading
+from config_loader import config
 
 class HotkeyState:
     """
@@ -136,8 +137,12 @@ def get_input_handler(verbose=False):
     """
     import platform
     if platform.system() == "Windows":
-        from input_apis.autohotkey_handler import AutohotkeyHandler
-        return AutohotkeyHandler(verbose)
+        if config.INPUT_HANDLER == "autohotkey":
+            from input_apis.autohotkey_handler import AutohotkeyHandler
+            return AutohotkeyHandler(verbose)
+        else:
+            from input_apis.keyboard_library_handler import KeyboardLibraryHandler
+            return KeyboardLibraryHandler(verbose)
     else:
         print("Using PynputHandler")
         from input_apis.pynput_handler import PynputHandler
