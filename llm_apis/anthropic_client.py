@@ -3,6 +3,16 @@ import anthropic.types
 import os
 import base64
 import httpx
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
+MAX_RETRIES = 5
+
+class AnthropicRateLimitError(Exception):
+    """Exception raised for rate limit errors."""
+    def __init__(self, message, retry_after):
+        self.message = message
+        self.retry_after = retry_after
+        super().__init__(self.message)
 
 class AnthropicClient:
     def __init__(self, verbose=False):
@@ -10,8 +20,23 @@ class AnthropicClient:
         self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
         self.verbose = verbose
 
+    @retry(
+        stop=stop_after_attempt(MAX_RETRIES),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type(AnthropicRateLimitError)
+    )
+    def _make_api_call(self, api_args):
+        """Make an API call with retry mechanism."""
+        try:
+            return self.client.messages.create(**api_args)
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 429:
+                retry_after = int(e.response.headers.get('retry-after', 60))
+                raise AnthropicRateLimitError(f"Rate limit exceeded. {str(e)}", retry_after)
+            raise
+
     def stream_completion(self, messages, model, **kwargs):
-        """Stream completion from the Anthropic API.
+        """Stream completion from the Anthropic API with retry logic.
 
         Args:
             messages (list): List of messages.
@@ -28,75 +53,75 @@ class AnthropicClient:
         # Filter out system messages from the messages list
         messages = [message for message in messages if message['role'] != 'system']
 
-        try:
-            # Prepare the arguments for the Anthropic API call
-            api_args = {
-                "model": model,
-                "max_tokens": kwargs.get('max_tokens', 1000),  # Default to 1000 if not provided
-                **kwargs
-            }
-            
-            # Only include the system parameter if a system message is present
-            if system_message:
-                api_args["system"] = system_message
+        # Prepare the arguments for the Anthropic API call
+        api_args = {
+            "model": model,
+            "max_tokens": kwargs.get('max_tokens', 1000),  # Default to 1000 if not provided
+            "stream": True,
+            **kwargs
+        }
+        
+        # Only include the system parameter if a system message is present
+        if system_message:
+            api_args["system"] = system_message
 
-            processed_messages = []
-            for message in messages:
-                if 'image' in message:
-                    processed_content = [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": "image/jpeg",
-                                "data": message['image'].replace('\n', '')  # Remove newlines
-                            }
+        processed_messages = []
+        for message in messages:
+            if 'image' in message:
+                processed_content = [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": "image/jpeg",
+                            "data": message['image'].replace('\n', '')  # Remove newlines
                         }
-                    ]
-                    
-                    # Add original text content if present
-                    if 'content' in message and message['content']:
-                        processed_content.append({
-                            "type": "text",
-                            "text": message['content']
-                        })
+                    }
+                ]
                 
-                    processed_messages.append({
-                        "role": message['role'],
-                        "content": processed_content
+                # Add original text content if present
+                if 'content' in message and message['content']:
+                    processed_content.append({
+                        "type": "text",
+                        "text": message['content']
                     })
-                else:
-                    processed_messages.append({
-                        "role": message['role'],
-                        "content": message['content']
-                    })
+            
+                processed_messages.append({
+                    "role": message['role'],
+                    "content": processed_content
+                })
+            else:
+                processed_messages.append({
+                    "role": message['role'],
+                    "content": message['content']
+                })
 
-            if not processed_messages:
-                raise ValueError(f"No messages to send to the API. Original messages: {messages}")
+        if not processed_messages:
+            raise ValueError(f"No messages to send to the API. Original messages: {messages}")
 
-            api_args["messages"] = processed_messages
+        api_args["messages"] = processed_messages
 
-            with self.client.messages.stream(**api_args) as stream:
-                for event in stream:
-                    if isinstance(event, anthropic.types.MessageStartEvent):
-                        continue
-                    if isinstance(event, anthropic.types.ContentBlockStartEvent):
-                        continue
-                    if isinstance(event, anthropic.types.ContentBlockDeltaEvent):
-                        yield event.delta.text
+        try:
+            stream = self._make_api_call(api_args)
+            for message in stream:
+                if message.type == "content_block_delta":
+                    yield message.delta.text
+        except AnthropicRateLimitError as e:
+            if self.verbose:
+                print(f"Rate limit error: {e.message}. Retry after {e.retry_after} seconds.")
+            raise
         except Exception as e:
             if self.verbose:
                 import traceback
                 traceback.print_exc()
             print(f"An error occurred streaming completion from Anthropic API: {e}")
             raise RuntimeError(f"An error occurred streaming completion from Anthropic API: {e}")
-        
-        
+
 # Test the AnthropicClient
 if __name__ == "__main__":
     client = AnthropicClient(verbose=True)
     
-#test text only   
+    #test text only   
     messages = [
         {
             "role": "system",
@@ -107,15 +132,19 @@ if __name__ == "__main__":
             "content": "What is the capital of France?"
         }
     ]
-    model = "claude-3-5-sonnet-20240620"
+    model = "claude-3-sonnet-20240229"
 
-    print("Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk, end='', flush=True)
-    print()  # Add a newline at the end
+    print("Text-only Response:")
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()  # Add a newline at the end
+    except AnthropicRateLimitError as e:
+        print(f"\nRate limit error encountered: {e.message}. Retry after {e.retry_after} seconds.")
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
 
-    
-#test multimodal
+    #test multimodal
     image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Camponotus_flavomarginatus_ant.jpg"
     image_media_type = "image/jpeg"
     image_data = base64.b64encode(httpx.get(image_url).content).decode("utf-8")
@@ -144,8 +173,12 @@ if __name__ == "__main__":
         }
     ]
    
-    print("Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk, end='', flush=True)
-    print()  
-
+    print("\nMultimodal Response:")
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()
+    except AnthropicRateLimitError as e:
+        print(f"\nRate limit error encountered: {e.message}. Retry after {e.retry_after} seconds.")
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
