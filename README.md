@@ -152,6 +152,9 @@ OR run `python3 main.py` from the command prompt or terminal.
 If you have issues try deleting the venv folder and starting again.
 Set VERBOSE = True in the config to get more detailed logs and error traces
 
+**Hotkey issues** 
+If you are on Windows and having issues where the AlwaysReddy hotkeys are not being detected while you are running games or full screen applications, try setting `WINDOWS_INPUT_HANDLER=autohotkey` in the `config.py`.
+
 ## How to:
 ### How to use AlwaysReddy:
 There are currently only main 2 actions:

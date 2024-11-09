@@ -137,7 +137,7 @@ def get_input_handler(verbose=False):
     """
     import platform
     if platform.system() == "Windows":
-        if config.INPUT_HANDLER == "autohotkey":
+        if config.WINDOWS_INPUT_HANDLER == "autohotkey":
             from input_apis.autohotkey_handler import AutohotkeyHandler
             return AutohotkeyHandler(verbose)
         else:
