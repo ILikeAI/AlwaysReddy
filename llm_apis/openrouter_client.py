@@ -1,17 +1,68 @@
-import requests
+from openai import OpenAI
+from openai import APIError
 import os
-import json
 import base64
 import httpx
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
+class OpenRouterRateLimitError(Exception):
+    """Exception raised for rate limit errors."""
+    def __init__(self, message, retry_after):
+        """
+        Initialize the OpenRouterRateLimitError with a message and retry interval.
+
+        Args:
+            message (str): The error message to display.
+            retry_after (int): The number of seconds to wait before retrying.
+        """
+        self.message = message
+        self.retry_after = retry_after
+        super().__init__(self.message)
 
 class OpenRouterClient:
     """Client for interacting with the OpenRouter API."""
 
     def __init__(self, verbose=False):
         """Initialize the OpenRouter client with the API key."""
-        self.api_key = os.getenv('OPENROUTER_API_KEY')
-        self.base_url = "https://openrouter.ai/api/v1/chat/completions"
+        base_url = "https://openrouter.ai/api/v1"
+        api_key = os.getenv("OPENROUTER_API_KEY")  # Make sure to set this environment variable
+        
+        if not api_key:
+            raise ValueError("OPENROUTER_API_KEY environment variable is not set")
+            
+        self.client = OpenAI(
+            base_url=base_url,
+            api_key=api_key,
+            default_headers={
+                "HTTP-Referer": "https://your-site-url.com",  # Required for OpenRouter
+                "X-Title": "Your App Name"                    # Required for OpenRouter
+            }
+        )
         self.verbose = verbose
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type(OpenRouterRateLimitError)
+    )
+    def _make_api_call(self, model, processed_messages, **kwargs):
+        """Make an API call with retry mechanism."""
+        try:
+            return self.client.chat.completions.create(
+                model=model,
+                messages=processed_messages,
+                stream=True,
+                **kwargs
+            )
+        except APIError as e:
+            error_dict = e.response.json() if hasattr(e, 'response') else {}
+            error_type = error_dict.get('error', {}).get('type')
+            error_message = error_dict.get('error', {}).get('message', str(e))
+            
+            if error_type == 'model_rate_limit':
+                retry_after = error_dict.get('error', {}).get('retry_after', 60)
+                raise OpenRouterRateLimitError(f"Rate limit exceeded for model {model}. {error_message}", retry_after)
+            raise
 
     def stream_completion(self, messages, model, **kwargs):
         """Stream completion from the OpenRouter API.
@@ -49,32 +100,18 @@ class OpenRouterClient:
                 "content": content if content else message.get('content')
             })
 
-        payload = {
-            "model": model,
-            "messages": processed_messages,
-            **kwargs
-        }
-        headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-            "Authorization": f"Bearer {self.api_key}",
-            "HTTP-Referer": "https://your-site-url.com",  # Optional, for including your app on openrouter.ai rankings.
-            "X-Title": "Your App Name",  # Optional. Shows in rankings on openrouter.ai.
-        }
-
         try:
-            response = requests.post(self.base_url, json=payload, headers=headers, stream=False)
-            response.raise_for_status()
-            data = response.json()
-            message_content = data['choices'][0]['message']['content']
-            yield message_content
+            stream = self._make_api_call(model, processed_messages, **kwargs)
+            for chunk in stream:
+                content = chunk.choices[0].delta.content
+                if content is not None:
+                    yield content
+        except OpenRouterRateLimitError as e:
+            print(f"Rate limit error: {e.message}. Retry after {e.retry_after} seconds.")
+            raise
         except Exception as e:
-            if self.verbose:
-                import traceback
-                traceback.print_exc()
-            else:
-                print(f"An error occurred streaming completion from OpenRouter API: {e}")
-            raise RuntimeError(f"An error occurred streaming completion from OpenRouter API: {e}")
+            print(f"Unexpected error: {str(e)}")
+            raise RuntimeError(f"An unexpected error occurred: {e}") from None
 
 # Test the OpenRouterClient
 if __name__ == "__main__":
@@ -94,9 +131,14 @@ if __name__ == "__main__":
     model = "meta-llama/llama-3.2-11b-vision-instruct:free"  # or another vision-capable model
 
     print("\nText-only Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk, end='', flush=True)
-    print()  # Add a newline at the end
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()  # Add a newline at the end
+    except OpenRouterRateLimitError as e:
+        print(f"\nRate limit error encountered: {e.message}. Retry after {e.retry_after} seconds.")
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
 
     
     #test multimodal
@@ -123,6 +165,11 @@ if __name__ == "__main__":
     ]
    
     print("\nMultimodal Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk, end='', flush=True)
-    print()
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()
+    except OpenRouterRateLimitError as e:
+        print(f"\nRate limit error encountered: {e.message}. Retry after {e.retry_after} seconds.")
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
