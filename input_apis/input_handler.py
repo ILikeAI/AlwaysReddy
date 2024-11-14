@@ -1,6 +1,7 @@
 import time
 import threading
 from config_loader import config
+from typing import Callable, Optional, Dict
 
 class HotkeyState:
     """
@@ -25,10 +26,19 @@ class InputHandler:
         self.double_tap_threshold = 0.3  # seconds
         self.running = False
 
-    def add_hotkey(self, hotkey, *, pressed=None, released=None, held=None, held_release=None, double_tap=None):
+    def add_hotkey(
+        self,
+        hotkey: str,
+        *,
+        pressed: Optional[Callable] = None,
+        released: Optional[Callable] = None,
+        held: Optional[Callable] = None,
+        held_release: Optional[Callable] = None,
+        double_tap: Optional[Callable] = None
+    ):
         """
         Adds a hotkey with specified callbacks for different events.
-        
+
         :param hotkey: The hotkey combination (e.g., 'ctrl+a')
         :param pressed: Callback for when the hotkey is initially pressed
         :param released: Callback for when the hotkey is released (short press)
@@ -36,14 +46,37 @@ class InputHandler:
         :param held_release: Callback for when the hotkey is released after being held
         :param double_tap: Callback for when the hotkey is double-tapped
         """
-        self.hotkeys[hotkey] = {
+        if hotkey not in self.hotkeys:
+            # Initialize the hotkey entry with all events set to None
+            self.hotkeys[hotkey] = {
+                'pressed': None,
+                'released': None,
+                'held': None,
+                'held_release': None,
+                'double_tap': None
+            }
+            self.hotkey_states[hotkey] = HotkeyState()
+            if self.verbose:
+                print(f"Registering new hotkey: {hotkey}")
+
+        # Define a mapping of event names to their corresponding callbacks
+        event_callbacks = {
             'pressed': pressed,
             'released': released,
             'held': held,
             'held_release': held_release,
             'double_tap': double_tap
         }
-        self.hotkey_states[hotkey] = HotkeyState()
+
+        for event, callback in event_callbacks.items():
+            if callback is not None:
+                if self.hotkeys[hotkey][event] is not None:
+                    raise ValueError(
+                        f"Conflict: {callback.__name__} Hotkey '{hotkey}' already has a '{event}' callback assigned by another action"
+                    )
+                self.hotkeys[hotkey][event] = callback
+                if self.verbose:
+                    print(f"Assigned '{event}' callback to hotkey '{hotkey}'.")
 
     def handle_event(self, hotkey, event_type):
         """
@@ -107,7 +140,7 @@ class InputHandler:
         Starts the input handler.
         
         :param blocking: If True, the method will block until stop() is called.
-                         If False, the method will return immediately and run in the background.
+                        If False, the method will return immediately and run in the background.
         """
         self.running = True
         if blocking:

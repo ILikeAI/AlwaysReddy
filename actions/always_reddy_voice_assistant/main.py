@@ -1,20 +1,22 @@
 import time
 from config_loader import config
 from actions.base_action import BaseAction
-from utils import to_clipboard
+from utils import to_clipboard, handle_clipboard_image, handle_clipboard_text, add_timestamp_to_message
 import prompt
 
 class AlwaysReddyVoiceAssistant(BaseAction):
     """Action for handling voice assistant functionality."""
     def setup(self):
         self.last_message_was_cut_off = False
-        
+
         if config.RECORD_HOTKEY:
-            self.AR.add_action_hotkey(config.RECORD_HOTKEY, 
-                                pressed=self.handle_default_assistant_response,
-                                held_release=self.handle_default_assistant_response,
-                                double_tap=self.AR.save_clipboard_text)
-            
+            self.AR.add_action_hotkey(
+                config.RECORD_HOTKEY, 
+                pressed=self.handle_default_assistant_response,
+                held_release=self.handle_default_assistant_response,
+                double_tap=self.AR.save_clipboard_text
+            )
+
             print(f"'{config.RECORD_HOTKEY}': Start/stop talking to voice assistant (press to toggle on and off, or hold and release)")
             if "+" in config.RECORD_HOTKEY:
                 hotkey_start, hotkey_end = config.RECORD_HOTKEY.rsplit("+", 1)
@@ -38,41 +40,25 @@ class AlwaysReddyVoiceAssistant(BaseAction):
 
             if not self.AR.stop_action and message:
                 print("\nTranscript:\n", message)
-                
+
                 if len(self.messages) > 0 and self.messages[0]["role"] == "system":
                     self.messages[0]["content"] = prompt.get_system_prompt_message(config.ACTIVE_PROMPT)
                 if self.last_message_was_cut_off:
-                    message = "--> USER CUT THE ASSISTANTS LAST MESSAGE SHORT <--\n" + message
+                    message = "--> USER CUT THE ASSISTANT'S LAST MESSAGE SHORT <--\n" + message
 
                 new_message = {"role": "user", "content": message}
 
-                if hasattr(self.AR, 'clipboard_image') and self.AR.clipboard_image:
-                    new_message['content'] = [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": "image/jpeg",  
-                                "data": self.AR.clipboard_image.replace('\n', '')
-                            }
-                        },
-                        {
-                            "type": "text",
-                            "text": message + "\n\nTHE USER HAS GRANTED YOU ACCESS TO AN IMAGE FROM THEIR CLIPBOARD. ANALYZE AND BRIEFLY DESCRIBE THE IMAGE IF RELEVANT TO THE CONVERSATION."
-                        }
-                    ]
-                    self.AR.clipboard_image = None
-                elif self.AR.clipboard_text and self.AR.clipboard_text != self.AR.last_clipboard_text:
-                    new_message['content'] += f"\n\nTHE USER HAS GRANTED YOU ACCESS TO THEIR CLIPBOARD, THIS IS ITS CONTENT (ignore if user doesn't mention it):\n```{self.AR.clipboard_text}```"
-                    self.AR.last_clipboard_text = self.AR.clipboard_text
-                    self.AR.clipboard_text = None
-                
+                # Handle clipboard image
+                clipboard_image_content = handle_clipboard_image(self.AR, message)
+                if clipboard_image_content:
+                    new_message['content'] = clipboard_image_content
+                else:
+                    # Handle clipboard text
+                    new_message['content'] = handle_clipboard_text(self.AR, new_message['content'])
+
+                # Add timestamp if configured
                 if config.TIMESTAMP_MESSAGES:
-                    timestamp = f"\n\nMESSAGE TIMESTAMP:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')} "
-                    if isinstance(new_message['content'], list):
-                        new_message['content'][-1]['text'] += timestamp
-                    else:
-                        new_message['content'] += timestamp
+                    new_message['content'] = add_timestamp_to_message(new_message['content'])
 
                 self.messages.append(new_message)
 
@@ -84,10 +70,16 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                     print("Error: No messages to send to the API.")
                     return
 
-                stream = self.AR.completion_client.get_completion_stream(self.messages, config.COMPLETION_MODEL, **config.COMPLETION_PARAMS)
-                response = self.AR.completion_client.process_text_stream(stream,
-                                                                         marker_tuples=[(config.CLIPBOARD_TEXT_START_SEQ, config.CLIPBOARD_TEXT_END_SEQ, to_clipboard)],
-                                                                          sentence_callback=self.AR.tts.run_tts)
+                stream = self.AR.completion_client.get_completion_stream(
+                    self.messages, 
+                    config.COMPLETION_MODEL, 
+                    **config.COMPLETION_PARAMS
+                )
+                response = self.AR.completion_client.process_text_stream(
+                    stream,
+                    marker_tuples=[(config.CLIPBOARD_TEXT_START_SEQ, config.CLIPBOARD_TEXT_END_SEQ, to_clipboard)],
+                    sentence_callback=self.AR.tts.run_tts
+                )
 
                 while self.AR.tts.running_tts:
                     time.sleep(0.001)
