@@ -6,6 +6,7 @@ from PIL import Image, ImageGrab
 import base64
 import json
 import os
+import time
 
 def read_clipboard(model_supports_images=True):
     """Read text or image from clipboard."""
@@ -182,8 +183,6 @@ def process_image(image):
         print(f"Error processing image: {e}")
         return None
 
-
-
 def does_model_support_images(model_name: str) -> bool:
     try:
         # Get the directory of the current file
@@ -203,3 +202,41 @@ def does_model_support_images(model_name: str) -> bool:
     except Exception as e:
         print(f"Error reading or parsing the supported models file: {e}")
         return False
+
+def handle_clipboard_image(AR, message_content):
+    """Handle clipboard image and return content if image exists."""
+    if hasattr(AR, 'clipboard_image') and AR.clipboard_image:
+        content = [
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/jpeg",  
+                    "data": AR.clipboard_image.replace('\n', '')
+                }
+            },
+            {
+                "type": "text",
+                "text": message_content + "\n\nTHE USER HAS GRANTED YOU ACCESS TO AN IMAGE FROM THEIR CLIPBOARD. ANALYZE AND BRIEFLY DESCRIBE THE IMAGE IF RELEVANT TO THE CONVERSATION."
+            }
+        ]
+        AR.clipboard_image = None
+        return content
+    return None
+
+def handle_clipboard_text(AR, message_content):
+    """Append clipboard text to the message content if new clipboard text exists."""
+    if AR.clipboard_text and AR.clipboard_text != AR.last_clipboard_text:
+        message_content += f"\n\nTHE USER HAS GRANTED YOU ACCESS TO THEIR CLIPBOARD, THIS IS ITS CONTENT (ignore if user doesn't mention it):\n```{AR.clipboard_text}```"
+        AR.last_clipboard_text = AR.clipboard_text
+        AR.clipboard_text = None
+    return message_content
+
+def add_timestamp_to_message(message_content):
+    """Add a timestamp to the message content."""
+    timestamp = f"\n\nMESSAGE TIMESTAMP:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')} "
+    if isinstance(message_content, list):
+        message_content[-1]['text'] += timestamp
+    else:
+        message_content += timestamp
+    return message_content

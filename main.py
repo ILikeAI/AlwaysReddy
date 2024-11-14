@@ -84,14 +84,6 @@ class AlwaysReddy:
             if self.verbose:
                 print("Recording cancelled.")
 
-    def _cancel_tts(self):
-        """Cancel the current TTS."""
-        if self.verbose:
-            print("Stopping text-to-speech...")
-        self.tts.stop()
-        if self.verbose:
-            print("Text-to-speech cancelled.")
-
     def cancel_all(self, silent=False):
         """
         Cancel the current recording and TTS.
@@ -112,7 +104,7 @@ class AlwaysReddy:
             cancelled_something = True
 
         if self.tts.running_tts:
-            self._cancel_tts()
+            self.tts.stop()
             cancelled_something = True
 
         if cancelled_something and not silent:
