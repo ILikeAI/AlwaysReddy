@@ -26,7 +26,7 @@ class TTSManager:
         self.verbose = verbose
         self.stop_playback = False
         self.playback_stopped = threading.Event()
-        self.sentence_pattern = re.compile(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)(?=\s|$)|\n')
+        self.sentence_pattern = r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)(?=\s|$)|\n'
 
         ## NOTE: For now all TTS services need to return wav files.
         if self.service == "openai":
@@ -56,7 +56,7 @@ class TTSManager:
         """
         Split the text into sentences and remove empty ones.
         """
-        sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)(?=\s|$)|\n', text)
+        sentences = re.split(self.sentence_pattern, text)
         # Ensure sentences end with punctuation and remove empty sentences
         sentences = [s + '.' if not s.strip().endswith(('.', '!', '?')) else s for s in sentences if s.strip()]
 
