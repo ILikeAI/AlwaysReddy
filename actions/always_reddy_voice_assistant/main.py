@@ -28,7 +28,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
             self.AR.add_action_hotkey(config.NEW_CHAT_HOTKEY, pressed=self.new_chat)
             print(f"'{config.NEW_CHAT_HOTKEY}': New chat for voice assistant")
 
-        self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
+        self.messages = prompt.build_initial_messages_from_prompt_name(config.ACTIVE_PROMPT)
 
     def handle_default_assistant_response(self):
         """Handle the response from the transcription and generate a completion."""
@@ -109,7 +109,7 @@ class AlwaysReddyVoiceAssistant(BaseAction):
 
     def new_chat(self):
         """Clear the message history and start a new chat session."""
-        self.messages = prompt.build_initial_messages(config.ACTIVE_PROMPT)
+        self.messages = prompt.build_initial_messages_from_prompt_name(config.ACTIVE_PROMPT)
         self.last_message_was_cut_off = False
         self.AR.last_clipboard_text = None
         print("New chat session started.")
