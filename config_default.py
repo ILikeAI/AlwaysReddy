@@ -131,9 +131,3 @@ END_SOUND_VOLUME = 0.05
 CANCEL_SOUND_VOLUME = 0.09
 MAX_RECORDING_DURATION= 600 # If you record for more than 10 minutes, the recording will stop automatically
 
-### WEATHER,NEWS AND SEARCH SETTINGS ###
-DEFAULT_UNITS = 'metric' #metric or imperial (or standard if you want your weather in Kelvin)
-DEFAULT_LOCATION = ''
-#Search and News providers can be Bing, Brave, Exa or Tavily, and don't need to be the same
-SEARCH_PROVIDER = ''
-NEWS_PROVIDER = ''
