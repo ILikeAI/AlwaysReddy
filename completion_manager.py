@@ -132,7 +132,9 @@ class CompletionManager:
         
     def process_text_stream(self, text_stream, sentence_callback=None, marker_tuples=None):
         """
-        This takes in a stream of text, it will search for text between the markers and pass it to the designated callback functions.
+        This takes in a stream of text, it will search for text between the markers and pass it to the designated callback functions if provided.
+        Text between markers will be removed from the stream before being passed to the sentence_callback function.
+        
 
         Args:
             text_stream: An iterable providing chunks of text.
