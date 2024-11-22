@@ -20,7 +20,7 @@ The code base is a mess right now, I am in the middle of transforming AlwaysRedd
 - [Supported TTS systems](#supported-tts-systems)
 
 ## Meet AlwaysReddy 
-AlwaysReddy is a simple LLM assistant with the perfect amount of UI... None!
+AlwaysReddy is a simple AI voice assistant with the perfect amount of UI... None!
 You interact with it entirely using hotkeys, it can easily read from or write to your clipboard.
 It's like having voice ChatGPT running on your computer at all times, you just press a hotkey and it will listen to any questions you have, no need to swap windows or tabs, and if you want to give it context of some extra text, just copy the text and double tap the hotkey! 
 
