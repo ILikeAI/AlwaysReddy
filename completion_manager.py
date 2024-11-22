@@ -154,8 +154,9 @@ class CompletionManager:
             for i, (start, end, callback) in enumerate(active_markers):
                 if end in buffer:
                     marked_text, _, rest = buffer.partition(end)
-                    if marked_text.strip() and callback:
-                        callback(marked_text)
+                    if marked_text.strip():
+                        if callback:
+                            callback(marked_text)
                         buffer = rest
                         return i
             return -1
