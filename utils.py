@@ -7,6 +7,8 @@ import base64
 import json
 import os
 import time
+import requests
+from ip2geotools.databases.noncommercial import DbIpCity
 
 def read_clipboard(model_supports_images=True):
     """Read text or image from clipboard."""
@@ -25,10 +27,24 @@ def read_clipboard(model_supports_images=True):
     clipboard_content = clipboard.paste()
     if isinstance(clipboard_content, str) and clipboard_content:
         # It's text
+        url_pattern = r'^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$'
+        if re.search(url_pattern, clipboard_content):
+            clipboard_content = fetch_url_text_contents(clipboard_content) or clipboard_content
         return {'type': 'text', 'content': clipboard_content}
     
     print("No valid content found in clipboard.")
     return None
+
+def fetch_url_text_contents(url):
+    try:
+        response = requests.get('https://r.jina.ai/' + url)
+        response.raise_for_status()
+        print(response.text[:200])
+        return response.text
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching URL: {e}")
+        return None
+
 
 def to_clipboard(text):
     """
@@ -67,7 +83,7 @@ def sanitize_text(text):
 
 def _trim_messages(messages, max_tokens):
     """
-    Trim the messages to fit within the maximum token limit.
+    Trim the messages to fit within the maximum token limit while preserving the last message.
 
     Args:
     messages (list): A list of messages to be trimmed.
@@ -76,25 +92,39 @@ def _trim_messages(messages, max_tokens):
     Returns:
     list: The trimmed list of messages.
     """
-    msg_token_count = 0
+    if len(messages) <= 1:
+        return messages
 
+    # Separate the last message from the rest
+    messages_without_last = messages[:-1]
+    last_message = messages[-1]
+
+    # Keep trimming messages until we're under the token limit or only system messages remain
     while True:
-        msg_token_count = _count_tokens(messages)
-        if msg_token_count <= max_tokens:
+        # Calculate total tokens including the last message
+        total_tokens = _count_tokens(messages_without_last + [last_message])
+        if total_tokens <= max_tokens:
             break
-        # Remove the oldest non-system message
-        for i in range(len(messages)):
-            if messages[i].get('role') != 'system':
-                del messages[i]
+
+        # Find the first non-system message to remove
+        for i in range(len(messages_without_last)):
+            if messages_without_last[i].get('role') != 'system':
+                del messages_without_last[i]
                 break
+        else:  # No more non-system messages to remove
+            break
 
     # Ensure the first non-system message is from the user
-    first_non_system_msg_index = next((i for i, message in enumerate(messages) if message.get('role') != 'system'), None)
-    while first_non_system_msg_index is not None and messages[first_non_system_msg_index].get('role') == 'assistant':
-        del messages[first_non_system_msg_index]
-        first_non_system_msg_index = next((i for i, message in enumerate(messages) if message.get('role') != 'system'), None)
+    first_non_system_msg_index = next((i for i, message in enumerate(messages_without_last) 
+                                     if message.get('role') != 'system'), None)
+    while (first_non_system_msg_index is not None and 
+           messages_without_last[first_non_system_msg_index].get('role') == 'assistant'):
+        del messages_without_last[first_non_system_msg_index]
+        first_non_system_msg_index = next((i for i, message in enumerate(messages_without_last) 
+                                         if message.get('role') != 'system'), None)
 
-    return messages
+    # Combine the trimmed messages with the preserved last message
+    return messages_without_last + [last_message]
 
 def _count_tokens(messages, model="gpt-3.5-turbo"):
     """
@@ -128,6 +158,7 @@ def _count_tokens(messages, model="gpt-3.5-turbo"):
 def maintain_token_limit(messages, max_tokens):
     """
     Maintain the token limit by trimming messages if the token count exceeds the maximum limit.
+    The most recent message (last in the array) will never be trimmed.
 
     Args:
     messages (list): A list of messages to maintain.
@@ -240,3 +271,4 @@ def add_timestamp_to_message(message_content):
     else:
         message_content += timestamp
     return message_content
+
