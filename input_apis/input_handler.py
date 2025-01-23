@@ -100,7 +100,7 @@ class InputHandler:
                 state.is_pressed = True
                 state.press_start_time = current_time
                 is_double_tap = (current_time - state.last_press_time < self.double_tap_threshold)
-                
+
                 if is_double_tap and self.hotkeys[hotkey]['double_tap']:
                     self.handle_event(hotkey, 'double_tap')
                 else:
@@ -168,14 +168,11 @@ def get_input_handler(verbose=False):
     """
     Factory function to get the appropriate input handler based on the platform.
     """
-    import platform
-    if platform.system() == "Windows":
-        if config.WINDOWS_INPUT_HANDLER == "autohotkey":
-            from input_apis.autohotkey_handler import AutohotkeyHandler
-            return AutohotkeyHandler(verbose)
-        else:
-            from input_apis.keyboard_library_handler import KeyboardLibraryHandler
-            return KeyboardLibraryHandler(verbose)
+
+    if config.INPUT_HANDLER == "autohotkey":
+        from input_apis.autohotkey_handler import AutohotkeyHandler
+        return AutohotkeyHandler(verbose)
+
     else:
         print("Using PynputHandler")
         from input_apis.pynput_handler import PynputHandler

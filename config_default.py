@@ -116,7 +116,7 @@ MAX_TOKENS = 8000 #Max tokens allowed in memory at once
 CLIPBOARD_TEXT_START_SEQ = "[CLIPSTART]" #the model is instructed to place any text for the clipboard between the start and end seq
 CLIPBOARD_TEXT_END_SEQ = "[CLIPEND]" #the model is instructed to place any text for the clipboard between the start and end seq
 TIMESTAMP_MESSAGES = True # If this is true a timestamp will be added to the end of each of your messages
-WINDOWS_INPUT_HANDLER = "keyboard" # "autohotkey" or "keyboard" #  On windows there are 2 options for input handler libraries, the the default is the 'keyboard' library, however some users may prefer to use "autohotkey"
+INPUT_HANDLER = "pynput" # Alternatively you can use "autohotkey" 
 
 
 DOUBLE_TAP_THRESHOLD = 0.4 # The time window in which a second press must occur to be considered a double tap

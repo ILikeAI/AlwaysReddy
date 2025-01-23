@@ -1,7 +1,8 @@
-from input_apis.input_handler import InputHandler
 import pynput.keyboard as pynput_keyboard
 import threading
 import time
+
+from input_apis.input_handler import InputHandler
 
 class PynputHandler(InputHandler):
     """
@@ -17,7 +18,7 @@ class PynputHandler(InputHandler):
         super().__init__(verbose)
         self.listener = None
         self.current_keys = set()  # Set to track currently pressed keys
-        self.hotkey_maps = {}  # Maps pynput key combinations to original hotkey strings
+        self.hotkey_maps = {}      # Maps pynput key combinations to original hotkey strings
         self.listener_thread = None
 
     def add_hotkey(self, hotkey, *, pressed=None, released=None, held=None, held_release=None, double_tap=None):
@@ -31,8 +32,21 @@ class PynputHandler(InputHandler):
         :param held_release: Callback for when the hotkey is released after being held
         :param double_tap: Callback for when the hotkey is double-tapped
         """
-        super().add_hotkey(hotkey, pressed=pressed, released=released, held=held, held_release=held_release, double_tap=double_tap)
-        pynput_keys = frozenset(pynput_keyboard.HotKey.parse(self.convert_to_pynput_format(hotkey)))
+        # Register callbacks in the base class (InputHandler)
+        super().add_hotkey(
+            hotkey,
+            pressed=pressed,
+            released=released,
+            held=held,
+            held_release=held_release,
+            double_tap=double_tap
+        )
+
+        # Convert the hotkey string to a pynput-friendly format
+        pynput_keys = frozenset(
+            pynput_keyboard.HotKey.parse(self.convert_to_pynput_format(hotkey))
+        )
+        # Store in a map: frozenset(...) -> original hotkey string
         self.hotkey_maps[pynput_keys] = hotkey
 
     def on_press(self, key):
@@ -42,13 +56,33 @@ class PynputHandler(InputHandler):
         :param key: The key that was pressed
         """
         try:
+            if not self.listener:
+                return  # If the listener isn't active, do nothing
+
+            # Convert to a canonical form so shift-l vs. shift-r doesn't break logic
             canonical_key = self.listener.canonical(key)
+
+            # 1) Copy old state
+            old_keys = set(self.current_keys)
+
+            # 2) Add the newly pressed key
             self.current_keys.add(canonical_key)
-            
-            for hotkey_combo, original_hotkey in self.hotkey_maps.items():
+
+            # 3) If no change in the set of pressed keys, ignore (prevents duplicates)
+            if self.current_keys == old_keys:
+                return
+
+            # 4) Check combos from largest to smallest
+            for hotkey_combo, original_hotkey in sorted(
+                self.hotkey_maps.items(),
+                key=lambda x: len(x[0]),
+                reverse=True
+            ):
+                # If all keys of this combo are now pressed, trigger "pressed"
                 if hotkey_combo.issubset(self.current_keys):
                     self.process_key_event(original_hotkey, True)
                     break
+
         except Exception as e:
             if self.verbose:
                 print(f"Error in on_press: {e}")
@@ -60,13 +94,32 @@ class PynputHandler(InputHandler):
         :param key: The key that was released
         """
         try:
+            if not self.listener:
+                return
+
             canonical_key = self.listener.canonical(key)
-            self.current_keys.discard(canonical_key)
-            
-            for hotkey_combo, original_hotkey in self.hotkey_maps.items():
-                if canonical_key in hotkey_combo:
+
+            # 1) Copy old state
+            old_keys = set(self.current_keys)
+
+            # 2) Remove this key if present
+            if canonical_key in self.current_keys:
+                self.current_keys.remove(canonical_key)
+            else:
+                # If it's not in current_keys, the set didn't change, so ignore
+                return
+
+            # 3) Check combos from largest to smallest
+            for hotkey_combo, original_hotkey in sorted(
+                self.hotkey_maps.items(),
+                key=lambda x: len(x[0]),
+                reverse=True
+            ):
+                # If old_keys matched the combo, we release it
+                if hotkey_combo.issubset(old_keys):
                     self.process_key_event(original_hotkey, False)
                     break
+
         except Exception as e:
             if self.verbose:
                 print(f"Error in on_release: {e}")
@@ -131,5 +184,6 @@ class PynputHandler(InputHandler):
             elif len(part) > 1:
                 converted.append(f'<{part}>')
             else:
+                # Single-character keys stay as is (e.g., 'w', 'a', etc.)
                 converted.append(part)
         return '+'.join(converted)
