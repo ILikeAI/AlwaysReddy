@@ -1,24 +1,26 @@
+# ollama_client.py
+
+from llm_apis.base_client import BaseClient
 import requests
 import json
 import os
 import re
 from config_loader import config
 
-
-class OllamaClient:
+class OllamaClient(BaseClient):
     """Client for interacting with the Ollama API for streaming text completions."""
     def __init__(self, base_url="http://localhost:11434", api_key=None, verbose=False):
         """
-        Initialize the OllamaStreamingClient with the API base URL and optionally an API key.
+        Initialize the OllamaClient with the API base URL and optionally an API key.
 
         Args:
             base_url (str): Base URL of the Ollama API.
             api_key (str, optional): API key if required for the API.
             verbose (bool): Whether to print verbose output.
         """
+        super().__init__(verbose)
         self.base_url = base_url
         self.api_key = api_key if api_key else os.getenv('OLLAMA_API_KEY')
-        self.verbose = verbose
 
     def stream_completion(self, messages, model, **kwargs):
         """
@@ -64,7 +66,7 @@ class OllamaClient:
             raise RuntimeError(f"An error occurred streaming completion from Ollama API: {e}")
 
     def __fix_keep_alive(self, keep_alive):
-        """ Attempts to fix the keep_alive value if it is not a valid string. Returns -1 as a fallback. """
+        """Attempts to fix the keep_alive value if it is not a valid string. Returns -1 as a fallback."""
         try:
             return int(keep_alive)
         except ValueError:
@@ -73,3 +75,19 @@ class OllamaClient:
                 return keep_alive
             print(f"Invalid OLLAMA_KEEP_ALIVE value: {keep_alive}. Must be a number followed by s, m, or h.")
             return -1
+
+# Test the OllamaClient
+if __name__ == "__main__":
+    ollama_client = OllamaClient(verbose=True)
+    messages = [
+        {"role": "user", "content": "Explain the importance of fast language models"}
+    ]
+    model = "ollama-model-name"  # Replace with your actual model name
+
+    print("\nOllama Client Response:")
+    try:
+        for response in ollama_client.stream_completion(messages, model):
+            print(response, end='', flush=True)
+        print()
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")

@@ -1,7 +1,10 @@
+# groq_client.py
+
+from llm_apis.base_client import BaseClient
 import os
 from groq import Groq
 
-class GroqClient:
+class GroqClient(BaseClient):
     """Client for interacting with the Groq API for chat completions and other functionalities."""
     def __init__(self, verbose=False):
         """
@@ -10,10 +13,10 @@ class GroqClient:
         Args:
             verbose (bool): Whether to print verbose output.
         """
+        super().__init__(verbose)
         self.client = Groq(api_key=os.getenv('GROQ_API_KEY'))
-        self.verbose = verbose
 
-    def stream_completion(self, messages, model, **kwargs):
+    def stream_completion(self, messages, model='llama3-8b-8192', **kwargs):
         """
         Get chat completions from the Groq API.
 
@@ -31,8 +34,8 @@ class GroqClient:
                 model=model,
                 **kwargs
             )
-            for message in completion.choices:
-                content = message.message.content
+            for choice in completion.choices:
+                content = choice.message.content
                 if content is not None:
                     yield content
         except Exception as e:
@@ -49,5 +52,11 @@ if __name__ == "__main__":
     messages = [
         {"role": "user", "content": "Explain the importance of fast language models"}
     ]
-    for response in groq_client.stream_completion(messages):
-        print(response)
+    model = "llama3-8b-8192"
+
+    print("\nGroq Client Response:")
+    try:
+        for response in groq_client.stream_completion(messages, model):
+            print(response)
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")

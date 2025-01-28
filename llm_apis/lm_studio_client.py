@@ -1,19 +1,30 @@
+# lm_studio_client.py
+
+from llm_apis.base_client import BaseClient
 from openai import OpenAI
 import base64
 import httpx
+import os
 
-class LM_StudioClient:
-    """Client for interacting with LM studio using a local server and openai lib."""
+class LM_StudioClient(BaseClient):
+    """Client for interacting with LM Studio using a local server and OpenAI library."""
     def __init__(self, base_url="http://localhost:1234/v1", verbose=False):
+        """
+        Initialize the LM_StudioClient with the base URL.
+
+        Args:
+            base_url (str): Base URL of the LM Studio API.
+            verbose (bool): Whether to print verbose output.
+        """
+        super().__init__(verbose)
         self.client = OpenAI(base_url=base_url, api_key="not-needed")
-        self.verbose = verbose
 
     def stream_completion(self, messages, model, **kwargs):
-        """Get completion from LM studio API.
+        """Get completion from LM Studio API.
 
         Args:
             messages (list): List of messages.
-            model (str): Model for completion
+            model (str): Model for completion.
             **kwargs: Additional keyword arguments.
 
         Yields:
@@ -61,14 +72,14 @@ class LM_StudioClient:
                 import traceback
                 traceback.print_exc()
             else:
-                print(f"An error occurred streaming completion from LM studio: {e}")
-            raise RuntimeError(f"An error occurred streaming completion from LM studio: {e}")
+                print(f"An error occurred streaming completion from LM Studio: {e}")
+            raise RuntimeError(f"An error occurred streaming completion from LM Studio: {e}")
 
-# Test the LMStudioClient
+# Test the LM_StudioClient
 if __name__ == "__main__":
     client = LM_StudioClient(verbose=True)
     
-    #test text only   
+    # Test text only   
     messages = [
         {
             "role": "system",
@@ -82,15 +93,22 @@ if __name__ == "__main__":
     model = "your_model_name_here"  # Replace with your actual model name
 
     print("\nText-only Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk, end='', flush=True)
-    print()  # Add a newline at the end
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()  # Add a newline at the end
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
 
     
-    #test multimodal
+    # Test multimodal
     image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Camponotus_flavomarginatus_ant.jpg"
     image_media_type = "image/jpeg"
-    image_data = base64.b64encode(httpx.get(image_url).content).decode("utf-8")
+    try:
+        image_data = base64.b64encode(httpx.get(image_url).content).decode("utf-8")
+    except httpx.RequestError as e:
+        print(f"An error occurred while fetching the image: {e}")
+        exit()
  
     messages = [
         {
@@ -112,6 +130,9 @@ if __name__ == "__main__":
     ]
    
     print("\nMultimodal Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk, end='', flush=True)
-    print()
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")

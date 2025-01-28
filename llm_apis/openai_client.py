@@ -1,13 +1,22 @@
+# openai_client.py
+
+from llm_apis.base_client import BaseClient
 from openai import OpenAI
 import os
 import base64
 import httpx
 
-class OpenAIClient:
-    """Client for interacting with OpenAI API."""
+class OpenAIClient(BaseClient):
+    """Client for interacting with the OpenAI API."""
     def __init__(self, verbose=False):
+        """
+        Initialize the OpenAIClient with the API key.
+
+        Args:
+            verbose (bool): Whether to print verbose output.
+        """
+        super().__init__(verbose)
         self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-        self.verbose = verbose
 
     def stream_completion(self, messages, model, **kwargs):
         """Get completion from OpenAI API.
@@ -68,7 +77,7 @@ class OpenAIClient:
 if __name__ == "__main__":
     client = OpenAIClient(verbose=True)
     
-    #test text only   
+    # Test text only   
     messages = [
         {
             "role": "system",
@@ -82,15 +91,22 @@ if __name__ == "__main__":
     model = "gpt-4o"  # or another vision-capable model
 
     print("\nText-only Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk, end='', flush=True)
-    print()  # Add a newline at the end
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()  # Add a newline at the end
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
 
     
-    #test multimodal
+    # Test multimodal
     image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Camponotus_flavomarginatus_ant.jpg"
     image_media_type = "image/jpeg"
-    image_data = base64.b64encode(httpx.get(image_url).content).decode("utf-8")
+    try:
+        image_data = base64.b64encode(httpx.get(image_url).content).decode("utf-8")
+    except httpx.RequestError as e:
+        print(f"An error occurred while fetching the image: {e}")
+        exit()
  
     messages = [
         {
@@ -112,6 +128,9 @@ if __name__ == "__main__":
     ]
    
     print("\nMultimodal Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk, end='', flush=True)
-    print()
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")

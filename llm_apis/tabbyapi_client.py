@@ -1,13 +1,28 @@
+# tabby_api_client.py
+
+from llm_apis.base_client import BaseClient
 from openai import OpenAI
 import os
-from config_loader import config
+import base64
+import httpx
+from config_loader import config  # Ensure config_loader.py exists with TABBY_API_BASE_URL
 
-class TabbyApiClient:
+class TabbyApiClient(BaseClient):
     """Client for interacting with TabbyAPI."""
+
     def __init__(self, verbose=False):
-        key = os.getenv('TABBY_API_KEY')
-        self.client = OpenAI(api_key=key if key != "" else None, base_url=config.TABBY_API_BASE_URL)
-        self.verbose = verbose
+        """Initialize the TabbyAPI client with the API key and base URL."""
+        super().__init__(verbose)
+        api_key = os.getenv('TABBY_API_KEY')
+        base_url = config.TABBY_API_BASE_URL  # Ensure this is correctly set in config_loader.py
+
+        if not api_key:
+            raise ValueError("TABBY_API_KEY environment variable is not set")
+
+        if not base_url:
+            raise ValueError("TABBY_API_BASE_URL is not set in config_loader.py")
+
+        self.client = OpenAI(api_key=api_key, base_url=base_url)
 
     def stream_completion(self, messages, model, **kwargs):
         """Get completion from TabbyAPI.
@@ -38,3 +53,66 @@ class TabbyApiClient:
             else:
                 print(f"An error occurred streaming completion from TabbyAPI: {e}")
             raise RuntimeError(f"An error occurred streaming completion from TabbyAPI: {e}")
+
+# Test the TabbyApiClient
+if __name__ == "__main__":
+    client = TabbyApiClient(verbose=True)
+    
+    # Test text only   
+    messages = [
+        {
+            "role": "system",
+            "content": "Be precise and concise."
+        },
+        {
+            "role": "user",
+            "content": "What is the capital of France?"
+        }
+    ]
+    model = "your_tabby_model_name_here"  # Replace with your actual model name
+
+    print("\nTabbyAPI Text-only Response:")
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()  # Add a newline at the end
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
+
+    
+    # Test multimodal
+    image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Camponotus_flavomarginatus_ant.jpg"
+    try:
+        response = httpx.get(image_url)
+        response.raise_for_status()
+        image_data = base64.b64encode(response.content).decode("utf-8")
+    except httpx.RequestError as e:
+        print(f"An error occurred while fetching the image: {e}")
+        exit()
+ 
+    messages = [
+        {
+            "role": "system",
+            "content": "Respond only in rhyming couplets."
+        },
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Should I eat this?"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{image_data}"
+                    }
+                }
+            ]
+        }
+    ]
+   
+    print("\nTabbyAPI Multimodal Response:")
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")

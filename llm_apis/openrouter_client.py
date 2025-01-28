@@ -1,5 +1,7 @@
-from openai import OpenAI
-from openai import APIError
+# openrouter_client.py
+
+from llm_apis.base_client import BaseClient
+from openai import OpenAI, APIError
 import os
 import base64
 import httpx
@@ -19,17 +21,18 @@ class OpenRouterRateLimitError(Exception):
         self.retry_after = retry_after
         super().__init__(self.message)
 
-class OpenRouterClient:
+class OpenRouterClient(BaseClient):
     """Client for interacting with the OpenRouter API."""
 
     def __init__(self, verbose=False):
         """Initialize the OpenRouter client with the API key."""
+        super().__init__(verbose)
         base_url = "https://openrouter.ai/api/v1"
-        api_key = os.getenv("OPENROUTER_API_KEY")  # Make sure to set this environment variable
-        
+        api_key = os.getenv("OPENROUTER_API_KEY")  # Ensure this environment variable is set
+
         if not api_key:
             raise ValueError("OPENROUTER_API_KEY environment variable is not set")
-            
+
         self.client = OpenAI(
             base_url=base_url,
             api_key=api_key,
@@ -38,7 +41,6 @@ class OpenRouterClient:
                 "X-Title": "Your App Name"                    # Required for OpenRouter
             }
         )
-        self.verbose = verbose
 
     @retry(
         stop=stop_after_attempt(3),
@@ -61,7 +63,9 @@ class OpenRouterClient:
             
             if error_type == 'model_rate_limit':
                 retry_after = error_dict.get('error', {}).get('retry_after', 60)
-                raise OpenRouterRateLimitError(f"Rate limit exceeded for model {model}. {error_message}", retry_after)
+                raise OpenRouterRateLimitError(
+                    f"Rate limit exceeded for model {model}. {error_message}", retry_after
+                )
             raise
 
     def stream_completion(self, messages, model, **kwargs):
@@ -107,9 +111,13 @@ class OpenRouterClient:
                 if content is not None:
                     yield content
         except OpenRouterRateLimitError as e:
-            print(f"Rate limit error: {e.message}. Retry after {e.retry_after} seconds.")
+            if self.verbose:
+                print(f"Rate limit error: {e.message}. Retry after {e.retry_after} seconds.")
             raise
         except Exception as e:
+            if self.verbose:
+                import traceback
+                traceback.print_exc()
             print(f"Unexpected error: {str(e)}")
             raise RuntimeError(f"An unexpected error occurred: {e}") from None
 
@@ -117,7 +125,7 @@ class OpenRouterClient:
 if __name__ == "__main__":
     client = OpenRouterClient(verbose=True)
     
-    #test text only   
+    # Test text only   
     messages = [
         {
             "role": "system",
@@ -128,7 +136,7 @@ if __name__ == "__main__":
             "content": "What is the capital of France?"
         }
     ]
-    model = "meta-llama/llama-3.2-11b-vision-instruct:free"  # or another vision-capable model
+    model = "meta-llama/llama-3.2-11b-vision-instruct:free"  # Replace with your actual model name
 
     print("\nText-only Response:")
     try:
@@ -141,10 +149,16 @@ if __name__ == "__main__":
         print(f"\nAn error occurred: {e}")
 
     
-    #test multimodal
+    # Test multimodal
     image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Camponotus_flavomarginatus_ant.jpg"
-    image_data = base64.b64encode(httpx.get(image_url).content).decode("utf-8")
- 
+    try:
+        response = httpx.get(image_url)
+        response.raise_for_status()
+        image_data = base64.b64encode(response.content).decode("utf-8")
+    except httpx.RequestError as e:
+        print(f"An error occurred while fetching the image: {e}")
+        exit()
+
     messages = [
         {
             "role": "system",

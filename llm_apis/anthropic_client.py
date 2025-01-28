@@ -1,13 +1,14 @@
+# anthropic_client.py
+
+from llm_apis.base_client import BaseClient
 from anthropic import Anthropic
 import anthropic.types
 import os
 import base64
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential, \
-    retry_if_exception_type
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 MAX_RETRIES = 5
-
 
 class AnthropicRateLimitError(Exception):
     """Exception raised for rate limit errors."""
@@ -16,19 +17,17 @@ class AnthropicRateLimitError(Exception):
         self.retry_after = retry_after
         super().__init__(self.message)
 
-
 class AnthropicOverloadError(Exception):
     """Exception raised for overloaded errors."""
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
 
-
-class AnthropicClient:
+class AnthropicClient(BaseClient):
     def __init__(self, verbose=False):
         """Initialize the Anthropic client with the API key."""
+        super().__init__(verbose)
         self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
-        self.verbose = verbose
 
     @retry(
         stop=stop_after_attempt(MAX_RETRIES),
@@ -42,8 +41,7 @@ class AnthropicClient:
             return self.client.messages.create(**api_args)
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 429:
-                retry_after = int(e.response.headers.get(
-                    'retry-after', 60))
+                retry_after = int(e.response.headers.get('retry-after', 60))
                 raise AnthropicRateLimitError(
                     f"Rate limit exceeded. {str(e)}", retry_after)
             elif e.response.status_code == 529:
@@ -140,12 +138,11 @@ class AnthropicClient:
             raise RuntimeError(
                 f"An error occurred streaming completion from Anthropic API: {e}")
 
-
 # Test the AnthropicClient
 if __name__ == "__main__":
     client = AnthropicClient(verbose=True)
 
-    # test text only
+    # Test text only
     messages = [
         {
             "role": "system",
@@ -170,10 +167,14 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nAn error occurred: {e}")
 
-    # test multimodal
+    # Test multimodal
     image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Camponotus_flavomarginatus_ant.jpg"
     image_media_type = "image/jpeg"
-    image_data = base64.b64encode(httpx.get(image_url).content).decode("utf-8")
+    try:
+        image_data = base64.b64encode(httpx.get(image_url).content).decode("utf-8")
+    except httpx.RequestError as e:
+        print(f"An error occurred while fetching the image: {e}")
+        exit()
 
     messages = [
         {

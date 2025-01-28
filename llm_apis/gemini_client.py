@@ -1,13 +1,22 @@
+# gemini_client.py
+
+from llm_apis.base_client import BaseClient
 import google.generativeai as genai
 import os
 import base64
 import httpx
 
-class GeminiClient:
+class GeminiClient(BaseClient):
     """Client for interacting with Google Gemini API."""
     def __init__(self, verbose=False):
+        """
+        Initialize the GeminiClient with the API key.
+        
+        Args:
+            verbose (bool): Whether to print verbose output.
+        """
+        super().__init__(verbose)
         genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-        self.verbose = verbose
 
     def stream_completion(self, messages, model, **kwargs):
         """Get completion from Google Gemini API.
@@ -88,9 +97,12 @@ if __name__ == "__main__":
     model = "gemini-1.5-flash"
 
     print("\nText-only Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk, end='', flush=True)
-    print()
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
 
     # Test multimodal
     image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Camponotus_flavomarginatus_ant.jpg"
@@ -100,7 +112,6 @@ if __name__ == "__main__":
     except httpx.RequestError as e:
         print(f"An error occurred while fetching the image: {e}")
         exit()
-
 
     messages = [
         {
@@ -123,6 +134,9 @@ if __name__ == "__main__":
     ]
 
     print("\nMultimodal Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk, end='', flush=True)
-    print()
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")

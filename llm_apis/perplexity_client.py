@@ -1,15 +1,21 @@
+# perplexity_client.py
+
+from llm_apis.base_client import BaseClient
 import requests
 import os
 import json
 
-class PerplexityClient:
+class PerplexityClient(BaseClient):
     """Client for interacting with the Perplexity AI API."""
 
     def __init__(self, verbose=False):
         """Initialize the Perplexity AI client with the API key."""
+        super().__init__(verbose)
         self.api_key = os.getenv('PERPLEXITY_API_KEY')
         self.base_url = "https://api.perplexity.ai/chat/completions"
-        self.verbose = verbose
+
+        if not self.api_key:
+            raise ValueError("PERPLEXITY_API_KEY environment variable is not set")
 
     def stream_completion(self, messages, model, **kwargs):
         """Stream completion from the Perplexity AI API.
@@ -60,8 +66,11 @@ if __name__ == "__main__":
             "content": "What is the current price of Tesla stock?"
         }
     ]
-    model = "llama-3-sonar-small-32k-online"
+    model = "llama-3-sonar-small-32k-online"  # Replace with your actual model name
 
-    print("Response:")
-    for chunk in client.stream_completion(messages, model):
-        print(chunk)
+    print("\nPerplexity AI Response:")
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk)
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")

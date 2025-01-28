@@ -1,15 +1,25 @@
+# togetherai_client.py
+
+from llm_apis.base_client import BaseClient
 from openai import OpenAI
 import os
 
-class TogetherAIClient:
+class TogetherAIClient(BaseClient):
     """Client for interacting with the TogetherAI API."""
+
     def __init__(self, verbose=False):
         """Initialize the TogetherAI client with the API key and base URL."""
+        super().__init__(verbose)
+        api_key = os.getenv("TOGETHER_API_KEY")
+        base_url = "https://api.together.xyz/v1"
+
+        if not api_key:
+            raise ValueError("TOGETHER_API_KEY environment variable is not set")
+
         self.client = OpenAI(
-            api_key=os.environ.get("TOGETHER_API_KEY"),
-            base_url="https://api.together.xyz/v1",
+            api_key=api_key,
+            base_url=base_url,
         )
-        self.verbose = verbose
 
     def stream_completion(self, messages, model, **kwargs):
         """Get completion from the TogetherAI API.
@@ -40,3 +50,66 @@ class TogetherAIClient:
             else:
                 print(f"An error occurred streaming completion from TogetherAI API: {e}")
             raise RuntimeError(f"An error occurred streaming completion from TogetherAI API: {e}")
+
+# Test the TogetherAIClient
+if __name__ == "__main__":
+    client = TogetherAIClient(verbose=True)
+    
+    # Test text only   
+    messages = [
+        {
+            "role": "system",
+            "content": "Be precise and concise."
+        },
+        {
+            "role": "user",
+            "content": "What is the capital of France?"
+        }
+    ]
+    model = "togetherai-model-name"  # Replace with your actual model name
+
+    print("\nTogetherAI Text-only Response:")
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()  # Add a newline at the end
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
+
+    
+    # Test multimodal
+    image_url = "https://upload.wikimedia.org/wikipedia/commons/a/a7/Camponotus_flavomarginatus_ant.jpg"
+    try:
+        response = httpx.get(image_url)
+        response.raise_for_status()
+        image_data = base64.b64encode(response.content).decode("utf-8")
+    except httpx.RequestError as e:
+        print(f"An error occurred while fetching the image: {e}")
+        exit()
+ 
+    messages = [
+        {
+            "role": "system",
+            "content": "Respond only in rhyming couplets."
+        },
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Should I eat this?"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{image_data}"
+                    }
+                }
+            ]
+        }
+    ]
+   
+    print("\nTogetherAI Multimodal Response:")
+    try:
+        for chunk in client.stream_completion(messages, model):
+            print(chunk, end='', flush=True)
+        print()
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
