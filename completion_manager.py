@@ -3,56 +3,56 @@ import re
 from utils import maintain_token_limit
 
 class CompletionManager:
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=False, completions_api=config.COMPLETIONS_API):
         """Initialize the CompletionManager with the TTS client."""
         self.client = None
         self.model = None
         self.verbose = verbose
-        self._setup_client()
+        self._setup_client(completions_api)
 
-    def _setup_client(self):
+    def _setup_client(self, completions_api):
         """Instantiates the appropriate AI client based on configuration file."""
-        if config.COMPLETIONS_API == "openai":
+        if completions_api == "openai":
             from llm_apis.openai_client import OpenAIClient
             self.client = OpenAIClient(verbose=self.verbose)
             
-        elif config.COMPLETIONS_API == "together":
+        elif completions_api == "together":
             from llm_apis.togetherai_client import TogetherAIClient
             self.client = TogetherAIClient(verbose=self.verbose)
 
-        elif config.COMPLETIONS_API == "anthropic":
+        elif completions_api == "anthropic":
             from llm_apis.anthropic_client import AnthropicClient
             self.client = AnthropicClient(verbose=self.verbose)
 
-        elif config.COMPLETIONS_API == "perplexity":
+        elif completions_api == "perplexity":
             from llm_apis.perplexity_client import PerplexityClient
             self.client = PerplexityClient(verbose=self.verbose)
 
-        elif config.COMPLETIONS_API == "openrouter":
+        elif completions_api == "openrouter":
             from llm_apis.openrouter_client import OpenRouterClient
             self.client = OpenRouterClient(verbose=self.verbose)
         
-        elif config.COMPLETIONS_API == "groq":
+        elif completions_api == "groq":
             from llm_apis.groq_client import GroqClient
             self.client = GroqClient(verbose=self.verbose)
 
-        elif config.COMPLETIONS_API == "tabbyapi":
+        elif completions_api == "tabbyapi":
             from llm_apis.tabbyapi_client import TabbyApiClient
             self.client = TabbyApiClient(verbose=self.verbose)
 
-        elif config.COMPLETIONS_API == "google":
+        elif completions_api == "google":
             from llm_apis.gemini_client import GeminiClient
             self.client = GeminiClient(verbose=self.verbose)
 
-        elif config.COMPLETIONS_API == "portkey":
+        elif completions_api == "portkey":
             from llm_apis.portkey_client import PortkeyClient
             self.client = PortkeyClient(verbose=self.verbose)
         
-        elif config.COMPLETIONS_API == "portkey_prompt":
+        elif completions_api == "portkey_prompt":
             from llm_apis.portkey_prompt_client import PortkeyPromptClient
             self.client = PortkeyPromptClient(verbose=self.verbose) 
         
-        elif config.COMPLETIONS_API == "lm_studio":
+        elif completions_api == "lm_studio":
             from llm_apis.lm_studio_client import LM_StudioClient
             if hasattr(config, 'LM_STUDIO_API_BASE_URL'):
                 self.client = LM_StudioClient(base_url=config.LM_STUDIO_API_BASE_URL, verbose=self.verbose)
@@ -60,7 +60,7 @@ class CompletionManager:
                 print("No LM_STUDIO_API_BASE_URL found in config.py, using default")
                 self.client = LM_StudioClient(verbose=self.verbose)
 
-        elif config.COMPLETIONS_API == "ollama":
+        elif completions_api == "ollama":
             from llm_apis.ollama_client import OllamaClient
             if hasattr(config, 'OLLAMA_API_BASE_URL'):
                 self.client = OllamaClient(base_url=config.OLLAMA_API_BASE_URL, verbose=self.verbose)
