@@ -3,6 +3,7 @@ import clipboard
 import tiktoken
 import io
 from PIL import Image, ImageGrab
+import utils.prompt as prompt
 import base64
 import json
 import os
@@ -65,13 +66,13 @@ def sanitize_text(text):
     
     return sanitized_text
 
-def _trim_messages(messages, max_tokens):
+def _trim_messages(messages, max_prompt_tokens):
     """
     Trim the messages to fit within the maximum token limit.
 
     Args:
     messages (list): A list of messages to be trimmed.
-    max_tokens (int): The maximum number of tokens allowed.
+    max_prompt_tokens (int): The maximum number of tokens allowed.
 
     Returns:
     list: The trimmed list of messages.
@@ -80,7 +81,7 @@ def _trim_messages(messages, max_tokens):
 
     while True:
         msg_token_count = _count_tokens(messages)
-        if msg_token_count <= max_tokens:
+        if msg_token_count <= max_prompt_tokens:
             break
         # Remove the oldest non-system message
         for i in range(len(messages)):
@@ -125,19 +126,19 @@ def _count_tokens(messages, model="gpt-3.5-turbo"):
 
     return msg_token_count
 
-def maintain_token_limit(messages, max_tokens):
+def maintain_token_limit(messages, max_prompt_tokens):
     """
     Maintain the token limit by trimming messages if the token count exceeds the maximum limit.
 
     Args:
     messages (list): A list of messages to maintain.
-    max_tokens (int): The maximum number of tokens allowed.
+    max_prompt_tokens (int): The maximum number of tokens allowed.
 
     Returns:
     list: The trimmed list of messages.
     """
-    if _count_tokens(messages) > max_tokens:
-        messages = _trim_messages(messages, max_tokens)
+    if _count_tokens(messages) > max_prompt_tokens:
+        messages = _trim_messages(messages, max_prompt_tokens)
     return messages
 
 def extract_code_if_only_code_block(markdown_text):

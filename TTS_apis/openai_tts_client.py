@@ -1,6 +1,6 @@
 from openai import OpenAI
 from config_loader import config
-import utils
+import utils.utils as utils
 
 class OpenAITTSClient:
     def __init__(self, verbose=False):

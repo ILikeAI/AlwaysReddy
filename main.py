@@ -5,8 +5,8 @@ from transcription_manager import TranscriptionManager
 from input_apis.input_handler import get_input_handler
 import tts_manager
 from completion_manager import CompletionManager
-from soundfx import play_sound_FX
-from utils import read_clipboard, does_model_support_images
+from utils.soundfx import play_sound_FX
+from utils.utils import read_clipboard, does_model_support_images
 from config_loader import config
 import os
 import importlib
@@ -30,7 +30,6 @@ class AlwaysReddy:
         self.input_handler.double_tap_threshold = config.DOUBLE_TAP_THRESHOLD
         self.last_action_time = 0
         self.current_recording_action = None
-        self.model_supports_images = does_model_support_images(config.COMPLETION_MODEL)
 
     def _start_recording(self, action=None):
         """

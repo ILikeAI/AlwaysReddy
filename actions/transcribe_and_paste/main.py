@@ -1,4 +1,4 @@
-from utils import to_clipboard
+from utils.utils import to_clipboard
 from actions.base_action import BaseAction
 from config_loader import config
 import pyautogui

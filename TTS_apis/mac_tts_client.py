@@ -1,5 +1,5 @@
 import subprocess
-import utils
+import utils.utils as utils
 
 class MacTTSClient:
     def __init__(self, verbose=False):

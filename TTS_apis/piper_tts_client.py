@@ -1,7 +1,7 @@
 import os
 import subprocess
 from config_loader import config
-import utils
+import utils.utils as utils
 import platform
 
 class PiperTTSClient:

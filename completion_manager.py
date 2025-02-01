@@ -1,6 +1,5 @@
 from config_loader import config
 import re
-from utils import maintain_token_limit
 
 class CompletionManager:
     def __init__(self, verbose=False, completions_api=config.COMPLETIONS_API):
@@ -82,10 +81,7 @@ class CompletionManager:
         Returns:
             str: The complete response from the AI client, or None if an error occurs.
         """
-        try:
-            # Make sure the token count is within the limit
-            #messages = maintain_token_limit(messages, config.MAX_TOKENS)
-            
+        try:           
             completion_stream = self.client.stream_completion(messages, model, **kwargs)
             
             # Accumulate the entire response
@@ -116,9 +112,6 @@ class CompletionManager:
                     or None if an error occurs.
         """
         try:
-            # Make sure the token count is within the limit
-            messages = maintain_token_limit(messages, config.MAX_TOKENS)
-            
             completion_stream = self.client.stream_completion(messages, model, **kwargs)
             return completion_stream
 
@@ -130,15 +123,15 @@ class CompletionManager:
                 print(f"An error occurred while getting completion: {e}")
             return None
         
-    def process_text_stream(self, text_stream, sentence_callback=None, marker_tuples=None):
+    def process_text_stream(self, text_stream, tts_callback=None, marker_tuples=None):
         """
         This takes in a stream of text, it will search for text between the markers and pass it to the designated callback functions if provided.
-        Text between markers will be removed from the stream before being passed to the sentence_callback function.
+        Text between markers will be removed from the stream before being passed to the tts_callback function.
         
 
         Args:
             text_stream: An iterable providing chunks of text.
-            sentence_callback: Optional callback function for sentences.
+            tts_callback: Optional callback function for sentences to be passed to.
             marker_tuples: Optional list of tuples (start_marker, end_marker, callback_function).
 
         Returns:
@@ -172,8 +165,8 @@ class CompletionManager:
             match = sentence_pattern.match(buffer)
             if match:
                 sentence = match.group(1)
-                if sentence_callback and sentence.strip():
-                    sentence_callback(sentence.strip())
+                if tts_callback and sentence.strip():
+                    tts_callback(sentence.strip())
                 buffer = buffer[len(sentence):]
                 return True
             return False
@@ -198,8 +191,8 @@ class CompletionManager:
             if active_markers:
                 active_markers.pop(0)
             else:
-                if sentence_callback and buffer.strip():
-                    sentence_callback(buffer.strip())
+                if tts_callback and buffer.strip():
+                    tts_callback(buffer.strip())
                 break
 
         return full_text
