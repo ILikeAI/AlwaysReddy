@@ -233,11 +233,28 @@ def handle_clipboard_text(AR, message_content):
         AR.clipboard_text = None
     return message_content
 
-def add_timestamp_to_message(message_content):
-    """Add a timestamp to the message content."""
-    timestamp = f"\n\nMESSAGE TIMESTAMP:{time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')} "
-    if isinstance(message_content, list):
-        message_content[-1]['text'] += timestamp
-    else:
-        message_content += timestamp
-    return message_content
+def append_timestamp_to_last_user_message(messages):
+    """
+    Append a timestamp to the content of the last message if it is a user message.
+
+    This function checks the provided list of messages. If the last message in the list
+    has a role of "user", a timestamp is appended to its content. Otherwise, the list
+    is returned unmodified.
+
+    Args:
+        messages (list): A list of message dictionaries. Each dictionary is expected to
+            have at least the keys 'role' and 'content'.
+
+    Returns:
+        list: The updated list of messages with the timestamp appended to the last user
+              message, if applicable.
+    """
+    if not messages:
+        return messages
+
+    last_message = messages[-1]
+    if last_message.get('role') == 'user':
+        timestamp = f"\n\nMESSAGE TIMESTAMP: {time.strftime('%I:%M %p')} {time.strftime('%Y-%m-%d (%A)')}"
+        last_message['content'] += timestamp
+
+    return messages

@@ -1,4 +1,4 @@
-from typing import Union, List, Dict, Callable, Optional
+from typing import Union, List, Dict, Callable, Optional, Any
 from llm_apis.base_client import BaseClient
 import config
 from utils import prompt
@@ -8,7 +8,7 @@ from utils.utils import maintain_token_limit
 class Chat:
     """
     A chat interface to manage conversations with an LLM API.
-    
+
     Attributes:
         completions_api_client (BaseClient): Client for making LLM completions requests.
         model (str): The model name to use for completions.
@@ -18,19 +18,24 @@ class Chat:
         system_prompt (str): The system prompt content.
         system_prompt_filename (Optional[str]): If provided, used to load a system prompt file.
         messages (List[Dict[str, Union[str, list]]]): Conversation history messages.
+        message_callbacks (List[Callable]): A list of callbacks that modify the message list.
+            Each callback should accept the current message list as its only parameter and
+            return a new message list.
     """
 
     def __init__(self,
                  completions_api_client: BaseClient,
                  model: str,
-                 completion_params: dict = None,
+                 completion_params: Optional[dict] = None,
                  max_prompt_tokens: int = 8192,
                  tts_callback: Optional[Callable] = None,
                  system_prompt: str = "",
-                 system_prompt_filename: Optional[str] = None):
+                 system_prompt_filename: Optional[str] = None,
+                 message_callbacks: Optional[List[Callable[[List[Dict[str, Union[str, list]]]], 
+                                                        List[Dict[str, Union[str, list]]]]]] = None):
         """
         Initialize the Chat object.
-        
+
         Args:
             completions_api_client (BaseClient): The API client used for completions.
             model (str): The name of the model to use.
@@ -39,6 +44,8 @@ class Chat:
             tts_callback (Callable, optional): Callback function for text-to-speech generation.
             system_prompt (str, optional): The system prompt text.
             system_prompt_filename (str, optional): Filename for the system prompt. If provided, it overwrites system_prompt.
+            message_callbacks (List[Callable], optional): A list of functions that will be applied to the message
+                list each time a new message is added.
         """
         if completion_params is None:
             completion_params = {'temperature': 0.7, 'max_tokens': 2048}
@@ -50,6 +57,10 @@ class Chat:
         self.tts_callback = tts_callback
         self.system_prompt = system_prompt
         self.system_prompt_filename = system_prompt_filename
+
+        # Store the list of callbacks or initialize as an empty list if not provided.
+        self.message_callbacks: List[Callable[[List[Dict[str, Union[str, list]]]],
+                                              List[Dict[str, Union[str, list]]]]] = message_callbacks or []
 
         if system_prompt and system_prompt_filename:
             print("Info: Both system_prompt and system_prompt_filename were provided to Chat; using system_prompt_filename")
@@ -72,10 +83,10 @@ class Chat:
                        tts_callback: Optional[Callable] = None) -> str:
         """
         Get a completion from the LLM API based on the current conversation context.
-        
+
         This method ensures that the messages do not exceed the token limit, optionally updates
         the system prompt from a file, and then streams the response from the completions API.
-        
+
         Args:
             completions_api_client (BaseClient, optional): An override for the completions API client.
             model (str, optional): An override for the model to use.
@@ -84,7 +95,7 @@ class Chat:
             messages (list, optional): An override for the conversation messages.
             marker_tuples (list, optional): Markers used during processing of the text stream.
             tts_callback (Callable, optional): An override for the TTS callback.
-        
+
         Returns:
             str: The response text from the LLM.
         """
@@ -120,18 +131,26 @@ class Chat:
 
     def add_message(self, role: str, content: Union[str, list]) -> None:
         """
-        Append a message to the conversation history.
-        
+        Append a message to the conversation history and process the updated message list
+        through all registered callbacks.
+
+        Each callback is a function that takes the current message list as input and returns
+        a new message list. The updated list from each callback is used as the input for the next.
+
         Args:
             role (str): The role of the message sender (e.g., 'user', 'assistant', 'system').
             content (Union[str, list]): The content of the message.
         """
         self.messages.append({"role": role, "content": content})
 
+        # Process the messages through each callback sequentially.
+        for callback in self.message_callbacks:
+            self.messages = callback(self.messages)
+
     def clear_chat(self) -> None:
         """
         Clear the current conversation history.
-        
+
         If a system prompt or system prompt file is provided, the conversation history is reset
         with the initial system prompt; otherwise, it is cleared completely.
         """

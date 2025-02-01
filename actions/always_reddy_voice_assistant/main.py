@@ -8,7 +8,7 @@ from utils.utils import (
     to_clipboard,
     handle_clipboard_image,
     handle_clipboard_text,
-    add_timestamp_to_message,
+    append_timestamp_to_last_user_message,
 )
 from completion_manager import CompletionManager
 import utils.utils as utils
@@ -55,6 +55,11 @@ class AlwaysReddyVoiceAssistant(BaseAction):
             self.AR.add_action_hotkey(config.NEW_CHAT_HOTKEY, pressed=self.new_chat)
             print(f"'{config.NEW_CHAT_HOTKEY}': New chat for voice assistant")
 
+        message_callbacks = None
+        # Optionally add a timestamp to the message
+        if config.TIMESTAMP_MESSAGES:
+            message_callbacks = [append_timestamp_to_last_user_message]
+            
         # Initialize Chat with the configured parameters and completion manager
         self.chat = Chat(
             completions_api_client=CompletionManager(
@@ -64,7 +69,8 @@ class AlwaysReddyVoiceAssistant(BaseAction):
             model=config.COMPLETION_MODEL,
             max_prompt_tokens=config.MAX_PROMPT_TOKENS,
             tts_callback=self.AR.tts.run_tts,
-            system_prompt_filename=config.ACTIVE_PROMPT
+            system_prompt_filename=config.ACTIVE_PROMPT,
+            message_callbacks=message_callbacks
         )
 
     def handle_default_assistant_response(self) -> None:
@@ -95,10 +101,6 @@ class AlwaysReddyVoiceAssistant(BaseAction):
                     message = clipboard_image_content
                 else:
                     message = handle_clipboard_text(self.AR, message)
-
-                # Optionally add a timestamp to the message
-                if config.TIMESTAMP_MESSAGES:
-                    message = add_timestamp_to_message(message)
 
                 # Append the user's message to the chat history
                 self.chat.add_message("user", message)
