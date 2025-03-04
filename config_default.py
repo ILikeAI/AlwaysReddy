@@ -115,7 +115,7 @@ AUDIO_FILE_DIR = "audio_files"
 CLIPBOARD_TEXT_START_SEQ = "[CLIPSTART]" #the model is instructed to place any text for the clipboard between the start and end seq
 CLIPBOARD_TEXT_END_SEQ = "[CLIPEND]" #the model is instructed to place any text for the clipboard between the start and end seq
 TIMESTAMP_MESSAGES = True # If this is true a timestamp will be added to the end of each of your messages
-INPUT_HANDLER = "pynput" # Alternatively you can use "autohotkey" 
+INPUT_HANDLER = "autohotkey" # Alternatively you can use "autohotkey" 
 MAX_PROMPT_TOKENS = 4096 # The message list will be cut down to fit within this number of tokens
 
 DOUBLE_TAP_THRESHOLD = 0.4 # The time window in which a second press must occur to be considered a double tap

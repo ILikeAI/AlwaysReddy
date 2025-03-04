@@ -1,5 +1,6 @@
 import time
 import threading
+import platform
 from config_loader import config
 from typing import Callable, Optional, Dict
 
@@ -167,12 +168,21 @@ class InputHandler:
 def get_input_handler(verbose=False):
     """
     Factory function to get the appropriate input handler based on the platform.
+    
+    If config.INPUT_HANDLER is set to use AHK (Autohotkey):
+      - On Windows: returns AutohotkeyHandler.
+      - On non-Windows: prints a message and falls back to PynputHandler.
+    
+    Otherwise, it uses the PynputHandler.
     """
-
     if config.INPUT_HANDLER == "autohotkey":
-        from input_apis.autohotkey_handler import AutohotkeyHandler
-        return AutohotkeyHandler(verbose)
-
+        if platform.system() == "Windows":
+            from input_apis.autohotkey_handler import AutohotkeyHandler
+            return AutohotkeyHandler(verbose)
+        else:
+            print("AHK input handler is only supported on Windows. Falling back to PynputHandler.")
+            from input_apis.pynput_handler import PynputHandler
+            return PynputHandler(verbose)
     else:
         print("Using PynputHandler")
         from input_apis.pynput_handler import PynputHandler
